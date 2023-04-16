@@ -4,9 +4,10 @@ data "terraform_remote_state" "shared" {
 }
 
 locals {
-  stage      = terraform.workspace
-  bucketName = "${local.stage}.algeriastartupjobs.com"
-  domainName = "${local.stage == "production" ? "www" : local.stage}.algeriastartupjobs.com"
+  stage         = terraform.workspace
+  subDomainName = local.stage == "production" ? "www" : local.stage
+  domainName    = "${local.subDomainName}.algeriastartupjobs.com"
+  bucketName    = "${local.subDomainName}.algeriastartupjobs.com"
 }
 
 provider "aws" {
@@ -56,7 +57,7 @@ resource "aws_route53_record" "website-a" {
   name    = local.domainName
   type    = "A"
   alias {
-    name                   = aws_s3_bucket_website_configuration.website.website_endpoint
+    name                   = aws_s3_bucket_website_configuration.website.website_domain
     zone_id                = aws_s3_bucket.website.hosted_zone_id
     evaluate_target_health = true
   }
