@@ -1,5 +1,5 @@
 locals {
-  sharedName        = "shared.algeriastartupjobs.com"
+  rootDomainName    = "algeriastartupjobs.com"
   isSharedWorkspace = terraform.workspace == "shared"
   count             = local.isSharedWorkspace ? 1 : 0
 }
@@ -10,8 +10,9 @@ provider "aws" {
 
 # Shared Route53 zone configuration
 resource "aws_route53_zone" "website" {
-  count = local.count
-  name  = local.sharedName
+  count         = local.count
+  name          = local.rootDomainName
+  force_destroy = true
 }
 
 # Output the zone ID

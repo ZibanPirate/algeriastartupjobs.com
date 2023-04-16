@@ -56,7 +56,7 @@ resource "aws_route53_record" "website-a" {
   name    = local.domainName
   type    = "A"
   alias {
-    name                   = aws_s3_bucket.website.website_endpoint
+    name                   = aws_s3_bucket_website_configuration.website.website_endpoint
     zone_id                = aws_s3_bucket.website.hosted_zone_id
     evaluate_target_health = true
   }
