@@ -1,3 +1,8 @@
+data "terraform_remote_state" "shared" {
+  backend = "local"
+  config  = { path = "${path.module}/../shared/terraform.tfstate.d/shared/terraform.tfstate" }
+}
+
 locals {
   stage      = terraform.workspace
   bucketName = "${local.stage}.algeriastartupjobs.com"
@@ -46,12 +51,8 @@ resource "null_resource" "remove_and_upload_website_to_s3" {
   }
 }
 
-resource "aws_route53_zone" "website" {
-  name = local.domainName
-}
-
 resource "aws_route53_record" "website-a" {
-  zone_id = aws_route53_zone.website.zone_id
+  zone_id = data.terraform_remote_state.shared.outputs.route53_zone_id
   name    = local.domainName
   type    = "A"
   alias {
