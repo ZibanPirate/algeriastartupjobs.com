@@ -52,17 +52,6 @@ resource "null_resource" "remove_and_upload_website_to_s3" {
   }
 }
 
-resource "aws_route53_record" "website-a" {
-  zone_id = data.terraform_remote_state.shared.outputs.route53_zone_id
-  name    = local.domainName
-  type    = "A"
-  alias {
-    name                   = aws_s3_bucket_website_configuration.website.website_domain
-    zone_id                = aws_s3_bucket.website.hosted_zone_id
-    evaluate_target_health = true
-  }
-}
-
 resource "aws_cloudfront_origin_access_identity" "website" {}
 
 # TODO-ZM: remove PublicReadGetObject from aws_s3_bucket_website_configuration?
@@ -115,5 +104,16 @@ resource "aws_cloudfront_distribution" "website" {
   viewer_certificate {
     acm_certificate_arn = data.terraform_remote_state.shared.outputs.certificate_arn
     ssl_support_method  = "sni-only"
+  }
+}
+
+resource "aws_route53_record" "website-a" {
+  zone_id = data.terraform_remote_state.shared.outputs.route53_zone_id
+  name    = local.domainName
+  type    = "A"
+  alias {
+    name                   = aws_cloudfront_distribution.website.domain_name
+    zone_id                = aws_cloudfront_distribution.website.hosted_zone_id
+    evaluate_target_health = false
   }
 }
