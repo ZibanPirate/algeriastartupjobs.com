@@ -8,6 +8,12 @@ provider "aws" {
   region = "eu-west-1"
 }
 
+# Needed for creating CloudFront distributions
+provider "aws" {
+  alias  = "virginia"
+  region = "us-east-1"
+}
+
 # Shared Route53 zone configuration
 resource "aws_route53_zone" "website" {
   count         = local.count
@@ -28,6 +34,12 @@ resource "aws_acm_certificate" "website" {
   lifecycle {
     create_before_destroy = true
   }
+  provider = aws.virginia
+}
+
+# Output the certificate ARN
+output "certificate_arn" {
+  value = local.isSharedWorkspace ? aws_acm_certificate.website[0].arn : null
 }
 
 resource "aws_route53_record" "website" {
@@ -50,6 +62,6 @@ resource "aws_route53_record" "website" {
 resource "aws_acm_certificate_validation" "website" {
   certificate_arn         = aws_acm_certificate.website[0].arn
   validation_record_fqdns = [for record in aws_route53_record.website : record.fqdn]
+  provider                = aws.virginia
 }
 
-resource "aws_cloudfront_origin_access_identity" "origin_access_identity" {}
