@@ -64,6 +64,7 @@ resource "aws_s3_bucket_policy" "website" {
 
 # https://stackoverflow.com/a/57457344
 resource "null_resource" "remove_and_upload_website_to_s3" {
+  triggers = { always_run = "${timestamp()}" }
   provisioner "local-exec" {
     command = "aws s3 sync ${path.module}/../../web/dist s3://${aws_s3_bucket.website.id}"
   }
