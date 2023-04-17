@@ -14,18 +14,28 @@ provider "aws" {
   region = "eu-west-1"
 }
 
+resource "aws_cloudfront_origin_access_identity" "website" {}
+
 resource "aws_s3_bucket" "website" {
   bucket        = local.bucketName
   force_destroy = true
+}
+
+resource "aws_s3_bucket_ownership_controls" "website" {
+  bucket = aws_s3_bucket.website.id
+  rule { object_ownership = "BucketOwnerPreferred" }
+}
+
+resource "aws_s3_bucket_acl" "website" {
+  depends_on = [aws_s3_bucket_ownership_controls.website]
+  bucket     = aws_s3_bucket.website.id
+  acl        = "private"
 }
 
 resource "aws_s3_bucket_website_configuration" "website" {
   bucket = aws_s3_bucket.website.bucket
   index_document {
     suffix = "index.html"
-  }
-  error_document {
-    key = "index.html"
   }
 }
 
@@ -35,11 +45,18 @@ resource "aws_s3_bucket_policy" "website" {
     Version = "2012-10-17"
     Statement = [
       {
-        "Sid" : "PublicReadGetObject",
+        "Sid" : "1",
         "Effect" : "Allow",
-        "Principal" : "*",
+        "Principal" : { "AWS" : "${aws_cloudfront_origin_access_identity.website.iam_arn}" },
         "Action" : "s3:GetObject",
         "Resource" : "arn:aws:s3:::${local.bucketName}/*"
+      },
+      {
+        "Sid" : "2",
+        "Effect" : "Allow",
+        "Principal" : { "AWS" : "${aws_cloudfront_origin_access_identity.website.iam_arn}" },
+        "Action" : "s3:ListBucket",
+        "Resource" : "arn:aws:s3:::${local.bucketName}"
       }
     ]
   })
@@ -52,9 +69,6 @@ resource "null_resource" "remove_and_upload_website_to_s3" {
   }
 }
 
-resource "aws_cloudfront_origin_access_identity" "website" {}
-
-# TODO-ZM: remove PublicReadGetObject from aws_s3_bucket_website_configuration?
 resource "aws_cloudfront_distribution" "website" {
   origin {
     domain_name = aws_s3_bucket.website.bucket_regional_domain_name
@@ -63,44 +77,33 @@ resource "aws_cloudfront_distribution" "website" {
       origin_access_identity = aws_cloudfront_origin_access_identity.website.cloudfront_access_identity_path
     }
   }
-
   default_root_object = "index.html"
   enabled             = true
   is_ipv6_enabled     = true
-  # aliases             = [local.domainName]
-
-  # TODO-ZM: remove index_document and error_document from aws_s3_bucket_website_configuration?
+  aliases             = [local.domainName]
   custom_error_response {
     error_caching_min_ttl = 3000
     error_code            = 404
     response_code         = 200
     response_page_path    = "/index.html"
   }
-
   default_cache_behavior {
     allowed_methods  = ["DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"]
     cached_methods   = ["GET", "HEAD"]
     target_origin_id = "S3-${aws_s3_bucket.website.bucket}"
-
     forwarded_values {
       query_string = true
-      cookies {
-        forward = "none"
-      }
+      cookies { forward = "none" }
     }
     viewer_protocol_policy = "redirect-to-https"
     min_ttl                = 0
     default_ttl            = 3600
     max_ttl                = 86400
   }
-
   price_class = "PriceClass_100"
   restrictions {
-    geo_restriction {
-      restriction_type = "none"
-    }
+    geo_restriction { restriction_type = "none" }
   }
-
   viewer_certificate {
     acm_certificate_arn = data.terraform_remote_state.shared.outputs.certificate_arn
     ssl_support_method  = "sni-only"
