@@ -1,5 +1,10 @@
+import { FC } from "react";
 import "./style.css";
+import { Providers } from "./providers";
+import { App } from "./app";
 
-export function App() {
-  return <div>JOIN A STARTUP IN ALGERIA</div>;
-}
+export const EntryPoint: FC = () => (
+  <Providers>
+    <App />
+  </Providers>
+);
