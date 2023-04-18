@@ -13,3 +13,9 @@
   -moz-osx-font-smoothing: grayscale;
   -webkit-text-size-adjust: 100%;
 }
+
+#root {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
