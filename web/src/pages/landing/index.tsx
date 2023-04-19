@@ -1,9 +1,17 @@
-import { FC } from "react";
+import { FC, useEffect } from "react";
 import { Link } from "src/components/link";
 import { Stack } from "src/components/stack";
 import { Text } from "src/components/text";
+import { useSliceSelector } from "src/utils/state/selector";
+import { fetchJobPostsForLanding } from "./actions";
 
 export default (): ReturnType<FC> => {
+  const { jobPosts } = useSliceSelector("landingPage");
+
+  useEffect(() => {
+    fetchJobPostsForLanding();
+  }, []);
+
   return (
     <Stack orientation="vertical">
       <div className="absolute-center">
@@ -19,6 +27,9 @@ export default (): ReturnType<FC> => {
             >
               Github
             </Link>
+          </Text>
+          <Text variant="v4" margin="1">
+            {JSON.stringify(jobPosts, null, 2)}
           </Text>
         </Stack>
       </div>
