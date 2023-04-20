@@ -10,6 +10,9 @@ axum = "0.6.16"
 hyper = { version = "0.14.26", features = ["full"] }
 tokio = { version = "1.27.0", features = ["full"] }
 tower = "0.4.13"
+tower-http = { version = "0.4.0", features = ["trace"] }
+tracing = "0.1.37"
+tracing-subscriber = { version = "0.3.16", features = ["env-filter"] }
 
 [dev-dependencies]
 cargo-watch = "8.4.0"
