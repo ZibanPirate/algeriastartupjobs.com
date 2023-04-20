@@ -1,1 +1,1 @@
-export { landingPage } from "./landing-page";
+export { landingPage } from "src/pages/landing/state";

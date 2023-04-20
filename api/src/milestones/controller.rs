@@ -1,5 +1,6 @@
 use axum::{routing::get, Router};
 use serde::{Deserialize, Serialize};
+use serde_json::json;
 
 #[derive(Serialize, Deserialize)]
 pub struct Milestone {
@@ -45,7 +46,7 @@ pub fn milestone_controller() -> Router {
         "/",
         get(|| async {
             let milestones = get_milestones();
-            axum::response::Json(milestones)
+            axum::response::Json(json!({ "milestones": milestones }))
         }),
     )
 }

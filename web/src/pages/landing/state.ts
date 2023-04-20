@@ -2,20 +2,23 @@ import { LOADABLE } from "src/types/state";
 import { createSlice } from "@reduxjs/toolkit";
 import { setterReducerFactory } from "src/utils/state/reducer";
 
-interface JobPost {
+export interface MileStone {
   id: string;
   title: string;
   description: string;
+  deadline: Date;
+  progress: number;
+  completed: boolean;
 }
 
 export interface LandingPageState {
-  jobPosts: LOADABLE<JobPost[]>;
+  milestones: LOADABLE<MileStone[]>;
 }
 
 export const landingPage = createSlice({
   name: "landingPage",
   initialState: {
-    jobPosts: null,
+    milestones: null,
   } as LandingPageState,
   reducers: {
     set: setterReducerFactory(),

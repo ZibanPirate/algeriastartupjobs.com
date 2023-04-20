@@ -3,16 +3,16 @@ import { Link } from "src/components/link";
 import { Stack } from "src/components/stack";
 import { Text } from "src/components/text";
 import { useSliceSelector } from "src/utils/state/selector";
-import { fetchJobPostsForLanding } from "./actions";
+import { fetchMilestonesForLanding } from "./actions";
 import { usePageTitle } from "src/utils/hooks/page-title";
 
 export const Page: FC = () => {
   usePageTitle("Join a startup in Algeria");
 
-  const { jobPosts } = useSliceSelector("landingPage");
+  const { milestones } = useSliceSelector("landingPage");
 
   useEffect(() => {
-    fetchJobPostsForLanding();
+    fetchMilestonesForLanding();
   }, []);
 
   return (
@@ -32,7 +32,7 @@ export const Page: FC = () => {
             </Link>
           </Text>
           <Text variant="v4">
-            <pre>{JSON.stringify(jobPosts, null, 2)}</pre>
+            <pre>{JSON.stringify({ milestones }, null, 2)}</pre>
           </Text>
         </Stack>
       </div>

@@ -1,12 +1,13 @@
 use axum::{
     body::Bytes,
     extract::MatchedPath,
-    http::{HeaderMap, Request},
+    http::{HeaderMap, HeaderValue, Method, Request},
     response::Response,
     routing::get,
     Router,
 };
 use std::{net::SocketAddr, time::Duration};
+use tower_http::cors::CorsLayer;
 use tower_http::{classify::ServerErrorsFailureClass, trace::TraceLayer};
 use tracing::{info_span, Span};
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
@@ -32,6 +33,17 @@ async fn main() {
         .nest(
             "/milestones",
             milestones::controller::milestone_controller(),
+        )
+        .layer(
+            // see https://docs.rs/tower-http/latest/tower_http/cors/index.html
+            // for more details
+            //
+            // pay attention that for some request types like posting content-type: application/json
+            // it is required to add ".allow_headers([http::header::CONTENT_TYPE])"
+            // or see this issue https://github.com/tokio-rs/axum/issues/849
+            CorsLayer::new()
+                .allow_origin("http://localhost:8080".parse::<HeaderValue>().unwrap())
+                .allow_methods([Method::GET]),
         )
         // `TraceLayer` is provided by tower-http so you have to add that as a dependency.
         // It provides good defaults but is also very customizable.
