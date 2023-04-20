@@ -2,8 +2,11 @@ import { FC } from "react";
 import { Link } from "src/components/link";
 import { Stack } from "src/components/stack";
 import { Text } from "src/components/text";
+import { usePageTitle } from "src/utils/hooks/page-title";
 
-export const page: FC = () => {
+export const Page: FC = () => {
+  usePageTitle("404 - Page Not Found");
+
   return (
     <div className="absolute-center">
       <Stack orientation="vertical" align="center">

@@ -4,8 +4,11 @@ import { Stack } from "src/components/stack";
 import { Text } from "src/components/text";
 import { useSliceSelector } from "src/utils/state/selector";
 import { fetchJobPostsForLanding } from "./actions";
+import { usePageTitle } from "src/utils/hooks/page-title";
 
 export const Page: FC = () => {
+  usePageTitle("Join a startup in Algeria");
+
   const { jobPosts } = useSliceSelector("landingPage");
 
   useEffect(() => {
