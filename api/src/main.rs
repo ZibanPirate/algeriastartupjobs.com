@@ -11,6 +11,8 @@ use tower_http::{classify::ServerErrorsFailureClass, trace::TraceLayer};
 use tracing::{info_span, Span};
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
+mod milestones;
+
 #[tokio::main]
 async fn main() {
     tracing_subscriber::registry()
@@ -27,6 +29,10 @@ async fn main() {
     // build our application with a single route
     let app = Router::new()
         .route("/", get(|| async { "Hello, World!" }))
+        .nest(
+            "/milestones",
+            milestones::controller::milestone_controller(),
+        )
         // `TraceLayer` is provided by tower-http so you have to add that as a dependency.
         // It provides good defaults but is also very customizable.
         //

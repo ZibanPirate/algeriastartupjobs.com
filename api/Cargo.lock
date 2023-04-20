@@ -18,6 +18,7 @@ dependencies = [
  "axum",
  "cargo-watch",
  "hyper",
+ "serde",
  "tokio",
  "tower",
  "tower-http",
