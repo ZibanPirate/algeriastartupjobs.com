@@ -1,7 +1,6 @@
 import { FC } from "react";
 import "./style.css";
-import "src/utils/css/reset.css";
-import "src/utils/css/rules.css";
+import "src/utils/css/index.css";
 import { Route, Routes } from "react-router-dom";
 import { LazyPages } from "src/pages";
 

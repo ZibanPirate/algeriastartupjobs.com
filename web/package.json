@@ -12,6 +12,7 @@
   "dependencies": {
     "@loadable/component": "^5.15.3",
     "@reduxjs/toolkit": "^1.9.5",
+    "lodash": "^4.17.21",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-redux": "^8.0.5",
@@ -19,6 +20,7 @@
   },
   "devDependencies": {
     "@types/loadable__component": "^5.13.4",
+    "@types/lodash": "^4.14.194",
     "@types/react": "^18.0.28",
     "@types/react-dom": "^18.0.11",
     "@types/react-router-dom": "^5.3.3",

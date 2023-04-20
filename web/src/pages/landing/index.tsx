@@ -16,10 +16,10 @@ export default (): ReturnType<FC> => {
     <Stack orientation="vertical">
       <div className="absolute-center">
         <Stack orientation="vertical">
-          <Text variant="v1" margin="1">
+          <Text variant="v1" margin="1 0">
             Join a startup in Algeria
           </Text>
-          <Text variant="v4" margin="1">
+          <Text variant="v4" margin="0 0 1">
             Source code is publicly available at{" "}
             <Link
               to="https://github.com/algeriastartupjobs/algeriastartupjobs.com"
@@ -28,8 +28,8 @@ export default (): ReturnType<FC> => {
               Github
             </Link>
           </Text>
-          <Text variant="v4" margin="1">
-            {JSON.stringify(jobPosts, null, 2)}
+          <Text variant="v4">
+            <pre>{JSON.stringify(jobPosts, null, 2)}</pre>
           </Text>
         </Stack>
       </div>
