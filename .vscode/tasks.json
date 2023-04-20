@@ -30,6 +30,30 @@
       "problemMatcher": [],
       "options": { "cwd": "${workspaceFolder}/infra/web" },
       "dependsOn": ["build web", "terraform shared"]
+    },
+    {
+      "label": "dev api",
+      "type": "shell",
+      "command": "cargo watch -x run",
+      "problemMatcher": [],
+      "options": { "cwd": "${workspaceFolder}/api" },
+      "isBackground": true,
+      "presentation": { "group": "dev" }
+    },
+    {
+      "label": "dev web",
+      "type": "shell",
+      "command": "npm run dev",
+      "problemMatcher": [],
+      "options": { "cwd": "${workspaceFolder}/web" },
+      "isBackground": true,
+      "presentation": { "group": "dev" }
+    },
+    {
+      "label": "dev",
+      "dependsOn": ["dev web", "dev api"],
+      "dependsOrder": "parallel",
+      "problemMatcher": []
     }
   ]
 }
