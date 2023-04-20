@@ -5,7 +5,7 @@ import { Text } from "src/components/text";
 import { useSliceSelector } from "src/utils/state/selector";
 import { fetchJobPostsForLanding } from "./actions";
 
-export default (): ReturnType<FC> => {
+export const Page: FC = () => {
   const { jobPosts } = useSliceSelector("landingPage");
 
   useEffect(() => {

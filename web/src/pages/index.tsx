@@ -1,7 +1,7 @@
 import { globImportToLazyNodes } from "src/utils/vite-only/glob-import-to-lazy-nodes";
 
 const componentModules = import.meta.glob("./*/index.tsx", {
-  import: "default",
+  import: "Page",
 });
 
 // @TODO-ZM: nice to have static types for LazyPages properties, Vite plugin?
