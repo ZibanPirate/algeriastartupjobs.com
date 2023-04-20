@@ -3,7 +3,7 @@ import { Link } from "src/components/link";
 import { Stack } from "src/components/stack";
 import { Text } from "src/components/text";
 
-export default (): ReturnType<FC> => {
+export const page: FC = () => {
   return (
     <div className="absolute-center">
       <Stack orientation="vertical" align="center">
