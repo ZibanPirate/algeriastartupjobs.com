@@ -72,6 +72,13 @@ resource "digitalocean_droplet" "api" {
         sudo: ['ALL=(ALL) NOPASSWD:ALL']
         groups: sudo
         shell: /bin/bash
+    runcmd:
+      - sudo apt update
+      - sudo apt install nginx -y
+      - sudo ufw allow 'Nginx HTTP'
+      - sudo systemctl enable nginx
+      - sudo systemctl start nginx
+      - echo Done!
     EOT
 }
 
@@ -93,7 +100,6 @@ resource "ssh_resource" "always_run" {
   private_key = var.do_ssh_key
 
   commands = [
-    "pwd",
-    "echo \"Hello There!\""
+    "echo \"SSHed successfully\"",
   ]
 }
