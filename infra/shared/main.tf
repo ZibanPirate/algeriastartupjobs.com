@@ -66,3 +66,46 @@ resource "aws_acm_certificate_validation" "website" {
   provider                = aws.virginia
 }
 
+terraform {
+  required_providers {
+    digitalocean = {
+      source  = "digitalocean/digitalocean"
+      version = "~> 2.0"
+    }
+  }
+}
+
+variable "do_api_key" {
+  description = "The API key for the DigitalOcean account"
+  type        = string
+  sensitive   = true
+}
+
+variable "do_ssh_pub_key" {
+  description = "The SSH key for the DigitalOcean droptlet"
+  type        = string
+  sensitive   = true
+}
+
+provider "digitalocean" {
+  token = var.do_api_key
+}
+
+resource "digitalocean_ssh_key" "api" {
+  count      = local.count
+  name       = "Algeria Startup Jobs Terraform Key"
+  public_key = var.do_ssh_pub_key
+}
+
+output "digitalocean_ssh_key_fingerprint" {
+  value = local.isSharedWorkspace ? digitalocean_ssh_key.api[0].fingerprint : null
+}
+
+resource "digitalocean_project" "api" {
+  count = local.count
+  name  = "Algeria Startup Jobs"
+}
+
+output "digitalocean_project_id" {
+  value = local.isSharedWorkspace ? digitalocean_project.api[0].id : null
+}
