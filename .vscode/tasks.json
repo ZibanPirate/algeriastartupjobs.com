@@ -9,6 +9,19 @@
       "options": { "cwd": "${workspaceFolder}/web" }
     },
     {
+      "label": "build api",
+      "type": "shell",
+      "command": [
+        "rm -r -f ./ubuntu-target",
+        "&& mkdir -p ./ubuntu-target",
+        "&& docker rm -f $(docker ps -aqf \"name=ajs-api-ubuntu\") || true",
+        "&& docker build -t ajs-api-ubuntu --progress=plain .",
+        "&& docker cp $(docker run --name=ajs-api-ubuntu -d -it ajs-api-ubuntu):/usr/asj/api/target ./ubuntu-target"
+      ],
+      "problemMatcher": [],
+      "options": { "cwd": "${workspaceFolder}/api" }
+    },
+    {
       "label": "terraform shared",
       "type": "shell",
       "command": "terraform workspace select shared && terraform apply -auto-approve -var-file=\"secret.tfvars\"",
