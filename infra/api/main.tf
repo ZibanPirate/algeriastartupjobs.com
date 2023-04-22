@@ -52,8 +52,8 @@ locals {
   app_name         = "algeriastartupjobs-api"
   service_name     = "algeriastartupjobs-api"
   stage            = terraform.workspace
-  root_domain_name = "algeriastartupjobs.com"
-  sub_domain_name  = local.stage == "production" ? "api" : "api.${local.stage}"
+  root_domain_name = "api.algeriastartupjobs.com"
+  sub_domain_name  = local.stage
   domain_name      = "${local.sub_domain_name}.${local.root_domain_name}"
 }
 
@@ -134,7 +134,7 @@ resource "aws_route53_record" "api" {
   records = [digitalocean_droplet.api.ipv4_address]
 }
 
-resource "ssh_resource" "always_run" {
+resource "ssh_resource" "upload_app_to_vps" {
   triggers = {
     # @TODO-ZM: change to only run when code change
     always_run = "${timestamp()}"
