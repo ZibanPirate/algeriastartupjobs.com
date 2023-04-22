@@ -61,6 +61,10 @@ provider "digitalocean" {
   token = var.do_api_key
 }
 
+provider "aws" {
+  region = "eu-west-1"
+}
+
 resource "digitalocean_droplet" "api" {
   image     = "debian-11-x64"
   name      = local.domain_name
@@ -120,6 +124,14 @@ resource "digitalocean_project_resources" "api" {
   resources = [
     digitalocean_droplet.api.urn
   ]
+}
+
+resource "aws_route53_record" "api" {
+  zone_id = data.terraform_remote_state.shared.outputs.route53_zone_id
+  name    = local.domain_name
+  type    = "A"
+  ttl     = "300"
+  records = [digitalocean_droplet.api.ipv4_address]
 }
 
 resource "ssh_resource" "always_run" {

@@ -4,6 +4,7 @@ data "terraform_remote_state" "shared" {
 }
 
 locals {
+  # @TODO-ZM: snake-case the variables
   stage          = terraform.workspace
   rootDomainName = "algeriastartupjobs.com"
   subDomainName  = local.stage == "production" ? "www" : local.stage

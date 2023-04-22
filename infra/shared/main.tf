@@ -1,4 +1,5 @@
 locals {
+  # @TODO-ZM: snake-case the variables
   rootDomainName    = "algeriastartupjobs.com"
   isSharedWorkspace = terraform.workspace == "shared"
   count             = local.isSharedWorkspace ? 1 : 0
