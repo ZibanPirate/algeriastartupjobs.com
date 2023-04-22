@@ -1,13 +1,13 @@
 use axum::{
     body::Bytes,
     extract::MatchedPath,
-    http::{HeaderMap, HeaderValue, Method, Request},
+    http::{HeaderMap, Method, Request},
     response::Response,
     routing::get,
     Router,
 };
 use std::{net::SocketAddr, time::Duration};
-use tower_http::cors::CorsLayer;
+use tower_http::cors::{Any, CorsLayer};
 use tower_http::{classify::ServerErrorsFailureClass, trace::TraceLayer};
 use tracing::{info_span, Span};
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
@@ -42,7 +42,8 @@ async fn main() {
             // it is required to add ".allow_headers([http::header::CONTENT_TYPE])"
             // or see this issue https://github.com/tokio-rs/axum/issues/849
             CorsLayer::new()
-                .allow_origin("http://localhost:8080".parse::<HeaderValue>().unwrap())
+                // @TODO-ZM: what's best for cors? dynamic value or static list?
+                .allow_origin(Any)
                 .allow_methods([Method::GET]),
         )
         // `TraceLayer` is provided by tower-http so you have to add that as a dependency.

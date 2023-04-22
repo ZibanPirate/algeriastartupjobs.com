@@ -150,7 +150,8 @@ resource "acme_certificate" "api" {
 }
 
 output "acme_certificate_api_certificate_pem" {
-  value = local.is_shared_workspace ? acme_certificate.api[0].certificate_pem : null
+  value     = local.is_shared_workspace ? acme_certificate.api[0].certificate_pem : null
+  sensitive = true
 }
 
 output "acme_certificate_api_private_key_pem" {
