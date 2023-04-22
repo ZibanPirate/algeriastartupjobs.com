@@ -46,11 +46,15 @@ variable "do_droplet_password" {
 }
 
 locals {
-  stage          = terraform.workspace
-  rootDomainName = "algeriastartupjobs.com"
-  subDomainName  = local.stage == "production" ? "api" : "api.${local.stage}"
-  domainName     = "${local.subDomainName}.${local.rootDomainName}"
-  serviceName    = "${local.subDomainName}.${local.rootDomainName}"
+  app_folder_name  = "asj"
+  app_folder       = "~/${local.app_folder_name}"
+  upload_tmp_name  = "~/upload_tmp"
+  app_name         = "algeriastartupjobs-api"
+  service_name     = "algeriastartupjobs-api"
+  stage            = terraform.workspace
+  root_domain_name = "algeriastartupjobs.com"
+  sub_domain_name  = local.stage == "production" ? "api" : "api.${local.stage}"
+  domain_name      = "${local.sub_domain_name}.${local.root_domain_name}"
 }
 
 provider "digitalocean" {
@@ -58,8 +62,8 @@ provider "digitalocean" {
 }
 
 resource "digitalocean_droplet" "api" {
-  image     = "ubuntu-18-04-x64"
-  name      = local.serviceName
+  image     = "debian-11-x64"
+  name      = local.domain_name
   region    = "fra1"
   size      = "s-1vcpu-512mb-10gb"
   ssh_keys  = [data.terraform_remote_state.shared.outputs.digitalocean_ssh_key_fingerprint]
@@ -72,13 +76,42 @@ resource "digitalocean_droplet" "api" {
         sudo: ['ALL=(ALL) NOPASSWD:ALL']
         groups: sudo
         shell: /bin/bash
+    write_files:
+    - content: |
+        [Unit]
+        Description=Algeria Startup Jobs API
+        After=network.target
+
+        [Service]
+        ExecStart=/home/${var.do_droplet_user}/${local.app_folder_name}/${local.app_name}
+        Restart=always
+        RestartSec=5
+        User=${var.do_droplet_user}
+
+        [Install]
+        WantedBy=multi-user.target
+      path: /etc/systemd/system/${local.service_name}.service
     runcmd:
       - sudo apt update
       - sudo apt install nginx -y
       - sudo ufw allow 'Nginx HTTP'
+      - sudo sh -c "echo '
+          server {
+              listen 80;
+              server_name ${local.domain_name};
+
+              location / {
+                  proxy_pass http://localhost:9090;
+                  proxy_set_header Host \$host;
+                  proxy_set_header X-Real-IP \$remote_addr;
+              }
+          }' > /etc/nginx/sites-available/${local.domain_name}.conf"
+      - sudo rm /etc/nginx/sites-enabled/*
+      - sudo ln -s /etc/nginx/sites-available/${local.domain_name}.conf /etc/nginx/sites-enabled/
       - sudo systemctl enable nginx
       - sudo systemctl start nginx
-      - echo Done!
+      - sudo systemctl daemon-reload
+      - systemctl start ${local.service_name}
     EOT
 }
 
@@ -98,8 +131,20 @@ resource "ssh_resource" "always_run" {
   host        = digitalocean_droplet.api.ipv4_address
   user        = var.do_droplet_user
   private_key = var.do_ssh_key
+  timeout     = "5m"
+
+  file {
+    source      = "${path.module}/../../api/ubuntu-target/target/release/${local.app_name}"
+    destination = local.upload_tmp_name
+  }
 
   commands = [
-    "echo \"SSHed successfully\"",
+    "sudo systemctl stop ${local.service_name} || true",
+    "sudo mkdir -p ${local.app_folder} || true",
+    "sudo rm ${local.app_folder}/${local.app_name} || true",
+    "sudo mv ${local.upload_tmp_name} ${local.app_folder}/${local.app_name} || true",
+    "sudo chmod +x ${local.app_folder}/${local.app_name} || true",
+    "sudo systemctl start ${local.service_name} || true",
+    "sudo systemctl restart nginx"
   ]
 }

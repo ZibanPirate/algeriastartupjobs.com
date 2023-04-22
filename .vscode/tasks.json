@@ -15,7 +15,7 @@
         "rm -r -f ./ubuntu-target",
         "&& mkdir -p ./ubuntu-target",
         "&& docker rm -f $(docker ps -aqf \"name=ajs-api-ubuntu\") || true",
-        "&& docker build -t ajs-api-ubuntu --progress=plain .",
+        "&& DOCKER_DEFAULT_PLATFORM=linux/amd64 docker build -t ajs-api-ubuntu --progress=plain .",
         "&& docker cp $(docker run --name=ajs-api-ubuntu -d -it ajs-api-ubuntu):/usr/asj/api/target ./ubuntu-target"
       ],
       "problemMatcher": [],
