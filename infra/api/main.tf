@@ -46,15 +46,17 @@ variable "do_droplet_password" {
 }
 
 locals {
-  app_folder_name  = "asj"
-  app_folder       = "~/${local.app_folder_name}"
-  upload_tmp_name  = "~/upload_tmp"
-  app_name         = "algeriastartupjobs-api"
-  service_name     = "algeriastartupjobs-api"
-  stage            = terraform.workspace
-  root_domain_name = "api.algeriastartupjobs.com"
-  sub_domain_name  = local.stage
-  domain_name      = "${local.sub_domain_name}.${local.root_domain_name}"
+  app_port           = "9090"
+  app_folder_name    = "asj"
+  app_folder         = "~/${local.app_folder_name}"
+  certificate_folder = "/etc/ssl/certs"
+  upload_tmp_name    = "~/upload_tmp"
+  app_name           = "algeriastartupjobs-api"
+  service_name       = "algeriastartupjobs-api"
+  stage              = terraform.workspace
+  root_domain_name   = "api.algeriastartupjobs.com"
+  sub_domain_name    = local.stage
+  domain_name        = "${local.sub_domain_name}.${local.root_domain_name}"
 }
 
 provider "digitalocean" {
@@ -101,13 +103,17 @@ resource "digitalocean_droplet" "api" {
       - sudo ufw allow 'Nginx HTTP'
       - sudo sh -c "echo '
           server {
-              listen 80;
+              listen 443 ssl;
               server_name ${local.domain_name};
+              ssl_certificate ${local.certificate_folder}/${local.service_name}.crt;
+              ssl_certificate_key ${local.certificate_folder}/${local.service_name}.key;
 
               location / {
-                  proxy_pass http://localhost:9090;
+                  proxy_pass http://127.0.0.1:${local.app_port};
                   proxy_set_header Host \$host;
                   proxy_set_header X-Real-IP \$remote_addr;
+                  proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+                  proxy_set_header X-Forwarded-Proto \$scheme;
               }
           }' > /etc/nginx/sites-available/${local.domain_name}.conf"
       - sudo rm /etc/nginx/sites-enabled/*
@@ -118,6 +124,24 @@ resource "digitalocean_droplet" "api" {
       - systemctl start ${local.service_name}
     EOT
 }
+
+resource "ssh_resource" "upload_ssl_certificates_to_vps" {
+  triggers = {
+    vps_id = digitalocean_droplet.api.id
+    cert   = data.terraform_remote_state.shared.outputs.acme_certificate_api_certificate_pem
+  }
+
+  host        = digitalocean_droplet.api.ipv4_address
+  user        = var.do_droplet_user
+  private_key = var.do_ssh_key
+  timeout     = "2m"
+
+  commands = [
+    "sudo sh -c \"echo '${data.terraform_remote_state.shared.outputs.acme_certificate_api_certificate_pem}' > ${local.certificate_folder}/${local.service_name}.crt\"",
+    "sudo sh -c \"echo '${data.terraform_remote_state.shared.outputs.acme_certificate_api_private_key_pem}' > ${local.certificate_folder}/${local.service_name}.key\""
+  ]
+}
+
 
 resource "digitalocean_project_resources" "api" {
   project = data.terraform_remote_state.shared.outputs.digitalocean_project_id
@@ -136,8 +160,9 @@ resource "aws_route53_record" "api" {
 
 resource "ssh_resource" "upload_app_to_vps" {
   triggers = {
-    # @TODO-ZM: change to only run when code change
-    always_run = "${timestamp()}"
+    always   = timestamp()
+    vps_id   = digitalocean_droplet.api.id
+    app_hash = filesha256("${path.module}/../../api/ubuntu-target/target/release/${local.app_name}")
   }
 
   host        = digitalocean_droplet.api.ipv4_address
@@ -157,6 +182,6 @@ resource "ssh_resource" "upload_app_to_vps" {
     "sudo mv ${local.upload_tmp_name} ${local.app_folder}/${local.app_name} || true",
     "sudo chmod +x ${local.app_folder}/${local.app_name} || true",
     "sudo systemctl start ${local.service_name} || true",
-    "sudo systemctl restart nginx"
+    "sudo systemctl restart nginx",
   ]
 }

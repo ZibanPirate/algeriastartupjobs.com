@@ -1,8 +1,23 @@
+terraform {
+  required_providers {
+    digitalocean = {
+      source  = "digitalocean/digitalocean"
+      version = "~> 2.0"
+    }
+    acme = {
+      source  = "vancluever/acme"
+      version = "~> 2.5.3"
+    }
+  }
+}
+
 locals {
   # @TODO-ZM: snake-case the variables
-  rootDomainName    = "algeriastartupjobs.com"
-  isSharedWorkspace = terraform.workspace == "shared"
-  count             = local.isSharedWorkspace ? 1 : 0
+  rootDomainName        = "algeriastartupjobs.com"
+  isSharedWorkspace     = terraform.workspace == "shared"
+  count                 = local.isSharedWorkspace ? 1 : 0
+  contact_email_address = "contact@algeriastartupjobs.com"
+  api_root_domain_name  = "api.algeriastartupjobs.com"
 }
 
 provider "aws" {
@@ -13,6 +28,11 @@ provider "aws" {
 provider "aws" {
   alias  = "virginia"
   region = "us-east-1"
+}
+
+provider "acme" {
+  # server_url = "https://acme-staging-v02.api.letsencrypt.org/directory"
+  server_url = "https://acme-v02.api.letsencrypt.org/directory"
 }
 
 # Shared Route53 zone configuration
@@ -67,15 +87,6 @@ resource "aws_acm_certificate_validation" "website" {
   provider                = aws.virginia
 }
 
-terraform {
-  required_providers {
-    digitalocean = {
-      source  = "digitalocean/digitalocean"
-      version = "~> 2.0"
-    }
-  }
-}
-
 variable "do_api_key" {
   description = "The API key for the DigitalOcean account"
   type        = string
@@ -109,4 +120,41 @@ resource "digitalocean_project" "api" {
 
 output "digitalocean_project_id" {
   value = local.isSharedWorkspace ? digitalocean_project.api[0].id : null
+}
+
+resource "tls_private_key" "api" {
+  count     = local.count
+  algorithm = "RSA"
+}
+
+resource "acme_registration" "api" {
+  count           = local.count
+  account_key_pem = tls_private_key.api[0].private_key_pem
+  email_address   = local.contact_email_address
+}
+
+resource "acme_certificate" "api" {
+  count                     = local.count
+  account_key_pem           = acme_registration.api[0].account_key_pem
+  common_name               = local.api_root_domain_name
+  subject_alternative_names = ["*.${local.api_root_domain_name}"]
+
+  dns_challenge {
+    provider = "route53"
+
+    config = {
+      AWS_HOSTED_ZONE_ID = aws_route53_zone.website[0].id
+    }
+  }
+
+  depends_on = [acme_registration.api[0]]
+}
+
+output "acme_certificate_api_certificate_pem" {
+  value = local.isSharedWorkspace ? acme_certificate.api[0].certificate_pem : null
+}
+
+output "acme_certificate_api_private_key_pem" {
+  value     = local.isSharedWorkspace ? acme_certificate.api[0].private_key_pem : null
+  sensitive = true
 }
