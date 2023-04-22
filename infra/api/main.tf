@@ -103,6 +103,11 @@ resource "digitalocean_droplet" "api" {
       - sudo ufw allow 'Nginx HTTP'
       - sudo sh -c "echo '
           server {
+              listen 80;
+              server_name ${local.domain_name};
+              return 301 https://\$server_name\$request_uri;
+          }
+          server {
               listen 443 ssl;
               server_name ${local.domain_name};
               ssl_certificate ${local.certificate_folder}/${local.service_name}.crt;
