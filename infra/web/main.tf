@@ -4,12 +4,11 @@ data "terraform_remote_state" "shared" {
 }
 
 locals {
-  # @TODO-ZM: snake-case the variables
-  stage          = terraform.workspace
-  rootDomainName = "algeriastartupjobs.com"
-  subDomainName  = local.stage == "production" ? "www" : local.stage
-  domainName     = "${local.subDomainName}.${local.rootDomainName}"
-  bucketName     = "${local.subDomainName}.${local.rootDomainName}"
+  stage            = terraform.workspace
+  root_domain_name = "algeriastartupjobs.com"
+  sub_domain_name  = local.stage == "production" ? "www" : local.stage
+  domainName       = "${local.sub_domain_name}.${local.root_domain_name}"
+  bucketName       = "${local.sub_domain_name}.${local.root_domain_name}"
 }
 
 provider "aws" {
@@ -90,7 +89,7 @@ resource "aws_cloudfront_distribution" "website" {
   default_root_object = "index.html"
   enabled             = true
   is_ipv6_enabled     = true
-  aliases             = local.stage == "production" ? [local.domainName, local.rootDomainName] : [local.domainName]
+  aliases             = local.stage == "production" ? [local.domainName, local.root_domain_name] : [local.domainName]
   custom_error_response {
     error_caching_min_ttl = 3000
     error_code            = 404
@@ -123,7 +122,7 @@ resource "aws_cloudfront_distribution" "website" {
 resource "aws_route53_record" "website-a" {
   count   = local.stage == "production" ? 2 : 1
   zone_id = data.terraform_remote_state.shared.outputs.route53_zone_id
-  name    = [local.domainName, local.rootDomainName][count.index]
+  name    = [local.domainName, local.root_domain_name][count.index]
   type    = "A"
   alias {
     name                   = aws_cloudfront_distribution.website.domain_name

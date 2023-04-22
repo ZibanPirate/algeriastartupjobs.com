@@ -12,10 +12,9 @@ terraform {
 }
 
 locals {
-  # @TODO-ZM: snake-case the variables
-  rootDomainName        = "algeriastartupjobs.com"
-  isSharedWorkspace     = terraform.workspace == "shared"
-  count                 = local.isSharedWorkspace ? 1 : 0
+  root_domain_name      = "algeriastartupjobs.com"
+  is_shared_workspace   = terraform.workspace == "shared"
+  count                 = local.is_shared_workspace ? 1 : 0
   contact_email_address = "contact@algeriastartupjobs.com"
   api_root_domain_name  = "api.algeriastartupjobs.com"
 }
@@ -38,21 +37,21 @@ provider "acme" {
 # Shared Route53 zone configuration
 resource "aws_route53_zone" "website" {
   count         = local.count
-  name          = local.rootDomainName
+  name          = local.root_domain_name
   force_destroy = true
 }
 
 # Output the zone ID
 output "route53_zone_id" {
-  value = local.isSharedWorkspace ? aws_route53_zone.website[0].id : null
+  value = local.is_shared_workspace ? aws_route53_zone.website[0].id : null
 }
 
 
 resource "aws_acm_certificate" "website" {
   count                     = local.count
-  domain_name               = local.rootDomainName
+  domain_name               = local.root_domain_name
   validation_method         = "DNS"
-  subject_alternative_names = ["staging.${local.rootDomainName}", "www.${local.rootDomainName}"]
+  subject_alternative_names = ["staging.${local.root_domain_name}", "www.${local.root_domain_name}"]
   lifecycle {
     create_before_destroy = true
   }
@@ -61,7 +60,7 @@ resource "aws_acm_certificate" "website" {
 
 # Output the certificate ARN
 output "certificate_arn" {
-  value = local.isSharedWorkspace ? aws_acm_certificate.website[0].arn : null
+  value = local.is_shared_workspace ? aws_acm_certificate.website[0].arn : null
 }
 
 resource "aws_route53_record" "website" {
@@ -110,7 +109,7 @@ resource "digitalocean_ssh_key" "api" {
 }
 
 output "digitalocean_ssh_key_fingerprint" {
-  value = local.isSharedWorkspace ? digitalocean_ssh_key.api[0].fingerprint : null
+  value = local.is_shared_workspace ? digitalocean_ssh_key.api[0].fingerprint : null
 }
 
 resource "digitalocean_project" "api" {
@@ -119,7 +118,7 @@ resource "digitalocean_project" "api" {
 }
 
 output "digitalocean_project_id" {
-  value = local.isSharedWorkspace ? digitalocean_project.api[0].id : null
+  value = local.is_shared_workspace ? digitalocean_project.api[0].id : null
 }
 
 resource "tls_private_key" "api" {
@@ -151,10 +150,10 @@ resource "acme_certificate" "api" {
 }
 
 output "acme_certificate_api_certificate_pem" {
-  value = local.isSharedWorkspace ? acme_certificate.api[0].certificate_pem : null
+  value = local.is_shared_workspace ? acme_certificate.api[0].certificate_pem : null
 }
 
 output "acme_certificate_api_private_key_pem" {
-  value     = local.isSharedWorkspace ? acme_certificate.api[0].private_key_pem : null
+  value     = local.is_shared_workspace ? acme_certificate.api[0].private_key_pem : null
   sensitive = true
 }
