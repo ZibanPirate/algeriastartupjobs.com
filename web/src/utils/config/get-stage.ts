@@ -5,8 +5,6 @@ type Stage = typeof stages[number];
 
 const providedStage = import.meta.env.MODE as Stage;
 
-console.log("providedStage", providedStage);
-
 const _getStage = (): { stage: Stage; stageIndex: number } => {
   let stageIndex = stages.indexOf(providedStage);
   if (stageIndex === -1)

@@ -2,9 +2,16 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "build web",
+      "label": "build web staging",
       "type": "shell",
-      "command": "npm run clean && npm run build",
+      "command": "npm run clean && npm run build -- --mode staging",
+      "problemMatcher": [],
+      "options": { "cwd": "${workspaceFolder}/web" }
+    },
+    {
+      "label": "build web production",
+      "type": "shell",
+      "command": "npm run clean && npm run build -- --mode production",
       "problemMatcher": [],
       "options": { "cwd": "${workspaceFolder}/web" }
     },
@@ -34,7 +41,7 @@
       "command": "TF_WORKSPACE=staging terraform apply -auto-approve",
       "problemMatcher": [],
       "options": { "cwd": "${workspaceFolder}/infra/web" },
-      "dependsOn": ["build web", "terraform shared"]
+      "dependsOn": ["build web staging", "terraform shared"]
     },
     {
       "label": "terraform web production",
@@ -42,7 +49,7 @@
       "command": "TF_WORKSPACE=production terraform apply -auto-approve",
       "problemMatcher": [],
       "options": { "cwd": "${workspaceFolder}/infra/web" },
-      "dependsOn": ["build web", "terraform shared"]
+      "dependsOn": ["build web production", "terraform shared"]
     },
     {
       "label": "terraform api staging",
