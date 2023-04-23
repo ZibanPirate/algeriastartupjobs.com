@@ -30,6 +30,7 @@
     "rimraf": "^5.0.0",
     "typescript": "^5.0.4",
     "vite": "^4.3.0",
+    "vite-plugin-ejs": "^1.6.4",
     "vite-plugin-favicons-inject": "^2.2.0"
   }
 }

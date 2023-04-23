@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
+    <% if(mode!=='production'){ %>
+    <meta name="robots" content="noindex" />
+    <% } if(mode==='production' || mode==='staging'){ %>
     <!-- Google tag (gtag.js) -->
     <script
       async
@@ -15,6 +18,7 @@
 
       gtag("config", "G-5FHCGHP4T8");
     </script>
+    <% } %>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Join a startup in Algeria | Algeria Startup Jobs</title>
