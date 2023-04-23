@@ -1,4 +1,5 @@
 @import url(./reset.css);
+@import url(./theme.css);
 @import url(./rules/flex.css);
 @import url(./rules/margin.css);
 @import url(./rules/font.css);

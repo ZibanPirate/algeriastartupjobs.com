@@ -1,0 +1,10 @@
+.icon {
+  display: block;
+  font-size: inherit;
+  width: var(--this-font-size);
+  height: var(--this-font-size);
+  padding: 0.25em;
+  background-size: cover;
+  background-color: var(--color-primary);
+  mask-size: cover;
+}

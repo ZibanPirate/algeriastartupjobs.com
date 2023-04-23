@@ -1,0 +1,6 @@
+.button {
+  padding: 0.25em;
+  border: 1px solid #aaaa;
+  background-color: var(--color-background-front-1);
+  display: flex;
+}
