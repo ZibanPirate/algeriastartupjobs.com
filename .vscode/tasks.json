@@ -79,7 +79,7 @@
     {
       "label": "dev web",
       "type": "shell",
-      "command": "npm run dev",
+      "command": "npm install && npm run dev",
       "problemMatcher": [],
       "options": { "cwd": "${workspaceFolder}/web" },
       "isBackground": true,
@@ -89,7 +89,8 @@
       "label": "dev",
       "dependsOn": ["dev web", "dev api"],
       "dependsOrder": "parallel",
-      "problemMatcher": []
+      "problemMatcher": [],
+      "group": "build"
     }
   ]
 }
