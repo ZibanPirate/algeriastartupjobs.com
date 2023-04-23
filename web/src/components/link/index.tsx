@@ -1,6 +1,10 @@
 import { FC, PropsWithChildren } from "react";
 import "./style.css";
-import { FontVariantProps, StyleProps } from "src/utils/props/style";
+import {
+  FontVariantProps,
+  StyleProps,
+  marginToClasses,
+} from "src/utils/props/style";
 import { Link as RL, LinkProps as RLP } from "react-router-dom";
 
 interface LinkProps
@@ -18,8 +22,8 @@ export const Link: FC<LinkProps> = ({
   const classes = [
     "link",
     `font-variant-${variant}`,
-    margin && `margin-${margin}`,
-  ].filter(Boolean);
+    ...marginToClasses(margin),
+  ];
   return (
     <RL className={classes.join(" ")} {...props}>
       {children}

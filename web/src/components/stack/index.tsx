@@ -1,6 +1,6 @@
 import { FC, PropsWithChildren } from "react";
 import "./style.css";
-import { StyleProps } from "src/utils/props/style";
+import { StyleProps, marginToClasses } from "src/utils/props/style";
 
 interface StackProps extends PropsWithChildren, StyleProps {
   orientation: "horizontal" | "vertical";
@@ -19,7 +19,7 @@ export const Stack: FC<StackProps> = ({
     "flex",
     `flex-${orientation}`,
     `flex-align-${align}`,
-    margin && `margin-${margin}`,
-  ].filter(Boolean);
+    ...marginToClasses(margin),
+  ];
   return <div className={classes.join(" ")}>{children}</div>;
 };
