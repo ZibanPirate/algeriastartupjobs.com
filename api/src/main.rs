@@ -6,12 +6,15 @@ use axum::{
     routing::get,
     Router,
 };
-use std::{net::SocketAddr, time::Duration};
+use local_ip_address::local_ip;
+use std::{
+    net::{SocketAddr, TcpListener},
+    time::Duration,
+};
 use tower_http::cors::{Any, CorsLayer};
 use tower_http::{classify::ServerErrorsFailureClass, trace::TraceLayer};
 use tracing::{info_span, Span};
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
-
 mod milestones;
 
 #[tokio::main]
@@ -92,13 +95,46 @@ async fn main() {
                 ),
         );
 
-    // run it
-    let addr = SocketAddr::from(([127, 0, 0, 1], 9090));
-    tracing::debug!("\nlistening on {}", addr);
+    // get the local IP address of the system
+    let ip = local_ip();
 
-    // run it with hyper on localhost:9090
-    axum::Server::bind(&addr)
-        .serve(app.into_make_service())
-        .await
-        .unwrap();
+    // check if the IP address is local
+    if let Ok(ip) = ip {
+        // create two TcpListeners with different addresses and ports
+        let loopback_listener =
+            TcpListener::bind(SocketAddr::from(([127, 0, 0, 1], 9090))).unwrap();
+        let loopback_addr = loopback_listener.local_addr().unwrap();
+        let loopback_server = axum::Server::from_tcp(loopback_listener).unwrap().serve(
+            app.clone()
+                .into_make_service_with_connect_info::<SocketAddr>(),
+        );
+
+        let local_listener = TcpListener::bind(SocketAddr::new(ip, 9090)).unwrap();
+        let local_addr = local_listener.local_addr().unwrap();
+        let local_server = axum::Server::from_tcp(local_listener)
+            .unwrap()
+            .serve(app.into_make_service_with_connect_info::<SocketAddr>());
+
+        tracing::debug!(
+            "\nlistening on both:\nhttp://{}\nhttp://{}",
+            loopback_addr,
+            local_addr
+        );
+
+        // run both servers concurrently
+        let (_, _) = tokio::join!(local_server, loopback_server);
+    } else {
+        // create a TcpListener with the loopback address and port
+        let loopback_listener =
+            TcpListener::bind(SocketAddr::from(([127, 0, 0, 1], 9090))).unwrap();
+        let loopback_addr = loopback_listener.local_addr().unwrap();
+        let loopback_server = axum::Server::from_tcp(loopback_listener)
+            .unwrap()
+            .serve(app.into_make_service_with_connect_info::<SocketAddr>());
+
+        tracing::debug!("\nlistening on http://{}", loopback_addr);
+
+        // run the server
+        loopback_server.await.unwrap();
+    }
 }
