@@ -1,23 +1,40 @@
-import { getStateActions } from "src/state";
+import { getState, getStateActions } from "src/state";
 import Axios from "axios";
 import { getConfig } from "src/utils/config/get-config";
-import { MileStone } from "./state";
+import { JobPost, JobPostCategory } from "./state";
+import { isLoaded } from "src/utils/loadable";
 
-export const fetchMilestonesForLanding = async (): Promise<void> => {
+export const fetchJobsForFirstCategoryForLanding = async (): Promise<void> => {
   const { landingPage } = getStateActions();
+  const { jobsPostsGroupedByCategory } = getState().landingPage;
+  const [firstCategory, ...restOfJobsPostsGroupedByCategory] =
+    jobsPostsGroupedByCategory;
+
+  if (!firstCategory) return;
+  if (isLoaded(firstCategory.job_posts)) return;
+
   try {
-    landingPage.set({ milestones: null });
     // @TODO-ZM: use fetchV2
-    // const { milestones } = await fetchV2("api:MileStones/dzcode", {});
-    const {
-      data: { milestones },
-    } = await Axios.get<{ milestones: MileStone[] }>(
-      getConfig().api.base_url + "/milestones"
+    // const { jobPosts } = await fetchV2("api:job-posts/dzcode", {});
+    const { data: item } = await Axios.get<{
+      category: JobPostCategory;
+      job_posts: JobPost[];
+    }>(
+      getConfig().api.base_url +
+        "/job-posts?category=" +
+        firstCategory.category.name
     );
 
-    landingPage.set({ milestones });
+    landingPage.set({
+      jobsPostsGroupedByCategory: [item, ...restOfJobsPostsGroupedByCategory],
+    });
   } catch (error) {
-    landingPage.set({ milestones: "ERROR" });
+    landingPage.set({
+      jobsPostsGroupedByCategory: [
+        { ...firstCategory, job_posts: "ERROR" },
+        ...restOfJobsPostsGroupedByCategory,
+      ],
+    });
     // @TODO-ZM: add sentry
     // Sentry.captureException(error, { tags: { type: "WEB_FETCH" } });
   }

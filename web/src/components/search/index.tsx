@@ -5,13 +5,15 @@ import { Icon } from "src/components/icon";
 import { Button } from "src/components/button";
 import { StyleProps } from "src/utils/props/style";
 
-export interface SearchProps extends StyleProps {}
+export interface SearchProps extends StyleProps {
+  placeholder?: string;
+}
 
-export const Search: FC<SearchProps> = ({ margin }) => {
+export const Search: FC<SearchProps> = ({ margin, placeholder }) => {
   return (
     <Stack orientation="horizontal" margin={margin}>
-      <Input variant="v3" placeholder="Search 1354 jobs" />
-      <Button variant="v3">
+      <Input variant="v3" placeholder={placeholder} />
+      <Button variant="v3" padding="square">
         <Icon variant="v3" name="search" />
       </Button>
     </Stack>

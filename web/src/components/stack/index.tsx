@@ -1,10 +1,12 @@
 import { FC, PropsWithChildren } from "react";
 import "./style.css";
-import { StyleProps, marginToClasses } from "src/utils/props/style";
+import { CSSNumber, StyleProps, marginToClasses } from "src/utils/props/style";
 
 interface StackProps extends PropsWithChildren, StyleProps {
   orientation: "horizontal" | "vertical";
-  align?: "start" | "center" | "end";
+  align?: "start" | "center" | "end" | "baseline";
+  gap?: CSSNumber;
+  stretch?: boolean;
 }
 
 export const Stack: FC<StackProps> = ({
@@ -12,13 +14,17 @@ export const Stack: FC<StackProps> = ({
   orientation,
   align = "start",
   margin,
+  gap,
+  stretch = false,
 }) => {
   const classes = [
     "stack",
+    stretch ? (orientation === "vertical" ? "width100" : "height100") : "",
     "height100",
     "flex",
     `flex-${orientation}`,
     `flex-align-${align}`,
+    `flex-gap-${gap}`,
     ...marginToClasses(margin),
   ];
   return <div className={classes.join(" ")}>{children}</div>;

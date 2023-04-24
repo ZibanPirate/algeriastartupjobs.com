@@ -4,6 +4,7 @@
 
 .flex-horizontal {
   flex-direction: row;
+  align-items: baseline;
 }
 
 .flex-vertical {
@@ -20,4 +21,24 @@
 
 .flex-align-end {
   align-items: flex-end;
+}
+
+.flex-align-baseline {
+  align-items: baseline;
+}
+
+.flex-gap-0 {
+  gap: 0;
+}
+
+.flex-gap-1 {
+  gap: 1rem;
+}
+
+.flex-gap-2 {
+  gap: 2rem;
+}
+
+.flex-gap-3 {
+  gap: 3rem;
 }

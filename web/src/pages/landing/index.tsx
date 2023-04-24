@@ -3,23 +3,26 @@ import { Link } from "src/components/link";
 import { Stack } from "src/components/stack";
 import { Text } from "src/components/text";
 import { useSliceSelector } from "src/utils/state/selector";
-import { fetchMilestonesForLanding } from "./actions";
+import { fetchJobsForFirstCategoryForLanding } from "./actions";
 import { usePageTitle } from "src/utils/hooks/page-title";
 import { GlobalSearch } from "src/components/search/global";
+
+import { JobPostCard } from "src/components/card/job-post";
+import { Button } from "src/components/button";
 
 export const Page: FC = () => {
   usePageTitle("Join a startup in Algeria");
 
-  const { milestones } = useSliceSelector("landingPage");
+  const { jobsPostsGroupedByCategory } = useSliceSelector("landingPage");
 
   useEffect(() => {
-    fetchMilestonesForLanding();
+    fetchJobsForFirstCategoryForLanding();
   }, []);
 
   return (
-    <Stack orientation="vertical" align="center">
+    <Stack orientation="vertical">
       {/* Header */}
-      <Stack orientation="vertical" margin="3 1">
+      <Stack orientation="vertical" margin="3 1" stretch={true} align="center">
         <Text variant="v1" margin="0 0 1">
           Join a startup in Algeria
         </Text>
@@ -34,14 +37,40 @@ export const Page: FC = () => {
         </Text>
       </Stack>
       {/* Global Search */}
-      <Stack orientation="vertical" margin="3 1">
+      <Stack orientation="vertical" margin="3 1" stretch={true} align="center">
         <GlobalSearch margin="1" />
       </Stack>
       {/* Jobs */}
-      {/* Milestones */}
-      <Text variant="v4">
-        <pre>{JSON.stringify({ milestones }, null, 2)}</pre>
-      </Text>
+      <Stack orientation="horizontal" margin="0 1">
+        {jobsPostsGroupedByCategory.map((item) => (
+          <Stack orientation="vertical" key={item.category.name}>
+            <Text variant="v3" margin="0 0 1">
+              {item.category.name}
+            </Text>
+            <Stack orientation="vertical" margin="0 0 1" gap="1">
+              {item.job_posts === "ERROR" ? (
+                <Stack orientation="horizontal" align="baseline">
+                  <Text variant="v5" margin="0 0 1">
+                    An error occured while fetching jobs, please &nbsp;
+                  </Text>
+                  <Button
+                    variant="v5"
+                    onClick={fetchJobsForFirstCategoryForLanding}
+                  >
+                    Try Again
+                  </Button>
+                </Stack>
+              ) : item.job_posts ? (
+                item.job_posts.map((jobPost) => (
+                  <JobPostCard job_post={jobPost} />
+                ))
+              ) : (
+                "@TODO-ZM: Loading..."
+              )}
+            </Stack>
+          </Stack>
+        ))}
+      </Stack>
       {/* Footer */}
     </Stack>
   );

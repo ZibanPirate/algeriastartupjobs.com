@@ -15,7 +15,7 @@ use tower_http::cors::{Any, CorsLayer};
 use tower_http::{classify::ServerErrorsFailureClass, trace::TraceLayer};
 use tracing::{info_span, Span};
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
-mod milestones;
+mod job_post;
 
 #[tokio::main]
 async fn main() {
@@ -33,10 +33,7 @@ async fn main() {
     // build our application with a single route
     let app = Router::new()
         .route("/", get(|| async { "Hello, World!" }))
-        .nest(
-            "/milestones",
-            milestones::controller::milestone_controller(),
-        )
+        .nest("/job-posts", job_post::controller::job_post_controller())
         .layer(
             // see https://docs.rs/tower-http/latest/tower_http/cors/index.html
             // for more details

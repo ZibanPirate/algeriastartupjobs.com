@@ -46,3 +46,4 @@ export const getStore = ({
 };
 
 export const getStateActions = () => stateActions;
+export const getState = () => getStore().getState();

@@ -1,6 +1,6 @@
 import memoize from "lodash/memoize";
 
-type CSSNumber = `${0 | 1 | 2 | 3}`;
+export type CSSNumber = `${0 | 1 | 2 | 3}`;
 
 type Margin =
   | CSSNumber
