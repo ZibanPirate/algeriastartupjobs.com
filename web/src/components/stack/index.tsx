@@ -19,7 +19,7 @@ export const Stack: FC<StackProps> = ({
 }) => {
   const classes = [
     "stack",
-    stretch ? (orientation === "vertical" ? "width100" : "height100") : "",
+    stretch ? "width100" : "",
     "height100",
     "flex",
     `flex-${orientation}`,

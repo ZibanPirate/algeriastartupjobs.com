@@ -22,11 +22,14 @@ export const Page: FC = () => {
   return (
     <Stack orientation="vertical">
       {/* Header */}
-      <Stack orientation="vertical" margin="3 1" stretch={true} align="center">
-        <Text variant="v1" margin="0 0 1">
-          Join a startup in Algeria
-        </Text>
-        <Text variant="v4" margin="0 0 1">
+      <Stack
+        orientation="vertical"
+        margin="3 1 0"
+        stretch={true}
+        align="center"
+      >
+        <Text variant="v1">Join a startup in Algeria</Text>
+        <Text variant="v4" margin="1 0">
           Source code is publicly available at&nbsp;
           <Link
             to="https://github.com/algeriastartupjobs/algeriastartupjobs.com"
@@ -37,15 +40,20 @@ export const Page: FC = () => {
         </Text>
       </Stack>
       {/* Global Search */}
-      <Stack orientation="vertical" margin="3 1" stretch={true} align="center">
-        <GlobalSearch margin="1" />
+      <Stack
+        orientation="vertical"
+        margin="1 1 3"
+        stretch={true}
+        align="center"
+      >
+        <GlobalSearch />
       </Stack>
       {/* Jobs */}
       <Stack orientation="horizontal" margin="0 1">
         {jobsPostsGroupedByCategory.map((item) => (
           <Stack orientation="vertical" key={item.category.name}>
             <Text variant="v3" margin="0 0 1">
-              {item.category.name}
+              {item.category.name} Jobs
             </Text>
             <Stack orientation="vertical" margin="0 0 1" gap="1">
               {item.job_posts === "ERROR" ? (
@@ -68,6 +76,9 @@ export const Page: FC = () => {
                 "@TODO-ZM: Loading..."
               )}
             </Stack>
+            <Link to={`/jobs/${item.category.name}`} variant="v5">
+              See all {item.category.name} jobs
+            </Link>
           </Stack>
         ))}
       </Stack>
