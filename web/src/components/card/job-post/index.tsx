@@ -12,8 +12,8 @@ export interface JobPostCardProps extends StyleProps {
 export const JobPostCard: FC<JobPostCardProps> = ({ margin, job_post }) => {
   return (
     <Stack orientation="vertical" margin={margin}>
-      <Text variant="v4">{job_post.title}</Text>
-      <Text variant="v5">{job_post.short_description}</Text>
+      <Text variant="v3">{job_post.title}</Text>
+      <Text variant="v4">{job_post.short_description}</Text>
     </Stack>
   );
 };

@@ -51,7 +51,7 @@ export const Page: FC = () => {
         <GlobalSearch margin="0 1" />
       </Stack>
       {/* Jobs */}
-      <Stack orientation="horizontal" margin="0 1">
+      <Stack orientation="horizontal" margin="0 1 3">
         {jobsPostsGroupedByCategory.map((item) => (
           <Stack orientation="vertical" key={item.category.name}>
             <Text variant="v3" margin="0 0 1">
@@ -78,11 +78,7 @@ export const Page: FC = () => {
                 "@TODO-ZM: Loading..."
               )}
             </Stack>
-            <Link
-              to={`/jobs/${item.category.name}`}
-              variant="v5"
-              margin="0 0 1"
-            >
+            <Link to={`/jobs/${item.category.name}`} variant="v5">
               See all {item.category.name} jobs
             </Link>
           </Stack>
