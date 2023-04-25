@@ -8,8 +8,13 @@ export const Page: FC = () => {
   usePageTitle("404 - Page Not Found");
 
   return (
-    <div className="absolute-center">
-      <Stack orientation="vertical" align="center">
+    <Stack orientation="vertical">
+      <Stack
+        orientation="vertical"
+        margin="3 0 0"
+        stretch={true}
+        align="center"
+      >
         {(["v1", "v2", "v3", "v4", "v5"] as const).map((v) => (
           <Text variant={v} margin="1">
             WRONG PLACE
@@ -19,6 +24,6 @@ export const Page: FC = () => {
           {"<- Go Back Home"}
         </Link>
       </Stack>
-    </div>
+    </Stack>
   );
 };

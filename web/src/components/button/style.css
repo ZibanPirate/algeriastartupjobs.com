@@ -3,6 +3,7 @@
   border: 1px solid #aaaa;
   background-color: var(--color-background-front-1);
   display: flex;
+  color: var(--color-text);
 }
 
 .button-square {

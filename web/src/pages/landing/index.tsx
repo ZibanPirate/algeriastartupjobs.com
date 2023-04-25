@@ -24,12 +24,14 @@ export const Page: FC = () => {
       {/* Header */}
       <Stack
         orientation="vertical"
-        margin="3 1 0"
+        margin="3 0 0"
         stretch={true}
         align="center"
       >
-        <Text variant="v1">Join a startup in Algeria</Text>
-        <Text variant="v4" margin="1 0">
+        <Text variant="v1" margin="0 1">
+          Join a startup in Algeria
+        </Text>
+        <Text variant="v4" margin="1 1">
           Source code is publicly available at&nbsp;
           <Link
             to="https://github.com/algeriastartupjobs/algeriastartupjobs.com"
@@ -42,11 +44,11 @@ export const Page: FC = () => {
       {/* Global Search */}
       <Stack
         orientation="vertical"
-        margin="1 1 3"
+        margin="1 0 2"
         stretch={true}
         align="center"
       >
-        <GlobalSearch />
+        <GlobalSearch margin="0 1" />
       </Stack>
       {/* Jobs */}
       <Stack orientation="horizontal" margin="0 1">
@@ -76,7 +78,11 @@ export const Page: FC = () => {
                 "@TODO-ZM: Loading..."
               )}
             </Stack>
-            <Link to={`/jobs/${item.category.name}`} variant="v5">
+            <Link
+              to={`/jobs/${item.category.name}`}
+              variant="v5"
+              margin="0 0 1"
+            >
               See all {item.category.name} jobs
             </Link>
           </Stack>
