@@ -78,14 +78,12 @@ pub fn generate_tags_seed() -> Vec<Tag> {
         "engineering lead",
     ];
     let all_tag_names = [
-        &roles[..],
-        &programming_languages[..],
-        &skills[..],
-        &experience_levels[..],
+        roles.as_ref(),
+        programming_languages.as_ref(),
+        skills.as_ref(),
+        experience_levels.as_ref(),
     ]
-    .iter()
-    .flat_map(|x| x.iter())
-    .collect::<Vec<_>>();
+    .concat();
 
     let total_tags_len = all_tag_names.len();
     generate_many_tag_mocks_with_overwrite(
@@ -94,7 +92,7 @@ pub fn generate_tags_seed() -> Vec<Tag> {
         Some(|id| {
             let tag_name = all_tag_names[id as usize];
             PartialTag {
-                id: Some(id),
+                id: None,
                 slug: Some(tag_name.to_string().replace("+", "_plus").replace(" ", "_")),
                 name: Some(titlecase(tag_name)),
             }
