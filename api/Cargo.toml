@@ -2,6 +2,11 @@
 name = "algeriastartupjobs-api"
 version = "0.1.0"
 edition = "2021"
+repository = "https://github.com/algeriastartupjobs/algeriastartupjobs.com"
+
+[[bin]]
+name = "algeriastartupjobs-api"
+path = "src/_entry/app.rs"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
