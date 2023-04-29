@@ -59,7 +59,16 @@ pub fn generate_tags_seed() -> Vec<Tag> {
         "devops",
         "qa",
     ];
-    let programming_languages = ["rust", "python", "javascript", "go", "c++", "c", "java"];
+    let programming_languages = [
+        "rust",
+        "python",
+        "javascript",
+        "go",
+        "typescript",
+        "c++",
+        "c",
+        "java",
+    ];
     let skills = [
         "backend",
         "frontend",

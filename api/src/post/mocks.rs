@@ -1,3 +1,5 @@
+use regex::{escape, Regex};
+
 use super::model::{PartialPost, Post};
 use crate::{
     account::{
@@ -7,7 +9,9 @@ use crate::{
     category::mocks::generate_categories_seed,
     tag::{mocks::generate_tags_seed, model::Tag},
 };
+use sublime_fuzzy::best_match;
 use titlecase::titlecase;
+
 pub fn generate_one_post_mock(post_id: i32) -> Post {
     Post {
         id: post_id,
@@ -506,8 +510,8 @@ If you are interested in this opportunity, please apply online with your resume 
     let non_admin_accounts_len = non_admin_accounts.len();
     let categories = generate_categories_seed();
     let tags = generate_tags_seed();
-
     let total_posts_len = jobs.len();
+
     generate_many_post_mocks_with_overwrite(
         0,
         total_posts_len as i32,
@@ -518,9 +522,15 @@ If you are interested in this opportunity, please apply online with your resume 
             let category = &categories[id as usize % categories.len()];
             let short_description =
                 format!("{} is looking for a {}", poster.get_display_name(), title);
+
             let tags_found_on_description = tags
                 .iter()
-                .filter(|tag| post.description.contains(&tag.name))
+                .filter(|tag| match tag.name.len() {
+                    0..=3 => Regex::new(format!(r"\b{}\b", escape(&tag.name)).as_str())
+                        .unwrap()
+                        .is_match(&post.description),
+                    _ => best_match(&tag.name, &post.title).is_some(),
+                })
                 .collect::<Vec<&Tag>>();
 
             PartialPost {
