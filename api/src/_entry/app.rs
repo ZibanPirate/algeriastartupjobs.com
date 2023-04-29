@@ -1,17 +1,13 @@
-use std::sync::Arc;
-
 use axum::{routing::get, Json, Router};
 use local_ip_address::local_ip;
 use serde_json::json;
 
-use crate::post::{
-    controllers::create_post_router,
-    repository::{PostRepository, PostRepositoryState},
-};
+use crate::post::controllers::create_post_router;
 
 use super::{
     layers::{cors::create_cors_layer, trace::create_trace_layer},
     servers::{local::run_local_server, loopback::run_loopback_server},
+    state::create_app_state,
 };
 
 pub async fn actual_main() {
@@ -39,7 +35,7 @@ pub async fn actual_main() {
 
 // create and configure the app router
 fn create_app() -> Router {
-    let app_state: PostRepositoryState = Arc::new(PostRepository {});
+    let app_state = create_app_state();
 
     let app = Router::new();
     let app = app.layer(create_trace_layer()).layer(create_cors_layer());

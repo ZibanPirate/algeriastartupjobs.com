@@ -1,5 +1,3 @@
-use std::sync::Arc;
-
 use crate::utils::error::DataAccessError;
 
 use super::{mocks::generate_posts_seed, model::Post};
@@ -11,5 +9,3 @@ impl PostRepository {
         Ok(generate_posts_seed())
     }
 }
-
-pub type PostRepositoryState = Arc<PostRepository>;
