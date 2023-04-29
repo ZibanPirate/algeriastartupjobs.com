@@ -1,6 +1,5 @@
 use regex::{escape, Regex};
 
-use super::model::{PartialPost, Post};
 use crate::{
     account::{
         mocks::generate_accounts_seed,
@@ -9,6 +8,8 @@ use crate::{
     category::mocks::generate_categories_seed,
     tag::{mocks::generate_tags_seed, model::Tag},
 };
+
+use super::model::{PartialPost, Post};
 use sublime_fuzzy::best_match;
 use titlecase::titlecase;
 

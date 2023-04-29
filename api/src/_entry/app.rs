@@ -1,14 +1,20 @@
+use std::sync::Arc;
+
 use axum::{routing::get, Json, Router};
-use layers::{cors::create_cors_layer, trace::create_trace_layer};
 use local_ip_address::local_ip;
 use serde_json::json;
-use servers::{local::run_local_server, loopback::run_loopback_server};
 
-mod layers;
-mod servers;
+use crate::post::{
+    controllers::create_post_router,
+    repository::{PostRepository, PostRepositoryState},
+};
 
-#[tokio::main]
-async fn main() {
+use super::{
+    layers::{cors::create_cors_layer, trace::create_trace_layer},
+    servers::{local::run_local_server, loopback::run_loopback_server},
+};
+
+pub async fn actual_main() {
     // create the app router
     let app = create_app();
 
@@ -33,16 +39,21 @@ async fn main() {
 
 // create and configure the app router
 fn create_app() -> Router {
+    let app_state: PostRepositoryState = Arc::new(PostRepository {});
+
     let app = Router::new();
     let app = app.layer(create_trace_layer()).layer(create_cors_layer());
-    let app = app.route(
-        "/",
-        get(|| async {
-            Json(json!({
-                "app": { "version": env!("CARGO_PKG_VERSION") },
-                "repository": { "url": env!("CARGO_PKG_REPOSITORY") }
-            }))
-        }),
-    );
+    let app = app
+        .nest("/posts", create_post_router())
+        .route(
+            "/",
+            get(|| async {
+                Json(json!({
+                    "app": { "version": env!("CARGO_PKG_VERSION") },
+                    "repository": { "url": env!("CARGO_PKG_REPOSITORY") }
+                }))
+            }),
+        )
+        .with_state(app_state);
     app
 }

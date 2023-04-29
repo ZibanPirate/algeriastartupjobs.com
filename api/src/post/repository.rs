@@ -1,5 +1,15 @@
+use std::sync::Arc;
+
+use crate::utils::error::DataAccessError;
+
 use super::{mocks::generate_posts_seed, model::Post};
 
-pub fn get_post_by_id(post_id: i32) -> Result<Post, ()> {
-    Ok(generate_posts_seed().get(post_id as usize).unwrap().clone())
+pub struct PostRepository {}
+
+impl PostRepository {
+    pub fn get_all_posts(&self) -> Result<Vec<Post>, DataAccessError> {
+        Ok(generate_posts_seed())
+    }
 }
+
+pub type PostRepositoryState = Arc<PostRepository>;
