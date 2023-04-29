@@ -1,4 +1,5 @@
 use axum::{routing::get, Json, Router};
+use layers::{cors::create_cors_layer, trace::create_trace_layer};
 use local_ip_address::local_ip;
 use serde_json::json;
 use servers::{local::run_local_server, loopback::run_loopback_server};
@@ -33,8 +34,7 @@ async fn main() {
 // create and configure the app router
 fn create_app() -> Router {
     let app = Router::new();
-    let app = layers::trace::attach_trace_layer(app);
-    let app = layers::cors::attach_cors_layer(app);
+    let app = app.layer(create_trace_layer()).layer(create_cors_layer());
     let app = app.route(
         "/",
         get(|| async {
