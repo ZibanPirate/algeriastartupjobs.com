@@ -12,10 +12,14 @@ rustup update
 
 ### Fix Docker build issues
 
-Delete the line with `credsStore` from `~/.docker/config.json`, or simply the whole file:
+Either delete the line with `credsStore` from `~/.docker/config.json`:
+
+```sh
+vim ~/.docker/config.json
+```
+
+Or simply delete the whole file and restart Docker:
 
 ```sh
 rm ~/.docker/config.json
 ```
-
-then restart Docker.
