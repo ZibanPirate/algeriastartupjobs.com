@@ -32,3 +32,28 @@ impl PostTrait for Post {
         }
     }
 }
+
+pub trait PartialPostTrait {
+    fn to_post(&self, fallback_post: Post) -> Post;
+}
+
+impl PartialPostTrait for PartialPost {
+    fn to_post(&self, fallback_post: Post) -> Post {
+        Post {
+            id: self.id.unwrap_or(fallback_post.id),
+            slug: self.slug.clone().unwrap_or(fallback_post.slug),
+            title: self.title.clone().unwrap_or(fallback_post.title),
+            poster_id: self.poster_id.unwrap_or(fallback_post.poster_id),
+            short_description: self
+                .short_description
+                .clone()
+                .unwrap_or(fallback_post.short_description),
+            description: self
+                .description
+                .clone()
+                .unwrap_or(fallback_post.description),
+            category_id: self.category_id.unwrap_or(fallback_post.category_id),
+            tag_ids: self.tag_ids.clone().unwrap_or(fallback_post.tag_ids),
+        }
+    }
+}

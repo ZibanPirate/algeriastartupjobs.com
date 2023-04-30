@@ -23,3 +23,17 @@ impl TagTrait for Tag {
         }
     }
 }
+
+pub trait PartialTagTrait {
+    fn to_tag(&self, fallback_tag: Tag) -> Tag;
+}
+
+impl PartialTagTrait for PartialTag {
+    fn to_tag(&self, fallback_tag: Tag) -> Tag {
+        Tag {
+            id: self.id.unwrap_or(fallback_tag.id),
+            slug: self.slug.clone().unwrap_or(fallback_tag.slug),
+            name: self.name.clone().unwrap_or(fallback_tag.name),
+        }
+    }
+}

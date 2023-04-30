@@ -1,4 +1,4 @@
-use super::model::{Category, PartialCategory};
+use super::model::{Category, PartialCategory, PartialCategoryTrait};
 use titlecase::titlecase;
 
 pub fn generate_one_category_mock(category_id: i32) -> Category {
@@ -24,15 +24,7 @@ where
             Some(ref f) => {
                 let partial_category = f(i);
                 let default_category = generate_one_category_mock(i);
-                // @TODO-ZM: write a marco optional_override!
-                Category {
-                    id: partial_category.id.unwrap_or(default_category.id),
-                    slug: partial_category.slug.unwrap_or(default_category.slug),
-                    name: partial_category.name.unwrap_or(default_category.name),
-                    description: partial_category
-                        .description
-                        .unwrap_or(default_category.description),
-                }
+                partial_category.to_category(default_category)
             }
             None => generate_one_category_mock(i),
         };

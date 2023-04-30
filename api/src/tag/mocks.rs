@@ -1,4 +1,4 @@
-use super::model::{PartialTag, Tag};
+use super::model::{PartialTag, PartialTagTrait, Tag};
 use titlecase::titlecase;
 
 pub fn generate_one_tag_mock(tag_id: i32) -> Tag {
@@ -23,12 +23,7 @@ where
             Some(ref f) => {
                 let partial_tag = f(i);
                 let default_tag = generate_one_tag_mock(i);
-                // @TODO-ZM: write a marco optional_override!
-                Tag {
-                    id: partial_tag.id.unwrap_or(default_tag.id),
-                    slug: partial_tag.slug.unwrap_or(default_tag.slug),
-                    name: partial_tag.name.unwrap_or(default_tag.name),
-                }
+                partial_tag.to_tag(default_tag)
             }
             None => generate_one_tag_mock(i),
         };

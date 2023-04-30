@@ -5,11 +5,11 @@ use crate::{
         mocks::generate_accounts_seed,
         model::{Account, AccountTrait, AccountType},
     },
-    category::{mocks::generate_categories_seed, model::Category},
+    category::mocks::generate_categories_seed,
     tag::{mocks::generate_tags_seed, model::Tag},
 };
 
-use super::model::{PartialPost, Post};
+use super::model::{PartialPost, PartialPostTrait, Post};
 use sublime_fuzzy::best_match;
 use titlecase::titlecase;
 
@@ -40,19 +40,7 @@ where
             Some(ref f) => {
                 let partial_post = f(i);
                 let default_post = generate_one_post_mock(i);
-                // @TODO-ZM: write a marco optional_override!
-                Post {
-                    id: partial_post.id.unwrap_or(default_post.id),
-                    slug: partial_post.slug.unwrap_or(default_post.slug),
-                    title: partial_post.title.unwrap_or(default_post.title),
-                    poster_id: partial_post.poster_id.unwrap_or(default_post.poster_id),
-                    short_description: partial_post
-                        .short_description
-                        .unwrap_or(default_post.short_description),
-                    description: partial_post.description.unwrap_or(default_post.description),
-                    category_id: partial_post.category_id.unwrap_or(default_post.category_id),
-                    tag_ids: partial_post.tag_ids.unwrap_or(default_post.tag_ids),
-                }
+                partial_post.to_post(default_post)
             }
             None => generate_one_post_mock(i),
         };

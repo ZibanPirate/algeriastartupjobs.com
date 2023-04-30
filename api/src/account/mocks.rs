@@ -1,4 +1,4 @@
-use super::model::{Account, AccountType, PartialAccount};
+use super::model::{Account, AccountType, PartialAccount, PartialAccountTrait};
 use titlecase::titlecase;
 
 pub fn generate_one_account_mock(account_id: i32) -> Account {
@@ -27,13 +27,7 @@ where
             Some(ref f) => {
                 let partial_account = f(i);
                 let default_account = generate_one_account_mock(i);
-                // @TODO-ZM: write a marco optional_override!
-                Account {
-                    id: partial_account.id.unwrap_or(default_account.id),
-                    slug: partial_account.slug.unwrap_or(default_account.slug),
-                    r#type: partial_account.r#type.unwrap_or(default_account.r#type),
-                    email: partial_account.email.unwrap_or(default_account.email),
-                }
+                partial_account.to_account(default_account)
             }
             None => generate_one_account_mock(i),
         };

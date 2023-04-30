@@ -57,3 +57,18 @@ impl AccountTrait for Account {
         }
     }
 }
+
+pub trait PartialAccountTrait {
+    fn to_account(&self, fallback_account: Account) -> Account;
+}
+
+impl PartialAccountTrait for PartialAccount {
+    fn to_account(&self, fallback_account: Account) -> Account {
+        Account {
+            id: self.id.unwrap_or(fallback_account.id),
+            slug: self.slug.clone().unwrap_or(fallback_account.slug),
+            email: self.email.clone().unwrap_or(fallback_account.email),
+            r#type: self.r#type.clone().unwrap_or(fallback_account.r#type),
+        }
+    }
+}

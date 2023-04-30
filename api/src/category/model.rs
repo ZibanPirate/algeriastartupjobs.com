@@ -24,3 +24,21 @@ impl CategoryTrait for Category {
         }
     }
 }
+
+pub trait PartialCategoryTrait {
+    fn to_category(&self, fallback_category: Category) -> Category;
+}
+
+impl PartialCategoryTrait for PartialCategory {
+    fn to_category(&self, fallback_category: Category) -> Category {
+        Category {
+            id: self.id.unwrap_or(fallback_category.id),
+            slug: self.slug.clone().unwrap_or(fallback_category.slug),
+            name: self.name.clone().unwrap_or(fallback_category.name),
+            description: self
+                .description
+                .clone()
+                .unwrap_or(fallback_category.description),
+        }
+    }
+}
