@@ -12,6 +12,6 @@ The entire code for algeriastartupjobs.com
 
 Please use [VSCode](https://code.visualstudio.com/), and have [Rustup](https://rustup.rs/) and [NodeJS](https://nodejs.org/) installed.
 
-then simply run VSCode **Build Task** (<kbd>Ctrl</kbd>/<kbd>⌘ Command</kbd> + <kbd>⇧ Shift</kbd> + <kbd>B</kbd>)
+Then simply run VSCode **Build Task** (<kbd>Ctrl</kbd>/<kbd>⌘ Command</kbd> + <kbd>⇧ Shift</kbd> + <kbd>B</kbd>).
 
-you can additionally attach a debugger (<kbd>F5</kbd>)
+Additionally, you can also attach a debugger to `./web` code (<kbd>F5</kbd>)
