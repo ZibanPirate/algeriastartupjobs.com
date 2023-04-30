@@ -37,19 +37,22 @@ pub async fn actual_main() {
 fn create_app() -> Router {
     let app_state = create_app_state();
 
+    let cors_layer = create_cors_layer();
+    let trace_layer = create_trace_layer();
+
     let app = Router::new();
-    let app = app.layer(create_trace_layer()).layer(create_cors_layer());
     let app = app
         .nest("/posts", create_post_router())
         .route(
             "/",
             get(|| async {
                 Json(json!({
-                    "app": { "version": env!("CARGO_PKG_VERSION") },
-                    "repository": { "url": env!("CARGO_PKG_REPOSITORY") }
+                  "app": { "version": env!("CARGO_PKG_VERSION") },
+                  "repository": { "url": env!("CARGO_PKG_REPOSITORY") }
                 }))
             }),
         )
         .with_state(app_state);
+    let app = app.layer(cors_layer).layer(trace_layer);
     app
 }

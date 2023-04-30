@@ -29,6 +29,10 @@ pub async fn get_all_posts_for_feed(State(app_state): State<AppState>) -> impl I
         unique_poster_ids.push(post.poster_id);
     }
 
+    sort_and_dedup_vec(&mut unique_category_ids);
+    sort_and_dedup_vec(&mut unique_tag_ids);
+    sort_and_dedup_vec(&mut unique_poster_ids);
+
     let categories = app_state
         .category_repository
         .get_many_categories_by_ids(unique_category_ids.clone());
@@ -55,10 +59,6 @@ pub async fn get_all_posts_for_feed(State(app_state): State<AppState>) -> impl I
         return StatusCode::INTERNAL_SERVER_ERROR.into_response();
     }
     let posters = posters.unwrap();
-
-    sort_and_dedup_vec(&mut unique_category_ids);
-    sort_and_dedup_vec(&mut unique_tag_ids);
-    sort_and_dedup_vec(&mut unique_poster_ids);
 
     let compact_posts = posts
         .iter()
