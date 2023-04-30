@@ -1,36 +1,15 @@
 import { createSlice } from "@reduxjs/toolkit";
+import { PostCardProps } from "src/components/card/post";
 import { LOADABLE } from "src/utils/loadable";
 import { setterReducerFactory } from "src/utils/state/reducer";
 
-interface Account {
-  name: string;
-  avatar_url: string;
-}
-
-export interface JobPostCategory {
-  name: string;
-}
-
-export interface JobPost {
-  id: string;
-  title: string;
-  short_description: string;
-  poster: Account;
-}
-
 export interface LandingPageState {
-  jobsPostsGroupedByCategory: Array<{
-    category: JobPostCategory;
-    job_posts: LOADABLE<JobPost[]>;
-  }>;
+  posts: LOADABLE<Array<PostCardProps["post"]>>;
 }
 
 export const landingPage = createSlice({
   name: "landingPage",
-  initialState: {
-    milestones: null,
-    jobsPostsGroupedByCategory: [{ category: { name: "IT" }, job_posts: null }],
-  } as LandingPageState,
+  initialState: { posts: null } as LandingPageState,
   reducers: {
     set: setterReducerFactory(),
   },
