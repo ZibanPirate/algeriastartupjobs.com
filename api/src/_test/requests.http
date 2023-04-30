@@ -1,3 +1,8 @@
+# production
+# @baseUrl = http://production.api.algeriastartupjobs.com
+# staging
+# @baseUrl = https://staging.api.algeriastartupjobs.com
+# local
 @baseUrl = http://localhost:9090
 
-GET {{baseUrl}}/posts
+GET {{baseUrl}}/posts/feed

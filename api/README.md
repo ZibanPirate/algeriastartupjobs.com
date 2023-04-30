@@ -1,10 +1,10 @@
-# api
+# `./api`
 
 ## Helpful commands
 
 ### Update Rust
 
-Run:
+Rust is continuously improving, to make sure it doesn't get `Rust`y, run:
 
 ```sh
 rustup update

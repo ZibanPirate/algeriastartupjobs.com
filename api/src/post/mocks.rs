@@ -5,7 +5,7 @@ use crate::{
         mocks::generate_accounts_seed,
         model::{Account, AccountTrait, AccountType},
     },
-    category::mocks::generate_categories_seed,
+    category::{mocks::generate_categories_seed, model::Category},
     tag::{mocks::generate_tags_seed, model::Tag},
 };
 

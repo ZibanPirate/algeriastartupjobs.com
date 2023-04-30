@@ -1,8 +1,20 @@
+use crate::utils::error::DataAccessError;
+
 use super::{mocks::generate_accounts_seed, model::Account};
 
-pub fn get_account_by_id(account_id: i32) -> Result<Account, ()> {
-    Ok(generate_accounts_seed()
-        .get(account_id as usize)
-        .unwrap()
-        .clone())
+pub struct AccountRepository {}
+
+impl AccountRepository {
+    pub fn get_many_accounts_by_ids(&self, ids: Vec<i32>) -> Result<Vec<Account>, DataAccessError> {
+        let accounts = generate_accounts_seed();
+        let mut result: Vec<Account> = Vec::new();
+        for id in ids.iter() {
+            let account = accounts
+                .iter()
+                .find(|account| account.id == *id)
+                .ok_or(DataAccessError::NotFound)?;
+            result.push(account.clone());
+        }
+        Ok(result)
+    }
 }
