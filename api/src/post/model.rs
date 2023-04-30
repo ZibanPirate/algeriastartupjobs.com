@@ -1,7 +1,8 @@
 use serde::{Deserialize, Serialize};
-use utility_types::pick;
+use utility_types::{partial, pick};
 
 #[pick(CompactPost, [id, slug, title, poster_id, short_description, category_id, tag_ids], [Serialize, Deserialize, Clone])]
+#[partial(PartialPost)]
 #[derive(Serialize, Deserialize, Clone)]
 pub struct Post {
     pub id: i32,
@@ -12,18 +13,6 @@ pub struct Post {
     pub description: String,
     pub category_id: i32,
     pub tag_ids: Vec<i32>,
-}
-
-// @TODO-ZM: write a Partial proc derive marco
-pub struct PartialPost {
-    pub id: Option<i32>,
-    pub slug: Option<String>,
-    pub title: Option<String>,
-    pub poster_id: Option<i32>,
-    pub short_description: Option<String>,
-    pub description: Option<String>,
-    pub category_id: Option<i32>,
-    pub tag_ids: Option<Vec<i32>>,
 }
 
 pub trait PostTrait {

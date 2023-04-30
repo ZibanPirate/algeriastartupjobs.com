@@ -1,21 +1,14 @@
 use serde::{Deserialize, Serialize};
-use utility_types::pick;
+use utility_types::{partial, pick};
 
 #[pick(CompactCategory, [id, slug, name], [Serialize, Deserialize, Clone])]
+#[partial(PartialCategory)]
 #[derive(Serialize, Deserialize, Clone)]
 pub struct Category {
     pub id: i32,
     pub slug: String,
     pub name: String,
     pub description: String,
-}
-
-// @TODO-ZM: write a Partial proc derive marco
-pub struct PartialCategory {
-    pub id: Option<i32>,
-    pub slug: Option<String>,
-    pub name: Option<String>,
-    pub description: Option<String>,
 }
 
 pub trait CategoryTrait {

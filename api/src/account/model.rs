@@ -1,5 +1,5 @@
 use serde::{Deserialize, Serialize};
-use utility_types::pick;
+use utility_types::{partial, pick};
 
 #[derive(Clone, Serialize, Deserialize)]
 #[serde(tag = "type")] // to flatten the enum to the parent struct
@@ -19,6 +19,7 @@ pub enum AccountType {
 }
 
 #[pick(CompactAccount, [id, slug, r#type], [Serialize, Deserialize, Clone])]
+#[partial(PartialAccount)]
 #[derive(Clone, Serialize, Deserialize)]
 pub struct Account {
     pub id: i32,
@@ -55,12 +56,4 @@ impl AccountTrait for Account {
             r#type: self.r#type.clone(),
         }
     }
-}
-
-// @TODO-ZM: write a Partial proc derive marco
-pub struct PartialAccount {
-    pub id: Option<i32>,
-    pub slug: Option<String>,
-    pub email: Option<String>,
-    pub r#type: Option<AccountType>,
 }
