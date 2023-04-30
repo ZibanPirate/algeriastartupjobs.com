@@ -1,5 +1,7 @@
 use serde::{Deserialize, Serialize};
+use utility_types::pick;
 
+#[pick(CompactPost, [id, slug, title, poster_id, short_description, category_id, tag_ids], [Serialize, Deserialize, Clone])]
 #[derive(Serialize, Deserialize, Clone)]
 pub struct Post {
     pub id: i32,
@@ -22,4 +24,22 @@ pub struct PartialPost {
     pub description: Option<String>,
     pub category_id: Option<i32>,
     pub tag_ids: Option<Vec<i32>>,
+}
+
+pub trait PostTrait {
+    fn to_compact_post(&self) -> CompactPost;
+}
+
+impl PostTrait for Post {
+    fn to_compact_post(&self) -> CompactPost {
+        CompactPost {
+            id: self.id,
+            slug: self.slug.clone(),
+            title: self.title.clone(),
+            poster_id: self.poster_id,
+            short_description: self.short_description.clone(),
+            category_id: self.category_id,
+            tag_ids: self.tag_ids.clone(),
+        }
+    }
 }

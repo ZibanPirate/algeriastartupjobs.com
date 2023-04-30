@@ -2,7 +2,15 @@ use axum::{extract::State, response::IntoResponse, Json, Router};
 use hyper::StatusCode;
 use serde_json::json;
 
-use crate::{_entry::state::AppState, utils::vec::sort_and_dedup_vec};
+use crate::{
+    _entry::state::AppState,
+    account::model::{AccountTrait, CompactAccount},
+    category::model::{CategoryTrait, CompactCategory},
+    tag::model::{CompactTag, TagTrait},
+    utils::vec::sort_and_dedup_vec,
+};
+
+use super::model::{CompactPost, PostTrait};
 
 pub async fn get_all_posts_for_feed(State(app_state): State<AppState>) -> impl IntoResponse {
     let posts = app_state.post_repository.get_all_posts();
@@ -52,11 +60,31 @@ pub async fn get_all_posts_for_feed(State(app_state): State<AppState>) -> impl I
     sort_and_dedup_vec(&mut unique_tag_ids);
     sort_and_dedup_vec(&mut unique_poster_ids);
 
+    let compact_posts = posts
+        .iter()
+        .map(|post| post.to_compact_post())
+        .collect::<Vec<CompactPost>>();
+
+    let compact_categories = categories
+        .iter()
+        .map(|category| category.to_compact_category())
+        .collect::<Vec<CompactCategory>>();
+
+    let compact_tags = tags
+        .iter()
+        .map(|tag| tag.to_compact_tag())
+        .collect::<Vec<CompactTag>>();
+
+    let compact_posters = posters
+        .iter()
+        .map(|poster| poster.to_compact_account())
+        .collect::<Vec<CompactAccount>>();
+
     Json(json!({
-        "posts": posts,
-        "categories": categories,
-        "tags": tags,
-        "posters": posters,
+        "posts": compact_posts,
+        "categories": compact_categories,
+        "tags": compact_tags,
+        "posters": compact_posters,
     }))
     .into_response()
 }

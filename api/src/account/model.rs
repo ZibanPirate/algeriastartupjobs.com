@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+use utility_types::pick;
 
 #[derive(Clone, Serialize, Deserialize)]
 #[serde(tag = "type")] // to flatten the enum to the parent struct
@@ -17,6 +18,7 @@ pub enum AccountType {
     // JobSeeker,
 }
 
+#[pick(CompactAccount, [id, slug, r#type], [Serialize, Deserialize, Clone])]
 #[derive(Clone, Serialize, Deserialize)]
 pub struct Account {
     pub id: i32,
@@ -28,6 +30,7 @@ pub struct Account {
 
 pub trait AccountTrait {
     fn get_display_name(&self) -> String;
+    fn to_compact_account(&self) -> CompactAccount;
 }
 
 impl AccountTrait for Account {
@@ -42,6 +45,14 @@ impl AccountTrait for Account {
                 last_name,
             } => format!("{} {}", first_name, last_name),
             AccountType::Company { company_name } => company_name.to_string(),
+        }
+    }
+
+    fn to_compact_account(&self) -> CompactAccount {
+        CompactAccount {
+            id: self.id,
+            slug: self.slug.clone(),
+            r#type: self.r#type.clone(),
         }
     }
 }

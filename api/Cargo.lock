@@ -38,6 +38,7 @@ dependencies = [
  "tower-http",
  "tracing",
  "tracing-subscriber",
+ "utility-types",
 ]
 
 [[package]]
@@ -2346,6 +2347,17 @@ name = "unicode-width"
 version = "0.1.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c0edd1e5b14653f783770bce4a4dabb4a5108a5370a5f5d8cfe8710c361f6c8b"
+
+[[package]]
+name = "utility-types"
+version = "0.0.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f20b5dda50e68466846162da7279c0ac571f60ef8c6575d8a56740b6f1a2bae7"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 1.0.109",
+]
 
 [[package]]
 name = "valuable"
