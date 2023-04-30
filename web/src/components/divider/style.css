@@ -1,0 +1,13 @@
+.divider {
+  background-color: var(--color-background-front-1);
+}
+
+.divider-horizontal {
+  height: 1px;
+}
+
+.divider-vertical {
+  width: 1px;
+  height: 1em;
+  align-self: center;
+}

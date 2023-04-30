@@ -1,14 +1,16 @@
 import { getState, getStateActions } from "src/state";
 import Axios from "axios";
 import { getConfig } from "src/utils/config/get-config";
-import { CompactPost, Post } from "src/models/post";
-import { Category, CompactCategory } from "src/models/category";
-import { CompactTag, Tag } from "src/models/tag";
-import { Account, AccountType, CompactAccount } from "src/models/account";
+import { CompactPost } from "src/models/post";
+import { CompactCategory } from "src/models/category";
+import { CompactTag } from "src/models/tag";
+import { CompactAccount } from "src/models/account";
 import { LandingPageState } from "./state";
 
 export const fetchPostsForLandingPage = async (): Promise<void> => {
   const { landingPage } = getStateActions();
+  const { posts } = getState().landingPage;
+  if (posts === "ERROR") landingPage.set({ posts: null });
 
   try {
     // @TODO-ZM: auto-generate types for API endpoints

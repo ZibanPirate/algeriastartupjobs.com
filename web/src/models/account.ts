@@ -1,17 +1,17 @@
 export type AccountType =
   | {
-      type: "admin";
+      type: "Admin";
       first_name: string;
       last_name: string;
     }
   | {
-      type: "individual";
+      type: "Individual";
       first_name: string;
       last_name: string;
     }
   | {
-      type: "company";
-      company: string;
+      type: "Company";
+      company_name: string;
     };
 
 export type Account = {
@@ -20,5 +20,4 @@ export type Account = {
   email: string;
 } & AccountType;
 
-export type CompactAccount = Pick<Account, "id" | "slug" | "type"> &
-  AccountType;
+export type CompactAccount = Pick<Account, "id" | "slug" | "type"> & AccountType;
