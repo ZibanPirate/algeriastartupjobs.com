@@ -12,7 +12,7 @@ import { Link } from "src/components/link";
 import { getAccountName } from "src/utils/models/acount-name";
 import { Divider } from "src/components/divider";
 import { Tag } from "src/components/tag";
-import { getPostUrl } from "src/utils/urls/job-post-url";
+import { getPostUrl } from "src/utils/urls/post-url";
 
 export interface PostCardProps extends StyleProps {
   post: LoneModel<CompactPost> & {
