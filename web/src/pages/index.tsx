@@ -5,4 +5,7 @@ const componentModules = import.meta.glob("./*/page.tsx", {
 });
 
 // @TODO-ZM: nice to have static types for LazyPages properties, Vite plugin?
-export const LazyPages = globImportToLazyNodes(componentModules, "page");
+export const { lazyNodes: LazyPages, loaders: pageLoaders } = globImportToLazyNodes(
+  componentModules,
+  "page"
+);

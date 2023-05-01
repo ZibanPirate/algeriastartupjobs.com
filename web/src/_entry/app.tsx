@@ -1,18 +1,52 @@
-import { FC } from "react";
+import { FC, useEffect, useRef, useState } from "react";
 import "./style.css";
 import "src/utils/css/index.css";
 import { Route, Routes } from "react-router-dom";
-import { LazyPages } from "src/pages";
+import { LazyPages, pageLoaders } from "src/pages";
 import { useHtmlThemeColor } from "src/utils/hooks/html-theme-color";
 import { POST_PAGE_URL } from "src/utils/urls/common";
+import LoadingBar, { LoadingBarRef } from "react-top-loading-bar";
 
 export const App: FC = () => {
   useHtmlThemeColor();
+
+  // @TODO-ZM: refactor this info a DeferredRoutes component
+  const loadingBarRef = useRef<LoadingBarRef>(null);
+  const [pageToRender, setPageToRender] = useState("");
+  const [currentPage, setCurrentPage] = useState("");
+  const [loadedPages, setLoadedPages] = useState<string[]>([]);
+
+  const pageToRenderSetter =
+    (page: string): FC =>
+    () => {
+      useEffect(() => setPageToRender(page), []);
+      return null;
+    };
+
+  useEffect(() => {
+    if (currentPage === pageToRender) return;
+    if (!currentPage && pageToRender) setCurrentPage(pageToRender);
+
+    if (!loadedPages.includes(pageToRender)) loadingBarRef.current?.continuousStart();
+
+    pageLoaders[pageToRender]?.().finally(() => {
+      setCurrentPage(pageToRender);
+      if (!loadedPages.includes(pageToRender)) {
+        loadingBarRef.current?.complete();
+        loadedPages.push(pageToRender);
+      }
+    });
+  }, [currentPage, pageToRender, loadingBarRef.current]);
+
   return (
-    <Routes>
-      <Route path="/" element={LazyPages["landing"]} />
-      <Route path={POST_PAGE_URL} element={LazyPages["post"]} />
-      <Route path="*" element={LazyPages["404"]} />
-    </Routes>
+    <>
+      <LoadingBar color="#41aa55" ref={loadingBarRef} height={4} />
+      <Routes>
+        <Route path="/" Component={pageToRenderSetter("landing")} />
+        <Route path={POST_PAGE_URL} Component={pageToRenderSetter("post")} />
+        <Route path="*" Component={pageToRenderSetter("404")} />
+      </Routes>
+      {LazyPages[currentPage]}
+    </>
   );
 };
