@@ -1,4 +1,4 @@
-.tag {
+.tag > * {
   border: 1px solid var(--color-background-front-1);
   border-radius: 1em;
   padding: 0 0.5em;

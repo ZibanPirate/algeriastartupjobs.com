@@ -11,7 +11,7 @@ export interface SearchProps extends StyleProps {
 
 export const Search: FC<SearchProps> = ({ margin, placeholder }) => {
   return (
-    <Stack orientation="horizontal" margin={margin}>
+    <Stack orientation="horizontal" margin={margin} wrap={false}>
       <Input variant="v3" placeholder={placeholder} />
       <Button variant="v3" padding="square">
         <Icon variant="v3" name="search" />

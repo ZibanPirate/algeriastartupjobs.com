@@ -42,3 +42,7 @@
 .flex-gap-3 {
   gap: 3rem;
 }
+
+.flex-wrap {
+  flex-wrap: wrap;
+}

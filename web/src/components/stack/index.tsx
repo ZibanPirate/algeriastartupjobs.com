@@ -7,6 +7,7 @@ interface StackProps extends PropsWithChildren, StyleProps {
   align?: "start" | "center" | "end" | "baseline";
   gap?: CSSNumber;
   stretch?: boolean;
+  wrap?: boolean;
 }
 
 export const Stack: FC<StackProps> = ({
@@ -16,6 +17,7 @@ export const Stack: FC<StackProps> = ({
   margin,
   gap,
   stretch = false,
+  wrap = true,
 }) => {
   const classes = [
     "stack",
@@ -25,6 +27,7 @@ export const Stack: FC<StackProps> = ({
     `flex-${orientation}`,
     `flex-align-${align}`,
     `flex-gap-${gap}`,
+    wrap ? "flex-wrap" : "",
     ...marginToClasses(margin),
   ];
   return <div className={classes.join(" ")}>{children}</div>;

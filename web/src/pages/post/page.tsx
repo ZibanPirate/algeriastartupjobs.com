@@ -46,26 +46,25 @@ export const Page: FC = () => {
           <Text variant="v3" margin="0 0 1">
             {loadedPost?.title || "Loading Job..."}
           </Text>
-          <Text variant="v5">
+          <Text variant="v4">
             <pre style={{ whiteSpace: "pre-line", maxWidth: 600 }}>
               {loadedPost?.description || "Loading job description..."}
             </pre>
           </Text>
           {loadedPost?.tags && loadedPost?.tags.length > 0 && (
-            <Stack orientation="horizontal" margin="1 0 0" stretch={true}>
+            <Stack orientation="horizontal" margin="1 0 0" gap="1" stretch={true}>
               {loadedPost?.tags.map((tag) => (
-                <Tag variant="v5" key={tag.id}>
+                <Tag variant="v4" key={tag.id}>
                   {tag.name}
                 </Tag>
               ))}
             </Stack>
           )}
-          <Stack orientation="horizontal" margin="1 0 0" stretch={true}>
-            <Text variant="v5">
+          <Stack orientation="vertical" margin="1 0 0" stretch={true}>
+            <Text variant="v3">
               {loadedPost?.poster ? getAccountName(loadedPost?.poster) : "Loading poster..."}
             </Text>
-            <Divider margin="0 1" orientation="vertical" />
-            <Text variant="v5">{loadedPost?.category?.name || "Loading category..."}</Text>
+            <Text variant="v4">{loadedPost?.category?.name || "Loading category..."}</Text>
           </Stack>
           <Stack orientation="horizontal" margin="1 0 0" align="center" gap="1">
             <Button
