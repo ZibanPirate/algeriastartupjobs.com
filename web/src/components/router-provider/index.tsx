@@ -22,7 +22,10 @@ export const LocationListenerProvider: FC<PropsWithChildren> = ({ children }) =>
   useEffect(() => {
     navigatedWithinWebsiteAtLeastOnce = window.history.length > initialHistoryLength;
 
-    // @TODO-ZM: capture page views here
+    if (window.ga) {
+      window.ga("set", "page", location.pathname);
+      window.ga("send", "pageview");
+    }
   }, [location]);
   return <>{children}</>;
 };
