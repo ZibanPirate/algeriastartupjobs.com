@@ -6,6 +6,10 @@
   color: var(--color-text);
 }
 
+.button:hover {
+  background-color: var(--color-background-back-1);
+}
+
 .button-square {
   padding: 0.25em;
 }

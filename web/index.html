@@ -5,10 +5,7 @@
     <meta name="robots" content="noindex" />
     <% } if(mode==='production' || mode==='staging'){ %>
     <!-- Google tag (gtag.js) -->
-    <script
-      async
-      src="https://www.googletagmanager.com/gtag/js?id=G-5FHCGHP4T8"
-    ></script>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-5FHCGHP4T8"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
       function gtag() {
@@ -29,4 +26,5 @@
     <div id="root"></div>
     <script type="module" src="/src/_entry"></script>
   </body>
+  <script src="https://unpkg.com/delayed-scroll-restoration-polyfill@0.1.1/index.js"></script>
 </html>
