@@ -62,10 +62,10 @@ export const Page: FC = () => {
           )}
           <Stack orientation="horizontal" margin="1 0 0" stretch={true}>
             <Text variant="v5">
-              {loadedPost?.poster ? getAccountName(loadedPost?.poster) : "Loading Poster..."}
+              {loadedPost?.poster ? getAccountName(loadedPost?.poster) : "Loading poster..."}
             </Text>
             <Divider margin="0 1" orientation="vertical" />
-            <Text variant="v5">{loadedPost?.category.name}</Text>
+            <Text variant="v5">{loadedPost?.category?.name || "Loading category..."}</Text>
           </Stack>
           <Stack orientation="horizontal" margin="1 0 0" align="center" gap="1">
             <Button

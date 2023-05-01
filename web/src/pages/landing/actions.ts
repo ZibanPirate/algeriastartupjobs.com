@@ -8,7 +8,8 @@ import { CompactAccount } from "src/models/account";
 import { LandingPageState } from "./state";
 
 export const fetchPostsForLandingPage = async (): Promise<void> => {
-  const { landingPage } = getStateActions();
+  const { landingPage, postEntities, categoryEntities, tagEntities, accountEntities } =
+    getStateActions();
   const { posts } = getState().landingPage;
   if (posts === "ERROR") landingPage.set({ posts: null });
 
@@ -50,6 +51,12 @@ export const fetchPostsForLandingPage = async (): Promise<void> => {
     });
 
     landingPage.set({ posts });
+
+    // update cache:
+    postEntities.upsertMany(data.posts);
+    categoryEntities.upsertMany(data.categories);
+    tagEntities.upsertMany(data.tags);
+    accountEntities.upsertMany(data.posters);
   } catch (error) {
     landingPage.set({ posts: "ERROR" });
     // @TODO-ZM: use Logger abstraction instead of console.log
