@@ -12,6 +12,7 @@ import { Link } from "src/components/link";
 import { getAccountName } from "src/utils/models/acount-name";
 import { Divider } from "src/components/divider";
 import { Tag } from "src/components/tag";
+import { getPostUrl } from "src/utils/urls/job-post-url";
 
 export interface PostCardProps extends StyleProps {
   post: LoneModel<CompactPost> & {
@@ -25,7 +26,7 @@ export interface PostCardProps extends StyleProps {
 export const PostCard: FC<PostCardProps> = ({ margin, post, stretch }) => {
   return (
     <div className={`post-card${stretch ? " width100" : ""}`}>
-      <Link variant="v4" to={"#"}>
+      <Link variant="v4" to={getPostUrl(post, post.category, post.poster)}>
         <Stack orientation="vertical" margin={margin}>
           <Text variant="v3" margin="0 0 1">
             {post.title}
