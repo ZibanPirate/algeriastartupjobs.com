@@ -9,6 +9,7 @@ import { GlobalSearch } from "src/components/search/global";
 
 import { PostCard } from "src/components/card/post";
 import { Button } from "src/components/button";
+import { Skeleton } from "src/components/skeleton";
 
 export const Page: FC = () => {
   usePageTitle("Join a startup in Algeria");
@@ -48,14 +49,15 @@ export const Page: FC = () => {
               Try Again
             </Button>
           </Stack>
-        ) : posts ? (
-          <Stack orientation="vertical" gap="1" margin="0 1">
-            {posts.map((post) => (
-              <PostCard key={post.id} post={post} stretch={true} />
-            ))}
-          </Stack>
         ) : (
-          "@TODO-ZM: Loading..."
+          <Stack orientation="vertical" gap="1" margin="0 1">
+            {posts
+              ? posts.map((post) => <PostCard key={post.id} post={post} stretch={true} />)
+              : "|"
+                  .repeat(4)
+                  .split("|")
+                  .map(() => <Skeleton variant="v3" width="80vw" maxWidth={600} height="6rem" />)}
+          </Stack>
         )}
       </Stack>
       {/* Footer */}

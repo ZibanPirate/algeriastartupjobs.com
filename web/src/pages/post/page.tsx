@@ -12,8 +12,8 @@ import { POST_PAGE_URL } from "src/utils/urls/common";
 import { getPostLongTitle } from "src/utils/urls/post-long-title";
 import { Button } from "src/components/button";
 import { Tag } from "src/components/tag";
-import { Divider } from "src/components/divider";
 import { getAccountName } from "src/utils/models/acount-name";
+import { Skeleton } from "src/components/skeleton";
 
 export const Page: FC = () => {
   const postSlug = useMatch(POST_PAGE_URL)?.params.postSlug;
@@ -43,14 +43,31 @@ export const Page: FC = () => {
         </Stack>
       ) : (
         <Stack orientation="vertical" margin="1 1 0" align="center">
-          <Text variant="v3" margin="0 0 1">
-            {loadedPost?.title || "Loading Job..."}
-          </Text>
-          <Text variant="v4">
-            <pre style={{ whiteSpace: "pre-line", maxWidth: 600 }}>
-              {loadedPost?.description || "Loading job description..."}
-            </pre>
-          </Text>
+          {loadedPost ? (
+            <Text variant="v3" margin="0 0 1">
+              {loadedPost?.title}
+            </Text>
+          ) : (
+            <Skeleton variant="v3" width="18rem" margin="0 0 1" />
+          )}
+          {loadedPost?.description ? (
+            <Text variant="v4">
+              <pre style={{ whiteSpace: "pre-line", maxWidth: 600 }}>{loadedPost.description}</pre>
+            </Text>
+          ) : (
+            <Stack orientation="vertical" gap="1">
+              <Skeleton variant="v4" width="20rem" />
+              <Skeleton variant="v4" width="20rem" />
+              <Skeleton variant="v4" width="16rem" />
+              <Skeleton variant="v4" width="20rem" />
+              <Skeleton variant="v4" width="4rem" />
+              <Skeleton variant="v4" width="20rem" />
+              <Skeleton variant="v4" width="18rem" />
+              <Skeleton variant="v4" width="16rem" />
+              <Skeleton variant="v4" width="20rem" />
+              <Skeleton variant="v4" width="4rem" />
+            </Stack>
+          )}
           {loadedPost?.tags && loadedPost?.tags.length > 0 && (
             <Stack orientation="horizontal" margin="1 0 0" gap="1" stretch={true}>
               {loadedPost?.tags.map((tag) => (
@@ -60,11 +77,17 @@ export const Page: FC = () => {
               ))}
             </Stack>
           )}
-          <Stack orientation="vertical" margin="1 0 0" stretch={true}>
-            <Text variant="v3">
-              {loadedPost?.poster ? getAccountName(loadedPost?.poster) : "Loading poster..."}
-            </Text>
-            <Text variant="v4">{loadedPost?.category?.name || "Loading category..."}</Text>
+          <Stack orientation="vertical" margin="1 0 0" gap="1" stretch={true}>
+            {loadedPost?.poster ? (
+              <Text variant="v3">{getAccountName(loadedPost.poster)}</Text>
+            ) : (
+              <Skeleton variant="v3" width="10rem" />
+            )}
+            {loadedPost?.category ? (
+              <Text variant="v4">{loadedPost.category.name}</Text>
+            ) : (
+              <Skeleton variant="v4" width="10rem" />
+            )}
           </Stack>
           <Stack orientation="horizontal" margin="1 0 0" align="center" gap="1">
             <Button
