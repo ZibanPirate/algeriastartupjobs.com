@@ -20,4 +20,13 @@ impl CategoryRepository {
         }
         Ok(result)
     }
+
+    pub fn get_one_category_by_id(&self, id: i32) -> Result<Category, DataAccessError> {
+        let categories = generate_categories_seed();
+        let category = categories
+            .iter()
+            .find(|category| category.id == id)
+            .ok_or(DataAccessError::NotFound)?;
+        Ok(category.clone())
+    }
 }

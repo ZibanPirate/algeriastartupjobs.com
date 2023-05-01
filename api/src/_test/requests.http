@@ -5,4 +5,15 @@
 # production:
 # @baseUrl = http://production.api.algeriastartupjobs.com
 
+###
 GET {{baseUrl}}/posts/feed
+
+
+###
+GET {{baseUrl}}/posts/0
+
+###
+GET {{baseUrl}}/posts/10
+
+### Non-existing post
+GET {{baseUrl}}/posts/10000
