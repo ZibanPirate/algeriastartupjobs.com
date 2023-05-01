@@ -28,28 +28,38 @@ export const PostCard: FC<PostCardProps> = ({ margin, post, stretch }) => {
     <div className={`post-card${stretch ? " width100" : ""}`}>
       <Link variant="v4" to={getPostUrl(post, post.category, post.poster)}>
         <Stack orientation="vertical" margin={margin}>
-          <Text variant="v3" margin="0 0 1">
-            {post.title}
-          </Text>
-          <Text variant="v5">{post.short_description}</Text>
+          <div style={{ viewTransitionName: `post-title-${post?.id}` }}>
+            <Text variant="v3" margin="0 0 1">
+              {post.title}
+            </Text>
+          </div>
+          <div style={{ viewTransitionName: `post-description-${post.id}` }}>
+            <Text variant="v5">{post.short_description}</Text>
+          </div>
           {post.tags.length > 0 && (
-            <Stack orientation="horizontal" margin="1 0 0">
-              {post.tags.slice(0, 3).map((tag) => (
-                <Tag variant="v5" key={tag.id}>
-                  {tag.name}
-                </Tag>
-              ))}
-              {post.tags.length > 3 && (
-                <Tag variant="v5" key={post.tags[3].id}>
-                  +{post.tags.length - 3}
-                </Tag>
-              )}
-            </Stack>
+            <div style={{ viewTransitionName: `post-tags-${post.id}` }}>
+              <Stack orientation="horizontal" margin="1 0 0">
+                {post.tags.slice(0, 3).map((tag) => (
+                  <Tag variant="v5" key={tag.id}>
+                    {tag.name}
+                  </Tag>
+                ))}
+                {post.tags.length > 3 && (
+                  <Tag variant="v5" key={post.tags[3].id}>
+                    +{post.tags.length - 3}
+                  </Tag>
+                )}
+              </Stack>
+            </div>
           )}
           <Stack orientation="horizontal" margin="1 0 0">
-            <Text variant="v5">{getAccountName(post.poster)}</Text>
+            <div style={{ viewTransitionName: `post-poster-${post.id}` }}>
+              <Text variant="v5">{getAccountName(post.poster)}</Text>
+            </div>
             <Divider margin="0 1" orientation="vertical" />
-            <Text variant="v5">{post.category.name}</Text>
+            <div style={{ viewTransitionName: `post-category-${post.id}` }}>
+              <Text variant="v5">{post.category.name}</Text>
+            </div>
           </Stack>
         </Stack>
       </Link>

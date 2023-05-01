@@ -30,10 +30,22 @@ export const App: FC = () => {
     if (!loadedPages.includes(pageToRender)) loadingBarRef.current?.continuousStart();
 
     pageLoaders[pageToRender]?.().finally(() => {
-      setCurrentPage(pageToRender);
-      if (!loadedPages.includes(pageToRender)) {
-        loadingBarRef.current?.complete();
-        loadedPages.push(pageToRender);
+      const disableAnimation = matchMedia("(prefers-reduced-motion: reduce)").matches;
+      if (!disableAnimation && document.startViewTransition) {
+        document.startViewTransition(async () => {
+          setCurrentPage(pageToRender);
+          if (!loadedPages.includes(pageToRender)) {
+            loadingBarRef.current?.complete();
+            loadedPages.push(pageToRender);
+          }
+          await new Promise((resolve) => setTimeout(resolve, 10));
+        });
+      } else {
+        setCurrentPage(pageToRender);
+        if (!loadedPages.includes(pageToRender)) {
+          loadingBarRef.current?.complete();
+          loadedPages.push(pageToRender);
+        }
       }
     });
   }, [currentPage, pageToRender, loadingBarRef.current]);

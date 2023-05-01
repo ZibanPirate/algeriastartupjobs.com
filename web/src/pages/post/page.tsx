@@ -43,51 +43,63 @@ export const Page: FC = () => {
         </Stack>
       ) : (
         <Stack orientation="vertical" margin="1 1 0" align="center">
-          {loadedPost ? (
-            <Text variant="v3" margin="0 0 1">
-              {loadedPost?.title}
-            </Text>
-          ) : (
-            <Skeleton variant="v3" width="18rem" margin="0 0 1" />
-          )}
-          {loadedPost?.description ? (
-            <Text variant="v4">
-              <pre style={{ whiteSpace: "pre-line", maxWidth: 600 }}>{loadedPost.description}</pre>
-            </Text>
-          ) : (
-            <Stack orientation="vertical" gap="1">
-              <Skeleton variant="v4" width="20rem" />
-              <Skeleton variant="v4" width="20rem" />
-              <Skeleton variant="v4" width="16rem" />
-              <Skeleton variant="v4" width="20rem" />
-              <Skeleton variant="v4" width="4rem" />
-              <Skeleton variant="v4" width="20rem" />
-              <Skeleton variant="v4" width="18rem" />
-              <Skeleton variant="v4" width="16rem" />
-              <Skeleton variant="v4" width="20rem" />
-              <Skeleton variant="v4" width="4rem" />
-            </Stack>
-          )}
+          <div style={{ viewTransitionName: `post-title-${loadedPost?.id}` }}>
+            {loadedPost ? (
+              <Text variant="v3" margin="0 0 1">
+                {loadedPost?.title}
+              </Text>
+            ) : (
+              <Skeleton variant="v3" width="18rem" margin="0 0 1" />
+            )}
+          </div>
+          <div style={{ viewTransitionName: `post-description-${loadedPost?.id}` }}>
+            {loadedPost?.description ? (
+              <Text variant="v4">
+                <pre style={{ whiteSpace: "pre-line", maxWidth: 600 }}>
+                  {loadedPost.description}
+                </pre>
+              </Text>
+            ) : (
+              <Stack orientation="vertical" gap="1">
+                <Skeleton variant="v4" width="20rem" />
+                <Skeleton variant="v4" width="20rem" />
+                <Skeleton variant="v4" width="16rem" />
+                <Skeleton variant="v4" width="20rem" />
+                <Skeleton variant="v4" width="4rem" />
+                <Skeleton variant="v4" width="20rem" />
+                <Skeleton variant="v4" width="18rem" />
+                <Skeleton variant="v4" width="16rem" />
+                <Skeleton variant="v4" width="20rem" />
+                <Skeleton variant="v4" width="4rem" />
+              </Stack>
+            )}
+          </div>
           {loadedPost?.tags && loadedPost?.tags.length > 0 && (
-            <Stack orientation="horizontal" margin="1 0 0" gap="1" stretch={true}>
-              {loadedPost?.tags.map((tag) => (
-                <Tag variant="v4" key={tag.id}>
-                  {tag.name}
-                </Tag>
-              ))}
-            </Stack>
+            <div style={{ viewTransitionName: `post-tags-${loadedPost?.id}` }}>
+              <Stack orientation="horizontal" margin="1 0 0" gap="1" stretch={true}>
+                {loadedPost?.tags.map((tag) => (
+                  <Tag variant="v4" key={tag.id}>
+                    {tag.name}
+                  </Tag>
+                ))}
+              </Stack>
+            </div>
           )}
           <Stack orientation="vertical" margin="1 0 0" gap="1" stretch={true}>
-            {loadedPost?.poster ? (
-              <Text variant="v3">{getAccountName(loadedPost.poster)}</Text>
-            ) : (
-              <Skeleton variant="v3" width="10rem" />
-            )}
-            {loadedPost?.category ? (
-              <Text variant="v4">{loadedPost.category.name}</Text>
-            ) : (
-              <Skeleton variant="v4" width="10rem" />
-            )}
+            <div style={{ viewTransitionName: `post-poster-${loadedPost?.id}` }}>
+              {loadedPost?.poster ? (
+                <Text variant="v3">{getAccountName(loadedPost.poster)}</Text>
+              ) : (
+                <Skeleton variant="v3" width="10rem" />
+              )}
+            </div>
+            <div style={{ viewTransitionName: `post-category-${loadedPost?.id}` }}>
+              {loadedPost?.category ? (
+                <Text variant="v4">{loadedPost.category.name}</Text>
+              ) : (
+                <Skeleton variant="v4" width="10rem" />
+              )}
+            </div>
           </Stack>
           <Stack orientation="horizontal" margin="1 0 0" align="center" gap="1">
             <Button
