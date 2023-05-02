@@ -74,7 +74,7 @@ export const Page: FC = () => {
               margin="1 0 0"
               gap="1"
               stretch={true}
-              vtName={`post-tags-${loadedPost?.id}`}
+              vtName={`post-tags-${loadedPost.id}`}
             >
               {loadedPost?.tags.map((tag) => (
                 <Tag variant="v4" key={tag.id}>

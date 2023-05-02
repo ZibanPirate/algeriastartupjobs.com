@@ -50,9 +50,9 @@ export const Page: FC = () => {
             </Button>
           </Stack>
         ) : (
-          <Stack orientation="vertical" gap="1" margin="0 1">
+          <Stack orientation="horizontal" gap="1" margin="0 1" align="stretch">
             {posts
-              ? posts.map((post) => <PostCard key={post.id} post={post} stretch={true} />)
+              ? posts.map((post) => <PostCard key={post.id} post={post} />)
               : "|"
                   .repeat(4)
                   .split("|")

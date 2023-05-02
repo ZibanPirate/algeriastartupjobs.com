@@ -27,6 +27,10 @@
   align-items: baseline;
 }
 
+.flex-align-stretch {
+  align-items: stretch;
+}
+
 .flex-gap-0 {
   gap: 0;
 }

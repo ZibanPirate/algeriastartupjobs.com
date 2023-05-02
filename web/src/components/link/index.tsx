@@ -6,10 +6,13 @@ import { isNavigatingBackLeavesWebsite } from "../router-provider";
 
 interface LinkProps extends PropsWithChildren, StyleProps, FontVariantProps, RLP {
   back?: boolean;
+  className?: string;
 }
 
-export const Link: FC<LinkProps> = ({ children, variant, margin, back, ...props }) => {
-  const classes = ["link", `font-variant-${variant}`, ...marginToClasses(margin)];
+export const Link: FC<LinkProps> = ({ children, variant, margin, back, className, ...props }) => {
+  const classes = [className, "link", `font-variant-${variant}`, ...marginToClasses(margin)].filter(
+    Boolean
+  );
 
   const willGoBack = back && !isNavigatingBackLeavesWebsite();
 

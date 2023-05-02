@@ -5,7 +5,7 @@ import { AnimationProps } from "src/utils/props/animation";
 
 interface StackProps extends PropsWithChildren, StyleProps, AnimationProps {
   orientation: "horizontal" | "vertical";
-  align?: "start" | "center" | "end" | "baseline";
+  align?: "start" | "center" | "end" | "baseline" | "stretch";
   gap?: CSSNumber;
   stretch?: boolean;
   wrap?: boolean;
