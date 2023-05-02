@@ -1,8 +1,9 @@
-import { FC, PropsWithChildren } from "react";
+import { CSSProperties, FC, PropsWithChildren } from "react";
 import "./style.css";
 import { CSSNumber, StyleProps, marginToClasses } from "src/utils/props/style";
+import { AnimationProps } from "src/utils/props/animation";
 
-interface StackProps extends PropsWithChildren, StyleProps {
+interface StackProps extends PropsWithChildren, StyleProps, AnimationProps {
   orientation: "horizontal" | "vertical";
   align?: "start" | "center" | "end" | "baseline";
   gap?: CSSNumber;
@@ -18,6 +19,7 @@ export const Stack: FC<StackProps> = ({
   gap,
   stretch = false,
   wrap = true,
+  vtName,
 }) => {
   const classes = [
     "stack",
@@ -30,5 +32,13 @@ export const Stack: FC<StackProps> = ({
     wrap ? "flex-wrap" : "",
     ...marginToClasses(margin),
   ];
-  return <div className={classes.join(" ")}>{children}</div>;
+
+  const style: CSSProperties = {};
+  if (vtName) style["viewTransitionName"] = vtName;
+
+  return (
+    <div className={classes.join(" ")} style={style}>
+      {children}
+    </div>
+  );
 };

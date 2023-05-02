@@ -43,22 +43,16 @@ export const Page: FC = () => {
         </Stack>
       ) : (
         <Stack orientation="vertical" margin="1 1 0" align="center">
-          <div style={{ viewTransitionName: `post-title-${loadedPost?.id}` }}>
-            {loadedPost ? (
-              <Text variant="v3" margin="0 0 1">
-                {loadedPost?.title}
-              </Text>
-            ) : (
-              <Skeleton variant="v3" width="18rem" margin="0 0 1" />
-            )}
-          </div>
-          <div style={{ viewTransitionName: `post-description-${loadedPost?.id}` }}>
+          {loadedPost ? (
+            <Text variant="v3" margin="1 0" vtName={`post-title-${loadedPost?.id}`}>
+              {loadedPost?.title}
+            </Text>
+          ) : (
+            <Skeleton variant="v3" width="18rem" margin="0 0 1" />
+          )}
+          <Text variant="v4" vtName={`post-description-${loadedPost?.id}`}>
             {loadedPost?.description ? (
-              <Text variant="v4">
-                <pre style={{ whiteSpace: "pre-line", maxWidth: 600 }}>
-                  {loadedPost.description}
-                </pre>
-              </Text>
+              <pre style={{ whiteSpace: "pre-line", maxWidth: 600 }}>{loadedPost.description}</pre>
             ) : (
               <Stack orientation="vertical" gap="1">
                 <Skeleton variant="v4" width="20rem" />
@@ -73,33 +67,37 @@ export const Page: FC = () => {
                 <Skeleton variant="v4" width="4rem" />
               </Stack>
             )}
-          </div>
+          </Text>
           {loadedPost?.tags && loadedPost?.tags.length > 0 && (
-            <div style={{ viewTransitionName: `post-tags-${loadedPost?.id}` }}>
-              <Stack orientation="horizontal" margin="1 0 0" gap="1" stretch={true}>
-                {loadedPost?.tags.map((tag) => (
-                  <Tag variant="v4" key={tag.id}>
-                    {tag.name}
-                  </Tag>
-                ))}
-              </Stack>
-            </div>
+            <Stack
+              orientation="horizontal"
+              margin="1 0 0"
+              gap="1"
+              stretch={true}
+              vtName={`post-tags-${loadedPost?.id}`}
+            >
+              {loadedPost?.tags.map((tag) => (
+                <Tag variant="v4" key={tag.id}>
+                  {tag.name}
+                </Tag>
+              ))}
+            </Stack>
           )}
           <Stack orientation="vertical" margin="1 0 0" gap="1" stretch={true}>
-            <div style={{ viewTransitionName: `post-poster-${loadedPost?.id}` }}>
-              {loadedPost?.poster ? (
-                <Text variant="v3">{getAccountName(loadedPost.poster)}</Text>
-              ) : (
-                <Skeleton variant="v3" width="10rem" />
-              )}
-            </div>
-            <div style={{ viewTransitionName: `post-category-${loadedPost?.id}` }}>
-              {loadedPost?.category ? (
-                <Text variant="v4">{loadedPost.category.name}</Text>
-              ) : (
-                <Skeleton variant="v4" width="10rem" />
-              )}
-            </div>
+            {loadedPost?.poster ? (
+              <Text variant="v3" vtName={`post-poster-${loadedPost?.id}`}>
+                {getAccountName(loadedPost.poster)}
+              </Text>
+            ) : (
+              <Skeleton variant="v3" width="10rem" vtName={`post-poster-${loadedPost?.id}`} />
+            )}
+            {loadedPost?.category ? (
+              <Text variant="v4" vtName={`post-category-${loadedPost?.id}`}>
+                {loadedPost.category.name}
+              </Text>
+            ) : (
+              <Skeleton variant="v4" width="10rem" vtName={`post-category-${loadedPost?.id}`} />
+            )}
           </Stack>
           <Stack orientation="horizontal" margin="1 0 0" align="center" gap="1">
             <Button
@@ -116,7 +114,7 @@ export const Page: FC = () => {
         </Stack>
       )}
 
-      <Text variant="v4" margin="1 1">
+      <Text variant="v4" margin="2 1">
         Source code is publicly available at&nbsp;
         <Link to="https://github.com/algeriastartupjobs/algeriastartupjobs.com" variant="v4">
           Github
