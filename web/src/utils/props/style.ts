@@ -3,6 +3,7 @@ import memoize from "lodash/memoize";
 export type CSSNumber = `${0 | 1 | 2 | 3}`;
 
 type Margin =
+  | "auto"
   | CSSNumber
   | `${CSSNumber} ${CSSNumber}`
   | `${CSSNumber} ${CSSNumber} ${CSSNumber}`
@@ -14,7 +15,8 @@ export interface StyleProps {
 
 const _marginToClasses = (
   margin: Margin | "" = ""
-): `margin-${"top" | "right" | "bottom" | "left"}-${CSSNumber}`[] => {
+): Array<`margin-${"top" | "right" | "bottom" | "left"}-${CSSNumber}` | "margin-auto"> => {
+  if (margin === "auto") return ["margin-auto"];
   const [top, right, bottom, left] = margin.split(" ") as CSSNumber[];
   if (left)
     return [

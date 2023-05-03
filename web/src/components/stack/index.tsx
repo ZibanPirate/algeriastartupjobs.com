@@ -3,7 +3,11 @@ import "./style.css";
 import { CSSNumber, StyleProps, marginToClasses } from "src/utils/props/style";
 import { AnimationProps } from "src/utils/props/animation";
 
-interface StackProps extends PropsWithChildren, StyleProps, AnimationProps {
+interface StackProps
+  extends PropsWithChildren,
+    StyleProps,
+    AnimationProps,
+    Pick<CSSProperties, "maxWidth"> {
   orientation: "horizontal" | "vertical";
   align?: "start" | "center" | "end" | "baseline" | "stretch";
   gap?: CSSNumber;
@@ -20,6 +24,7 @@ export const Stack: FC<StackProps> = ({
   stretch = false,
   wrap = true,
   vtName,
+  maxWidth,
 }) => {
   const classes = [
     "stack",
@@ -35,6 +40,7 @@ export const Stack: FC<StackProps> = ({
 
   const style: CSSProperties = {};
   if (vtName) style["viewTransitionName"] = vtName;
+  if (maxWidth) style["maxWidth"] = maxWidth;
 
   return (
     <div className={classes.join(" ")} style={style}>
