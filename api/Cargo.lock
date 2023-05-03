@@ -29,9 +29,9 @@ dependencies = [
  "hyper",
  "local-ip-address",
  "regex",
+ "rust-fuzzy-search",
  "serde",
  "serde_json",
- "sublime_fuzzy",
  "titlecase",
  "tokio",
  "tower",
@@ -1756,6 +1756,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a5996294f19bd3aae0453a862ad728f60e6600695733dd5df01da90c54363a3c"
 
 [[package]]
+name = "rust-fuzzy-search"
+version = "0.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a157657054ffe556d8858504af8a672a054a6e0bd9e8ee531059100c0fa11bb2"
+
+[[package]]
 name = "rustix"
 version = "0.37.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1991,12 +1997,6 @@ dependencies = [
  "quote",
  "syn 1.0.109",
 ]
-
-[[package]]
-name = "sublime_fuzzy"
-version = "0.7.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fa7986063f7c0ab374407e586d7048a3d5aac94f103f751088bf398e07cd5400"
 
 [[package]]
 name = "syn"

@@ -81,11 +81,31 @@ pub fn generate_tags_seed() -> Vec<Tag> {
     "architect",
     "engineering lead",
   ];
+
+  let medical_tags = [
+    "doctor",
+    "nurse",
+    "pharmacist",
+    "dentist",
+    "surgeon",
+    "therapist",
+    "optometrist",
+    "psychologist",
+    "veterinarian",
+    "dietitian",
+    "nutritionist",
+    "chiropractor",
+    "pediatrician",
+    "treat",
+    "patients",
+  ];
+
   let all_tag_names = [
     roles.as_ref(),
     programming_languages.as_ref(),
     skills.as_ref(),
     experience_levels.as_ref(),
+    medical_tags.as_ref(),
   ]
   .concat();
 

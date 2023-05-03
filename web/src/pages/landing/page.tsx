@@ -56,7 +56,7 @@ export const Page: FC = () => {
               : "|"
                   .repeat(4)
                   .split("|")
-                  .map(() => <Skeleton variant="v3" width="80vw" maxWidth={600} height="6rem" />)}
+                  .map(() => <Skeleton variant="v3" width="20rem" maxWidth="80vw" height="6rem" />)}
           </Stack>
         )}
       </Stack>
