@@ -6,6 +6,7 @@ import { LazyPages, pageLoaders } from "src/pages";
 import { useHtmlThemeColor } from "src/utils/hooks/html-theme-color";
 import { POST_PAGE_URL } from "src/utils/urls/common";
 import LoadingBar, { LoadingBarRef } from "react-top-loading-bar";
+import { viewTransition } from "src/utils/animation/view-transition";
 
 export const App: FC = () => {
   useHtmlThemeColor();
@@ -36,19 +37,10 @@ export const App: FC = () => {
       }
     } catch (error) {}
 
-    const disableAnimation = matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (!disableAnimation && document.startViewTransition) {
-      document.startViewTransition(async () => {
-        setCurrentPage(pageToRender);
-        await new Promise((resolve) => setTimeout(resolve, 10));
-      });
-    } else {
+    viewTransition(async () => {
       setCurrentPage(pageToRender);
-      if (!loadedPages.includes(pageToRender)) {
-        loadingBarRef.current?.complete();
-        loadedPages.push(pageToRender);
-      }
-    }
+      await new Promise((resolve) => setTimeout(resolve, 10));
+    });
   };
 
   useEffect(() => {

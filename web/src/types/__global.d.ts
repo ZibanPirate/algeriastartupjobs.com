@@ -7,6 +7,6 @@ declare global {
     ga?: (command: string, ...fields: Array<string>) => void;
   }
   interface Document {
-    startViewTransition?: (callback: () => void) => void;
+    startViewTransition?: (callback?: () => void) => void;
   }
 }
