@@ -112,5 +112,10 @@ export const fetchSimilarPostsForPostPage = async (postId: string): Promise<void
     categoryEntities.upsertMany(data.categories);
     tagEntities.upsertMany(data.tags);
     accountEntities.upsertMany(data.posters);
-  } catch (error) {}
+  } catch (error) {
+    postPage.set({ similarPosts: "ERROR" });
+    // @TODO-ZM: use Logger abstraction instead of console.log
+    console.log("Error fetching similar posts for post page", error);
+    // Sentry.captureException(error, { tags: { type: "WEB_FETCH" } });
+  }
 };
