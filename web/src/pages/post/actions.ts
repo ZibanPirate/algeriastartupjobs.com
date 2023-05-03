@@ -63,3 +63,54 @@ export const fetchPostForPostPage = async (postId: string): Promise<void> => {
     // Sentry.captureException(error, { tags: { type: "WEB_FETCH" } });
   }
 };
+
+export const fetchSimilarPostsForPostPage = async (postId: string): Promise<void> => {
+  const { postPage, postEntities, categoryEntities, tagEntities, accountEntities } =
+    getStateActions();
+
+  postPage.set({ similarPosts: null });
+
+  try {
+    // @TODO-ZM: auto-generate types for API endpoints
+    const { data } = await Axios.get<{
+      posts: CompactPost[];
+      categories: CompactCategory[];
+      tags: CompactTag[];
+      posters: CompactAccount[];
+    }>(getConfig().api.base_url + "/posts/" + postId + "/similar");
+
+    const similarPosts: PostPageState["similarPosts"] = data.posts.map((post) => {
+      const { category_id, tag_ids, poster_id, ...lonePost } = post;
+
+      const category = data.categories.find((category) => category.id === category_id);
+      if (!category)
+        throw new Error(`Category with id ${category_id} not found for post ${post.id}`);
+
+      const tags = data.tags.filter((tag) => tag_ids.includes(tag.id));
+      if (tags.length !== tag_ids.length)
+        throw new Error(
+          `Not all tags with ids ${tag_ids} found for post ${post.id}. Found tags: ${tags.map(
+            (tag) => tag.id
+          )}`
+        );
+
+      const poster = data.posters.find((poster) => poster.id === poster_id);
+      if (!poster) throw new Error(`Poster with id ${poster_id} not found for post ${post.id}`);
+
+      return {
+        ...lonePost,
+        category,
+        tags,
+        poster,
+      };
+    });
+
+    if (getState().postPage.postId === postId) postPage.set({ similarPosts });
+
+    // update cache:
+    postEntities.upsertMany(data.posts);
+    categoryEntities.upsertMany(data.categories);
+    tagEntities.upsertMany(data.tags);
+    accountEntities.upsertMany(data.posters);
+  } catch (error) {}
+};

@@ -3,7 +3,7 @@ import { Link } from "src/components/link";
 import { Stack } from "src/components/stack";
 import { Text } from "src/components/text";
 import { useSliceSelector } from "src/utils/state/selector";
-import { fetchPostForPostPage } from "./actions";
+import { fetchPostForPostPage, fetchSimilarPostsForPostPage } from "./actions";
 import { usePageTitle } from "src/utils/hooks/page-title";
 
 import { isLoaded } from "src/utils/loadable";
@@ -14,17 +14,22 @@ import { Button } from "src/components/button";
 import { Tag } from "src/components/tag";
 import { getAccountName } from "src/utils/models/acount-name";
 import { Skeleton } from "src/components/skeleton";
+import { PostCard } from "src/components/card/post";
+import { getStateActions } from "src/state";
 
 export const Page: FC = () => {
   const postSlug = useMatch(POST_PAGE_URL)?.params.postSlug;
   const postId = useMemo(() => (/(.*)_(\d+)$/.exec(postSlug || "") || [])[2], [postSlug]);
 
   useEffect(() => {
+    getStateActions().postPage.set({ postId });
     if (!postId) return;
+
     fetchPostForPostPage(postId);
+    fetchSimilarPostsForPostPage(postId);
   }, [postId]);
 
-  const { post } = useSliceSelector("postPage");
+  const { post, similarPosts } = useSliceSelector("postPage");
   const loadedPost = isLoaded(post);
   usePageTitle(loadedPost ? getPostLongTitle(loadedPost, loadedPost.poster) : "Loading Job...");
 
@@ -113,6 +118,36 @@ export const Page: FC = () => {
           </Stack>
         </Stack>
       )}
+
+      <Stack orientation="vertical" margin="3 0 0" align="center">
+        <Text variant="v3" margin="1 0">
+          Similar Jobs
+        </Text>
+        {/* Posts */}
+        <Stack orientation="vertical" margin="0 0 3" stretch={true} align="center">
+          {similarPosts === "ERROR" ? (
+            <Stack orientation="horizontal" align="baseline" margin="0 1">
+              <Text variant="v5" margin="0 0 1">
+                An error occurred while fetching similar posts, please &nbsp;
+              </Text>
+              <Button variant="v5" onClick={() => fetchSimilarPostsForPostPage(postId)}>
+                Try Again
+              </Button>
+            </Stack>
+          ) : (
+            <Stack orientation="horizontal" gap="1" margin="0 1" align="stretch">
+              {similarPosts
+                ? similarPosts.map((post) => <PostCard key={post.id} post={post} />)
+                : "|"
+                    .repeat(4)
+                    .split("|")
+                    .map(() => (
+                      <Skeleton variant="v3" width="20rem" maxWidth="80vw" height="6rem" />
+                    ))}
+            </Stack>
+          )}
+        </Stack>
+      </Stack>
 
       <Text variant="v4" margin="2 1">
         Source code is publicly available at&nbsp;

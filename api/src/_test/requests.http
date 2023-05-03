@@ -17,3 +17,9 @@ GET {{baseUrl}}/posts/10
 
 ### Non-existing post
 GET {{baseUrl}}/posts/10000
+
+###
+GET {{baseUrl}}/posts/12/similar
+
+### Non-existing post
+GET {{baseUrl}}/posts/10000/similar
