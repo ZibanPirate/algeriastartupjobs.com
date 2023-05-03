@@ -1,12 +1,12 @@
 use regex::{escape, Regex};
 
 use crate::{
-    account::{
-        mocks::generate_accounts_seed,
-        model::{Account, AccountTrait, AccountType},
-    },
-    category::mocks::generate_categories_seed,
-    tag::{mocks::generate_tags_seed, model::Tag},
+  account::{
+    mocks::generate_accounts_seed,
+    model::{Account, AccountTrait, AccountType},
+  },
+  category::mocks::generate_categories_seed,
+  tag::{mocks::generate_tags_seed, model::Tag},
 };
 
 use super::model::{PartialPost, PartialPostTrait, Post};
@@ -14,65 +14,65 @@ use sublime_fuzzy::best_match;
 use titlecase::titlecase;
 
 pub fn generate_one_post_mock(post_id: i32) -> Post {
-    Post {
-        id: post_id,
-        slug: format!("post_{}", post_id),
-        title: format!("Post {}", post_id),
-        poster_id: post_id,
-        short_description: format!("Short description for post {}", post_id),
-        description: format!("Description for post {}", post_id),
-        category_id: post_id,
-        tag_ids: vec![post_id],
-    }
+  Post {
+    id: post_id,
+    slug: format!("post_{}", post_id),
+    title: format!("Post {}", post_id),
+    poster_id: post_id,
+    short_description: format!("Short description for post {}", post_id),
+    description: format!("Description for post {}", post_id),
+    category_id: post_id,
+    tag_ids: vec![post_id],
+  }
 }
 
 pub fn generate_many_post_mocks_with_overwrite<F>(
-    from: i32,
-    to: i32,
-    overwrite: Option<F>,
+  from: i32,
+  to: i32,
+  overwrite: Option<F>,
 ) -> Vec<Post>
 where
-    F: Fn(i32) -> PartialPost,
+  F: Fn(i32) -> PartialPost,
 {
-    let mut posts: Vec<Post> = Vec::new();
-    for i in from..to {
-        let post = match overwrite {
-            Some(ref f) => {
-                let partial_post = f(i);
-                let default_post = generate_one_post_mock(i);
-                partial_post.to_post(default_post)
-            }
-            None => generate_one_post_mock(i),
-        };
-        posts.push(post);
-    }
-    posts
+  let mut posts: Vec<Post> = Vec::new();
+  for i in from..to {
+    let post = match overwrite {
+      Some(ref f) => {
+        let partial_post = f(i);
+        let default_post = generate_one_post_mock(i);
+        partial_post.to_post(default_post)
+      }
+      None => generate_one_post_mock(i),
+    };
+    posts.push(post);
+  }
+  posts
 }
 
 pub fn generate_many_post_mocks(from: i32, to: i32) -> Vec<Post> {
-    generate_many_post_mocks_with_overwrite(
-        from,
-        to,
-        Some(|_id| PartialPost {
-            id: None,
-            slug: None,
-            title: None,
-            poster_id: None,
-            short_description: None,
-            description: None,
-            category_id: None,
-            tag_ids: None,
-        }),
-    )
+  generate_many_post_mocks_with_overwrite(
+    from,
+    to,
+    Some(|_id| PartialPost {
+      id: None,
+      slug: None,
+      title: None,
+      poster_id: None,
+      short_description: None,
+      description: None,
+      category_id: None,
+      tag_ids: None,
+    }),
+  )
 }
 
 struct PostSeed {
-    pub title: String,
-    pub description: String,
+  pub title: String,
+  pub description: String,
 }
 
 pub fn generate_posts_seed() -> Vec<Post> {
-    let jobs = [
+  let jobs = [
         PostSeed {
             title: "Senior Fullstack JavaScript Developer".to_string(),
             description: r#"Yassiron is a leading company in the field of hybrid solutions using C++, C#, and JavaScript. We are looking for a Senior Fullstack JavaScript Developer to join our team and work on developing, designing, and testing web portals that are fast and responsive.
@@ -488,55 +488,54 @@ If you are interested in this opportunity, please apply online with your resume 
         },
     ];
 
-    let non_admin_accounts = generate_accounts_seed()
-        .into_iter()
-        .filter(|account| match account.r#type {
-            AccountType::Individual { .. } => true,
-            AccountType::Company { .. } => true,
-            _ => false,
+  let non_admin_accounts = generate_accounts_seed()
+    .into_iter()
+    .filter(|account| match account.r#type {
+      AccountType::Individual { .. } => true,
+      AccountType::Company { .. } => true,
+      _ => false,
+    })
+    .collect::<Vec<Account>>();
+  let non_admin_accounts_len = non_admin_accounts.len();
+  let categories = generate_categories_seed();
+  let tags = generate_tags_seed();
+  let total_posts_len = jobs.len();
+
+  generate_many_post_mocks_with_overwrite(
+    0,
+    total_posts_len as i32,
+    Some(|id| {
+      let post = &jobs[id as usize];
+      let title = titlecase(&post.title);
+      let poster = &non_admin_accounts[id as usize % non_admin_accounts_len];
+      let category = &categories[id as usize % categories.len()];
+      let short_description = format!("{} is looking for a {}", poster.get_display_name(), title);
+
+      let tags_found_on_description = tags
+        .iter()
+        .filter(|tag| match tag.name.len() {
+          0..=3 => Regex::new(format!(r"\b{}\b", escape(&tag.name)).as_str())
+            .unwrap()
+            .is_match(&post.description),
+          _ => best_match(&tag.name, &post.title).is_some(),
         })
-        .collect::<Vec<Account>>();
-    let non_admin_accounts_len = non_admin_accounts.len();
-    let categories = generate_categories_seed();
-    let tags = generate_tags_seed();
-    let total_posts_len = jobs.len();
+        .collect::<Vec<&Tag>>();
 
-    generate_many_post_mocks_with_overwrite(
-        0,
-        total_posts_len as i32,
-        Some(|id| {
-            let post = &jobs[id as usize];
-            let title = titlecase(&post.title);
-            let poster = &non_admin_accounts[id as usize % non_admin_accounts_len];
-            let category = &categories[id as usize % categories.len()];
-            let short_description =
-                format!("{} is looking for a {}", poster.get_display_name(), title);
-
-            let tags_found_on_description = tags
-                .iter()
-                .filter(|tag| match tag.name.len() {
-                    0..=3 => Regex::new(format!(r"\b{}\b", escape(&tag.name)).as_str())
-                        .unwrap()
-                        .is_match(&post.description),
-                    _ => best_match(&tag.name, &post.title).is_some(),
-                })
-                .collect::<Vec<&Tag>>();
-
-            PartialPost {
-                id: None,
-                slug: Some(
-                    format!("{}_{}", post.title, id)
-                        .to_string()
-                        .replace("+", "_plus")
-                        .replace(" ", "_"),
-                ),
-                title: Some(title.clone()),
-                poster_id: Some(poster.id),
-                short_description: Some(short_description),
-                description: Some(post.description.clone()),
-                category_id: Some(category.id),
-                tag_ids: Some(tags_found_on_description.iter().map(|tag| tag.id).collect()),
-            }
-        }),
-    )
+      PartialPost {
+        id: None,
+        slug: Some(
+          format!("{}_{}", post.title, id)
+            .to_string()
+            .replace("+", "_plus")
+            .replace(" ", "_"),
+        ),
+        title: Some(title.clone()),
+        poster_id: Some(poster.id),
+        short_description: Some(short_description),
+        description: Some(post.description.clone()),
+        category_id: Some(category.id),
+        tag_ids: Some(tags_found_on_description.iter().map(|tag| tag.id).collect()),
+      }
+    }),
+  )
 }

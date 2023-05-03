@@ -1,5 +1,5 @@
 #[derive(Debug)]
 pub enum DataAccessError {
-    NotFound,
-    InternalError,
+  NotFound,
+  InternalError,
 }
