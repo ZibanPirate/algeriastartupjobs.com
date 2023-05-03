@@ -4,7 +4,7 @@ use tower_http::{
 };
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
-pub fn create_trace_layer() -> TraceLayer<SharedClassifier<ServerErrorsAsFailures>> {
+pub fn enable_tracing() {
   tracing_subscriber::registry()
     .with(
       tracing_subscriber::EnvFilter::try_from_default_env().unwrap_or_else(|_| {
@@ -16,7 +16,9 @@ pub fn create_trace_layer() -> TraceLayer<SharedClassifier<ServerErrorsAsFailure
     .with(tracing_subscriber::fmt::layer())
     .init();
   tracing::info!("enabled tracing");
+}
 
+pub fn create_trace_layer() -> TraceLayer<SharedClassifier<ServerErrorsAsFailures>> {
   // @TODO-ZM: to implement tracing, and integrate it with Sentry
   let layer = TraceLayer::new_for_http();
   tracing::info!("created trace layer");

@@ -68,13 +68,32 @@
       "dependsOn": ["build api", "terraform shared"]
     },
     {
+      "label": "dev db",
+      "type": "shell",
+      "command": [
+        "docker rm -f $(docker ps -aqf \"name=ajs-db-surrealdb\") || true",
+        "&& docker build -t ajs-db-surrealdb -f surrealdb.Dockerfile .",
+        "&& docker run -d --name=ajs-db-surrealdb -p 7070:7070 -v ./surrealdb_data:/surrealdb_data ajs-db-surrealdb"
+      ],
+      "problemMatcher": [],
+      "options": { "cwd": "${workspaceFolder}/api" }
+    },
+    {
+      "label": "logs db",
+      "type": "shell",
+      "command": ["docker logs --follow $(docker ps -aqf \"name=ajs-db-surrealdb\")"],
+      "problemMatcher": [],
+      "options": { "cwd": "${workspaceFolder}/api" }
+    },
+    {
       "label": "dev api",
       "type": "shell",
       "command": "cargo watch -x run",
       "problemMatcher": [],
       "options": { "cwd": "${workspaceFolder}/api" },
       "isBackground": true,
-      "presentation": { "group": "dev" }
+      "presentation": { "group": "dev" },
+      "dependsOn": ["dev db"]
     },
     {
       "label": "dev web",
