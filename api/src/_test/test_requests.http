@@ -1,0 +1,38 @@
+# local db:
+@dbBaseUrl = http://localhost:7070
+
+# local:
+@baseUrl = http://localhost:9090
+# staging:
+# @baseUrl = https://staging.api.algeriastartupjobs.com
+# production:
+# @baseUrl = http://production.api.algeriastartupjobs.com
+
+###
+POST {{baseUrl}}/test/seed
+
+###
+GET {{dbBaseUrl}}/export
+Authorization: Basic root root
+NS: test
+DB: test
+
+###
+POST {{dbBaseUrl}}/sql
+Accept: application/json
+Authorization: Basic root root
+NS: test
+DB: test
+
+BEGIN TRANSACTION;
+
+LET $count = (SELECT count() FROM account GROUP BY count)[0].count;
+
+CREATE account:{ id: $count } CONTENT {
+  email: 'contact@example.com',
+  slug: 'doe_llc',
+  type: 'Company',
+  company_name: 'Doe LLC',
+};
+
+COMMIT TRANSACTION;

@@ -1,8 +1,17 @@
-use crate::_utils::error::DataAccessError;
+use super::{
+  mocks::generate_accounts_seed,
+  model::{Account, AccountType, DBAccount},
+};
+use crate::_utils::{
+  database::{db_thing_to_id, DBRecord},
+  error::DataAccessError,
+};
+use std::sync::Arc;
+use surrealdb::{engine::remote::ws::Client, Surreal};
 
-use super::{mocks::generate_accounts_seed, model::Account};
-
-pub struct AccountRepository {}
+pub struct AccountRepository {
+  pub db: Arc<Surreal<Client>>,
+}
 
 impl AccountRepository {
   pub fn get_many_accounts_by_ids(&self, ids: Vec<i32>) -> Result<Vec<Account>, DataAccessError> {
@@ -26,5 +35,74 @@ impl AccountRepository {
       }
     }
     Err(DataAccessError::NotFound)
+  }
+
+  pub async fn create_one_account(&self, account: DBAccount) -> Result<u32, DataAccessError> {
+    let query = format!(
+      r#"
+      BEGIN TRANSACTION;
+
+      LET $count = (SELECT count() FROM account GROUP BY count)[0].count;
+
+      CREATE account:{{ id: $count }} CONTENT {{
+        email: '{}',
+        slug: '{}',
+        type: '{}',
+        {}
+      }};
+
+      COMMIT TRANSACTION;
+      "#,
+      account.email,
+      account.slug,
+      account.r#type.to_string(),
+      match account.r#type {
+        AccountType::Company { company_name } => format!("company_name: '{}'", company_name),
+        AccountType::Admin {
+          first_name,
+          last_name,
+        }
+        | AccountType::Individual {
+          first_name,
+          last_name,
+        } => {
+          format!("first_name: '{}', last_name: '{}'", first_name, last_name)
+        }
+      },
+    );
+
+    let query_result = self.db.query(query).await;
+    match query_result {
+      Ok(mut query_result) => {
+        let record: Result<Option<DBRecord>, _> = query_result.take(1);
+
+        match record {
+          Ok(record) => match record {
+            Some(record) => {
+              let id = db_thing_to_id(&record.id);
+              match id {
+                Some(id) => return Ok(id),
+                None => {
+                  tracing::error!("failed to get created account id {:?}", record);
+                  return Err(DataAccessError::InternalError);
+                }
+              }
+            }
+            None => {
+              tracing::error!("failed to get created account record {:?}", record);
+              return Err(DataAccessError::InternalError);
+            }
+          },
+          Err(e) => {
+            tracing::error!("failed to get created account record {:?}", e);
+            return Err(DataAccessError::InternalError);
+          }
+        }
+      }
+      Err(e) => {
+        tracing::error!("failed to create account {:?}", e);
+        return Err(DataAccessError::CreationError);
+      }
+    }
   }
 }

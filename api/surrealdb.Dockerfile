@@ -8,5 +8,4 @@ EXPOSE 7070
 VOLUME /surrealdb_data
 
 # Run SurrealDB server with the volume as the data directory and the custom port
-CMD ["start", "--bind", "0.0.0.0:7070", "file:/surrealdb_data"]
-
+CMD ["start","--log","trace","--user","root","--pass","root", "--bind", "0.0.0.0:7070", "file:/surrealdb_data"]

@@ -10,7 +10,7 @@ The entire code for algeriastartupjobs.com
 
 ## Get Started
 
-Please use [VSCode](https://code.visualstudio.com/), and have [Rustup](https://rustup.rs/) and [NodeJS](https://nodejs.org/) installed.
+Please use [VSCode](https://code.visualstudio.com/), and have [Rustup](https://rustup.rs/), [NodeJS](https://nodejs.org/) and [Docker](https://www.docker.com/) installed.
 
 Then simply run VSCode **Build Task** (<kbd>Ctrl</kbd>/<kbd>⌘ Command</kbd> + <kbd>⇧ Shift</kbd> + <kbd>B</kbd>).
 

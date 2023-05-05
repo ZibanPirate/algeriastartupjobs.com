@@ -22,6 +22,9 @@ regex = "1.8.1"
 utility-types = "0.0.2"
 rust-fuzzy-search = "0.1.1"
 surrealdb = "1.0.0-beta.9"
+fake = { version = "2.6", features = ['derive'] }
+rand = "0.8"
+strum_macros = "0.24.3"
 
 [dev-dependencies]
 cargo-watch = "8.4.0"
