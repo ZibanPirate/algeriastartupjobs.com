@@ -106,7 +106,7 @@ pub async fn seed_the_database_with_mocks(State(app_state): State<AppState>) -> 
   }
 
   let mut post_ids: Vec<u32> = [].to_vec();
-  for _ in 0..200 {
+  for index in 0..200 {
     let title = fake::faker::lorem::en::Sentence(3..5).fake::<String>();
     let slug = slugify(&title);
     let post_id = app_state
@@ -114,11 +114,16 @@ pub async fn seed_the_database_with_mocks(State(app_state): State<AppState>) -> 
       .create_one_post(DBPost {
         slug,
         title,
-        category_id: 1,
-        poster_id: 1,
-        description: fake::faker::lorem::en::Paragraph(50..100).fake::<String>(),
-        short_description: fake::faker::lorem::en::Sentence(3..5).fake::<String>(),
-        tag_ids: [1, 2, 3].to_vec(),
+        category_id: category_ids[index % category_ids.len()],
+        poster_id: account_ids[index % account_ids.len()],
+        description: fake::faker::lorem::en::Paragraph(20..30).fake::<String>(),
+        short_description: fake::faker::lorem::en::Sentence(5..10).fake::<String>(),
+        tag_ids: tag_ids
+          .iter()
+          .skip(index % tag_ids.len())
+          .take(3)
+          .map(|tag_id| *tag_id)
+          .collect::<Vec<u32>>(),
       })
       .await;
     match post_id {

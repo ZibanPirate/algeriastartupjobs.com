@@ -8,10 +8,7 @@ use crate::_utils::{
   string::escape_single_quote,
 };
 
-use super::{
-  mocks::generate_posts_seed,
-  model::{CompactPost, DBPost, Post},
-};
+use super::model::{CompactPost, DBPost, Post};
 
 pub struct PostRepository {
   pub db: Arc<Surreal<Client>>,
@@ -51,6 +48,7 @@ impl PostRepository {
             filter,
             query_result_string
           );
+          // @TODO-ZM: return empty array instead of error
           return Err(DataAccessError::NotFound);
         }
 

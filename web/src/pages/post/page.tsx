@@ -56,7 +56,7 @@ export const Page: FC = () => {
             </Stack>
           </Stack>
         ) : (
-          <Stack orientation="vertical" margin="1 1 0" align="center" flex={3} minWidth="60%">
+          <Stack orientation="vertical" margin="1 1 0" flex={3} minWidth="60%">
             {loadedPost ? (
               <Text variant="v3" margin="1 0" vtName={`post-title-${loadedPost?.id}`}>
                 {loadedPost?.title}
