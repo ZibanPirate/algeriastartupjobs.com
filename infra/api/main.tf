@@ -163,11 +163,31 @@ resource "aws_route53_record" "api" {
   records = [digitalocean_droplet.api.ipv4_address]
 }
 
-resource "ssh_resource" "upload_app_to_vps" {
+resource "ssh_resource" "upload_dot_env_to_vps" {
   triggers = {
     always   = timestamp()
     vps_id   = digitalocean_droplet.api.id
-    app_hash = filesha256("${path.module}/../../api/ubuntu-target/target/release/${local.app_name}")
+    app_hash = filesha256("${path.module}/../../api/${local.stage}.env")
+  }
+
+  host        = digitalocean_droplet.api.ipv4_address
+  user        = var.do_droplet_user
+  private_key = var.do_ssh_key
+  timeout     = "1m"
+
+  file {
+    source      = "${path.module}/../../api/${local.stage}.env"
+    destination = "${local.app_folder}/.env"
+  }
+}
+
+
+resource "ssh_resource" "upload_app_to_vps" {
+  triggers = {
+    always     = timestamp()
+    vps_id     = digitalocean_droplet.api.id
+    dor_env_id = ssh_resource.upload_dot_env_to_vps.id
+    app_hash   = filesha256("${path.module}/../../api/ubuntu-target/target/release/${local.app_name}")
   }
 
   host        = digitalocean_droplet.api.ipv4_address
