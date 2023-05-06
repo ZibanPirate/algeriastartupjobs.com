@@ -1,6 +1,7 @@
 use serde::{Deserialize, Serialize};
-use utility_types::{partial, pick};
+use utility_types::{omit, partial, pick};
 
+#[omit(DBCategory, [id])]
 #[pick(CompactCategory, [id, slug, name], [Serialize, Deserialize, Clone])]
 #[partial(PartialCategory)]
 #[derive(Serialize, Deserialize, Clone)]
