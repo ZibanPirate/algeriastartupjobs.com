@@ -14,4 +14,4 @@ Please use [VSCode](https://code.visualstudio.com/), and have [Rustup](https://r
 
 Then simply run VSCode **Build Task** (<kbd>Ctrl</kbd>/<kbd>⌘ Command</kbd> + <kbd>⇧ Shift</kbd> + <kbd>B</kbd>).
 
-Additionally, you can also attach a debugger to `./web` code (<kbd>F5</kbd>)
+Additionally, you can also attach a debugger to either `./web` or `./api` (<kbd>F5</kbd>)
