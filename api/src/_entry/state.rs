@@ -57,7 +57,7 @@ pub async fn create_app_state() -> Result<AppState, BootError> {
 
   Ok(AppState {
     db: db.clone(),
-    post_repository: Arc::new(PostRepository {}),
+    post_repository: Arc::new(PostRepository { db: db.clone() }),
     category_repository: Arc::new(CategoryRepository {}),
     tag_repository: Arc::new(TagRepository {}),
     account_repository: Arc::new(AccountRepository { db: db.clone() }),

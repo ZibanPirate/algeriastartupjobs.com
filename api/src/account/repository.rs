@@ -5,6 +5,7 @@ use super::{
 use crate::_utils::{
   database::{db_thing_to_id, DBRecord},
   error::DataAccessError,
+  string::escape_single_quote,
 };
 use std::sync::Arc;
 use surrealdb::{engine::remote::ws::Client, Surreal};
@@ -42,7 +43,7 @@ impl AccountRepository {
       r#"
       BEGIN TRANSACTION;
 
-      LET $count = (SELECT count() FROM account GROUP BY count)[0].count;
+      LET $count = (SELECT count() FROM account GROUP BY count)[0].count || 0;
 
       CREATE account:{{ id: $count }} CONTENT {{
         email: '{}',
@@ -53,9 +54,9 @@ impl AccountRepository {
 
       COMMIT TRANSACTION;
       "#,
-      account.email,
-      account.slug,
-      account.r#type.to_string(),
+      escape_single_quote(&account.email),
+      escape_single_quote(&account.slug),
+      escape_single_quote(&account.r#type.to_string()),
       match account.r#type {
         AccountType::Company { company_name } => format!("company_name: '{}'", company_name),
         AccountType::Admin {
@@ -66,12 +67,16 @@ impl AccountRepository {
           first_name,
           last_name,
         } => {
-          format!("first_name: '{}', last_name: '{}'", first_name, last_name)
+          format!(
+            "first_name: '{}', last_name: '{}'",
+            escape_single_quote(&first_name),
+            escape_single_quote(&last_name)
+          )
         }
       },
     );
 
-    let query_result = self.db.query(query).await;
+    let query_result = self.db.query(&query).await;
     match query_result {
       Ok(mut query_result) => {
         let record: Result<Option<DBRecord>, _> = query_result.take(1);
@@ -100,7 +105,7 @@ impl AccountRepository {
         }
       }
       Err(e) => {
-        tracing::error!("failed to create account {:?}", e);
+        tracing::error!("failed to create account {:?}, query {:?}", e, &query);
         return Err(DataAccessError::CreationError);
       }
     }

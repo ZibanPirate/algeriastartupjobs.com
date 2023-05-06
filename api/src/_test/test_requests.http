@@ -26,7 +26,7 @@ DB: test
 
 BEGIN TRANSACTION;
 
-LET $count = (SELECT count() FROM account GROUP BY count)[0].count;
+LET $count = (SELECT count() FROM account GROUP BY count)[0].count || 0;
 
 CREATE account:{ id: $count } CONTENT {
   email: 'contact@example.com',
@@ -36,3 +36,13 @@ CREATE account:{ id: $count } CONTENT {
 };
 
 COMMIT TRANSACTION;
+
+###
+POST {{dbBaseUrl}}/sql
+Accept: application/json
+Authorization: Basic root root
+NS: test
+DB: test
+
+DELETE account;
+DELETE post;

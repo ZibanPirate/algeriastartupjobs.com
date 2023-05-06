@@ -1,6 +1,7 @@
 use serde::{Deserialize, Serialize};
-use utility_types::{partial, pick};
+use utility_types::{omit, partial, pick};
 
+#[omit(DBPost, [id], [Serialize, Deserialize, Clone])]
 #[pick(CompactPost, [id, slug, title, poster_id, short_description, category_id, tag_ids], [Serialize, Deserialize, Clone])]
 #[partial(PartialPost)]
 #[derive(Serialize, Deserialize, Clone)]
