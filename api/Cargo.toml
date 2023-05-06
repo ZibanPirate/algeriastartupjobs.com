@@ -26,6 +26,7 @@ fake = { version = "2.6", features = ['derive'] }
 rand = "0.8"
 strum_macros = "0.24.3"
 slug = "0.1.4"
+dotenv = "0.15.0"
 
 [dev-dependencies]
 cargo-watch = "8.4.0"

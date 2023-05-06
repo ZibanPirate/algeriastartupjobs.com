@@ -8,8 +8,8 @@ use surrealdb::{
 
 use crate::{
   _utils::error::BootError, account::repository::AccountRepository,
-  category::repository::CategoryRepository, post::repository::PostRepository,
-  tag::repository::TagRepository,
+  category::repository::CategoryRepository, config::service::ConfigService,
+  post::repository::PostRepository, tag::repository::TagRepository,
 };
 
 #[derive(Clone)]
@@ -19,6 +19,7 @@ pub struct AppState {
   pub category_repository: Arc<CategoryRepository>,
   pub tag_repository: Arc<TagRepository>,
   pub account_repository: Arc<AccountRepository>,
+  pub config_service: Arc<ConfigService>,
 }
 
 pub async fn create_app_state() -> Result<AppState, BootError> {
@@ -61,5 +62,6 @@ pub async fn create_app_state() -> Result<AppState, BootError> {
     category_repository: Arc::new(CategoryRepository { db: db.clone() }),
     tag_repository: Arc::new(TagRepository { db: db.clone() }),
     account_repository: Arc::new(AccountRepository { db: db.clone() }),
+    config_service: Arc::new(ConfigService {}),
   })
 }

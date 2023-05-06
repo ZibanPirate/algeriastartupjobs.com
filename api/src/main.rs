@@ -3,6 +3,7 @@ mod _test;
 mod _utils;
 mod account;
 mod category;
+mod config;
 mod post;
 mod tag;
 
