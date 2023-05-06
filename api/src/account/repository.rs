@@ -1,7 +1,4 @@
-use super::{
-  mocks::generate_accounts_seed,
-  model::{Account, AccountType, CompactAccount, DBAccount},
-};
+use super::model::{Account, AccountType, CompactAccount, DBAccount};
 use crate::_utils::{
   database::{db_thing_to_id, DBRecord},
   error::DataAccessError,

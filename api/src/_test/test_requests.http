@@ -12,6 +12,9 @@
 POST {{baseUrl}}/test/seed
 
 ###
+POST {{baseUrl}}/test/clean
+
+###
 GET {{dbBaseUrl}}/export
 Authorization: Basic root root
 NS: test

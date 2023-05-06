@@ -146,6 +146,26 @@ pub async fn seed_the_database_with_mocks(State(app_state): State<AppState>) -> 
   .into_response()
 }
 
+pub async fn clean_the_database_from_mocks(State(app_state): State<AppState>) -> impl IntoResponse {
+  let query = format!(
+    r#"
+    DELETE account;
+    DELETE post;
+    DELETE tag;
+    DELETE category;
+    "#,
+  );
+
+  let query_result = app_state.db.query(query.as_str()).await;
+
+  match query_result {
+    Ok(_) => return StatusCode::NO_CONTENT.into_response(),
+    Err(_) => return StatusCode::INTERNAL_SERVER_ERROR.into_response(),
+  }
+}
+
 pub fn create_test_router() -> Router<AppState> {
-  Router::new().route("/seed", axum::routing::post(seed_the_database_with_mocks))
+  Router::new()
+    .route("/seed", axum::routing::post(seed_the_database_with_mocks))
+    .route("/clean", axum::routing::post(clean_the_database_from_mocks))
 }
