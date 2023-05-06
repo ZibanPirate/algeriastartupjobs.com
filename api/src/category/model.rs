@@ -2,9 +2,9 @@ use serde::{Deserialize, Serialize};
 use utility_types::{omit, partial, pick};
 
 #[omit(DBCategory, [id])]
-#[pick(CompactCategory, [id, slug, name], [Serialize, Deserialize, Clone])]
+#[pick(CompactCategory, [id, slug, name], [Debug, Serialize, Deserialize, Clone])]
 #[partial(PartialCategory)]
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Category {
   pub id: u32,
   pub slug: String,

@@ -1,5 +1,5 @@
 use axum::{
-  extract::{Path, State},
+  extract::{Path, Query, State},
   response::IntoResponse,
   Json, Router,
 };
@@ -8,26 +8,33 @@ use serde_json::json;
 
 use crate::{
   _entry::state::AppState,
-  _utils::{error::DataAccessError, vec::sort_and_dedup_vec},
+  _utils::{
+    error::DataAccessError,
+    query::{PaginationQuery, PaginationQueryTrait},
+    vec::sort_and_dedup_vec,
+  },
   account::model::{AccountTrait, CompactAccount},
-  category::model::{CategoryTrait, CompactCategory},
+  category::model::CategoryTrait,
   tag::model::{CompactTag, TagTrait},
 };
 
 use super::model::{CompactPost, PostTrait};
 
 pub async fn get_all_posts_for_feed(State(app_state): State<AppState>) -> impl IntoResponse {
-  let posts = app_state.post_repository.get_all_posts();
-  if !posts.is_ok() {
+  let compact_posts = app_state
+    .post_repository
+    .get_many_compact_posts_by_filter("true", 20, 0)
+    .await;
+  if !compact_posts.is_ok() {
     return StatusCode::INTERNAL_SERVER_ERROR.into_response();
   }
-  let posts = posts.unwrap();
+  let compact_posts = compact_posts.unwrap();
 
   let mut unique_category_ids: Vec<u32> = Vec::new();
   let mut unique_tag_ids: Vec<u32> = Vec::new();
   let mut unique_poster_ids: Vec<u32> = Vec::new();
 
-  for post in posts.iter() {
+  for post in compact_posts.iter() {
     unique_category_ids.push(post.category_id);
     unique_tag_ids.append(&mut post.tag_ids.clone());
     unique_poster_ids.push(post.poster_id);
@@ -37,52 +44,35 @@ pub async fn get_all_posts_for_feed(State(app_state): State<AppState>) -> impl I
   sort_and_dedup_vec(&mut unique_tag_ids);
   sort_and_dedup_vec(&mut unique_poster_ids);
 
-  let categories = app_state
+  let compact_categories = app_state
     .category_repository
-    .get_many_categories_by_ids(unique_category_ids.clone());
-  if !categories.is_ok() {
+    .get_many_compact_categories_by_ids(unique_category_ids.clone())
+    .await;
+  if !compact_categories.is_ok() {
     // @TODO-ZM: log error reason
     return StatusCode::INTERNAL_SERVER_ERROR.into_response();
   }
-  let categories = categories.unwrap();
+  let compact_categories = compact_categories.unwrap();
 
-  let tags = app_state
+  let compact_tags = app_state
     .tag_repository
-    .get_many_tags_by_ids(unique_tag_ids.clone());
-  if !tags.is_ok() {
+    .get_many_compact_tags_by_ids(unique_tag_ids.clone())
+    .await;
+  if !compact_tags.is_ok() {
     // @TODO-ZM: log error reason
     return StatusCode::INTERNAL_SERVER_ERROR.into_response();
   }
-  let tags = tags.unwrap();
+  let compact_tags = compact_tags.unwrap();
 
-  let posters = app_state
+  let compact_posters = app_state
     .account_repository
-    .get_many_accounts_by_ids(unique_poster_ids.clone());
-  if !posters.is_ok() {
+    .get_many_compact_accounts_by_ids(unique_poster_ids.clone())
+    .await;
+  if !compact_posters.is_ok() {
     // @TODO-ZM: log error reason
     return StatusCode::INTERNAL_SERVER_ERROR.into_response();
   }
-  let posters = posters.unwrap();
-
-  let compact_posts = posts
-    .iter()
-    .map(|post| post.to_compact_post())
-    .collect::<Vec<CompactPost>>();
-
-  let compact_categories = categories
-    .iter()
-    .map(|category| category.to_compact_category())
-    .collect::<Vec<CompactCategory>>();
-
-  let compact_tags = tags
-    .iter()
-    .map(|tag| tag.to_compact_tag())
-    .collect::<Vec<CompactTag>>();
-
-  let compact_posters = posters
-    .iter()
-    .map(|poster| poster.to_compact_account())
-    .collect::<Vec<CompactAccount>>();
+  let compact_posters = compact_posters.unwrap();
 
   Json(json!({
       "posts": compact_posts,
@@ -114,25 +104,28 @@ pub async fn get_one_post_by_id(
 
   let category = app_state
     .category_repository
-    .get_one_category_by_id(post.category_id);
+    .get_one_category_by_id(post.category_id)
+    .await;
   if !category.is_ok() {
     // @TODO-ZM: log error reason
     return StatusCode::INTERNAL_SERVER_ERROR.into_response();
   }
   let category = category.unwrap();
 
-  let tags = app_state
+  let compact_tags = app_state
     .tag_repository
-    .get_many_tags_by_ids(post.tag_ids.clone());
-  if !tags.is_ok() {
+    .get_many_compact_tags_by_ids(post.tag_ids.clone())
+    .await;
+  if !compact_tags.is_ok() {
     // @TODO-ZM: log error reason
     return StatusCode::INTERNAL_SERVER_ERROR.into_response();
   }
-  let tags = tags.unwrap();
+  let compact_tags = compact_tags.unwrap();
 
   let poster = app_state
     .account_repository
-    .get_one_account_by_id(post.poster_id);
+    .get_one_account_by_id(post.poster_id)
+    .await;
   if !poster.is_ok() {
     // @TODO-ZM: log error reason
     return StatusCode::INTERNAL_SERVER_ERROR.into_response();
@@ -140,10 +133,6 @@ pub async fn get_one_post_by_id(
   let poster = poster.unwrap();
 
   let compact_category = category.to_compact_category();
-  let compact_tags = tags
-    .iter()
-    .map(|tag| tag.to_compact_tag())
-    .collect::<Vec<CompactTag>>();
   let compact_poster = poster.to_compact_account();
 
   Json(json!({
@@ -158,11 +147,16 @@ pub async fn get_one_post_by_id(
 pub async fn get_many_similar_posts_by_id(
   State(app_state): State<AppState>,
   Path(id): Path<u32>,
+  pagination: Query<PaginationQuery>,
 ) -> impl IntoResponse {
-  let post = app_state.post_repository.get_one_post_by_id(id).await;
+  let db_pagination = pagination.to_db_query();
+  let similar_compact_posts = app_state
+    .post_repository
+    .get_many_similar_compact_posts_by_id(id, db_pagination.limit, db_pagination.limit)
+    .await;
 
-  if !post.is_ok() {
-    match post {
+  if !similar_compact_posts.is_ok() {
+    match similar_compact_posts {
       Err(DataAccessError::NotFound) => {
         return StatusCode::NOT_FOUND.into_response();
       }
@@ -172,24 +166,13 @@ pub async fn get_many_similar_posts_by_id(
       }
     }
   }
-  let post = post.unwrap();
-
-  let similar_posts = app_state
-    .post_repository
-    .get_many_similar_posts_by_id(post.id)
-    .await;
-
-  if !similar_posts.is_ok() {
-    // @TODO-ZM: log error reason
-    return StatusCode::INTERNAL_SERVER_ERROR.into_response();
-  }
-  let similar_posts = similar_posts.unwrap();
+  let similar_compact_posts = similar_compact_posts.unwrap();
 
   let mut unique_category_ids: Vec<u32> = Vec::new();
   let mut unique_tag_ids: Vec<u32> = Vec::new();
   let mut unique_poster_ids: Vec<u32> = Vec::new();
 
-  for post in similar_posts.iter() {
+  for post in similar_compact_posts.iter() {
     unique_category_ids.push(post.category_id);
     unique_tag_ids.append(&mut post.tag_ids.clone());
     unique_poster_ids.push(post.poster_id);
@@ -199,55 +182,38 @@ pub async fn get_many_similar_posts_by_id(
   sort_and_dedup_vec(&mut unique_tag_ids);
   sort_and_dedup_vec(&mut unique_poster_ids);
 
-  let categories = app_state
+  let compact_categories = app_state
     .category_repository
-    .get_many_categories_by_ids(unique_category_ids.clone());
-  if !categories.is_ok() {
+    .get_many_compact_categories_by_ids(unique_category_ids.clone())
+    .await;
+  if !compact_categories.is_ok() {
     // @TODO-ZM: log error reason
     return StatusCode::INTERNAL_SERVER_ERROR.into_response();
   }
-  let categories = categories.unwrap();
+  let compact_categories = compact_categories.unwrap();
 
-  let tags = app_state
+  let compact_tags = app_state
     .tag_repository
-    .get_many_tags_by_ids(unique_tag_ids.clone());
-  if !tags.is_ok() {
+    .get_many_compact_tags_by_ids(unique_tag_ids.clone())
+    .await;
+  if !compact_tags.is_ok() {
     // @TODO-ZM: log error reason
     return StatusCode::INTERNAL_SERVER_ERROR.into_response();
   }
-  let tags = tags.unwrap();
+  let compact_tags = compact_tags.unwrap();
 
-  let posters = app_state
+  let compact_posters = app_state
     .account_repository
-    .get_many_accounts_by_ids(unique_poster_ids.clone());
-  if !posters.is_ok() {
+    .get_many_compact_accounts_by_ids(unique_poster_ids.clone())
+    .await;
+  if !compact_posters.is_ok() {
     // @TODO-ZM: log error reason
     return StatusCode::INTERNAL_SERVER_ERROR.into_response();
   }
-  let posters = posters.unwrap();
-
-  let compact_similar_posts = similar_posts
-    .iter()
-    .map(|post| post.to_compact_post())
-    .collect::<Vec<CompactPost>>();
-
-  let compact_categories = categories
-    .iter()
-    .map(|category| category.to_compact_category())
-    .collect::<Vec<CompactCategory>>();
-
-  let compact_tags = tags
-    .iter()
-    .map(|tag| tag.to_compact_tag())
-    .collect::<Vec<CompactTag>>();
-
-  let compact_posters = posters
-    .iter()
-    .map(|poster| poster.to_compact_account())
-    .collect::<Vec<CompactAccount>>();
+  let compact_posters = compact_posters.unwrap();
 
   Json(json!({
-      "posts": compact_similar_posts,
+      "posts": similar_compact_posts,
       "categories": compact_categories,
       "tags": compact_tags,
       "posters": compact_posters,

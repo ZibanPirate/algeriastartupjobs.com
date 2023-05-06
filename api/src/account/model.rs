@@ -3,7 +3,7 @@ use strum_macros::Display;
 use serde::{Deserialize, Serialize};
 use utility_types::{omit, partial, pick};
 
-#[derive(Clone, Serialize, Deserialize, Display)]
+#[derive(Debug, Serialize, Deserialize, Display, Clone)]
 #[serde(tag = "type")] // to flatten the enum to the parent struct
 pub enum AccountType {
   Admin {
@@ -21,9 +21,9 @@ pub enum AccountType {
 }
 
 #[omit(DBAccount, [id], [Serialize, Deserialize, Clone])]
-#[pick(CompactAccount, [id, slug, r#type], [Serialize, Deserialize, Clone])]
+#[pick(CompactAccount, [id, slug, r#type], [Debug, Serialize, Deserialize, Clone])]
 #[partial(PartialAccount)]
-#[derive(Clone, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Account {
   pub id: u32,
   pub slug: String,

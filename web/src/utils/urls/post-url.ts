@@ -13,9 +13,7 @@ export const _getPostUrl = (
   poster: Pick<Account, "slug"> & AccountType
 ) => {
   const where = poster.type === "Company" ? "at" : "by";
-  const [_, postSlugWithoutId, postId] = /(.*)_(\d+)$/.exec(post.slug) || [];
-  const [__, posterSlugWithoutId] = /(.*)_(\d+)$/.exec(poster.slug) || [];
-  return `/jobs/${category.slug}/${postSlugWithoutId}_${where}_${posterSlugWithoutId}_${postId}`;
+  return `/jobs/${category.slug}/${[post.slug]}_${where}_${poster.slug}_${post.id}`;
 };
 
 export const getPostUrl = memoize(_getPostUrl);

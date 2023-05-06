@@ -2,9 +2,9 @@ use serde::{Deserialize, Serialize};
 use utility_types::{omit, partial, pick};
 
 #[omit(DBTag, [id])]
-#[pick(CompactTag, [id, slug, name], [Serialize, Deserialize, Clone])]
+#[pick(CompactTag, [id, slug, name], [Debug, Serialize, Deserialize, Clone])]
 #[partial(PartialTag)]
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Tag {
   pub id: u32,
   pub slug: String,

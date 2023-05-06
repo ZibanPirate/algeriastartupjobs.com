@@ -19,7 +19,7 @@ GET {{baseUrl}}/posts/10
 GET {{baseUrl}}/posts/10000
 
 ###
-GET {{baseUrl}}/posts/12/similar
+GET {{baseUrl}}/posts/1/similar?per_page=10&page=0
 
 ### Non-existing post
-GET {{baseUrl}}/posts/10000/similar
+GET {{baseUrl}}/posts/10000/similar?per_page=10&page=0

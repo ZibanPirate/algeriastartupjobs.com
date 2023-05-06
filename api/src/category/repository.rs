@@ -10,7 +10,7 @@ use crate::_utils::{
 
 use super::{
   mocks::generate_categories_seed,
-  model::{Category, DBCategory},
+  model::{Category, CompactCategory, DBCategory},
 };
 
 pub struct CategoryRepository {
@@ -18,29 +18,99 @@ pub struct CategoryRepository {
 }
 
 impl CategoryRepository {
-  pub fn get_many_categories_by_ids(
+  pub async fn get_many_compact_categories_by_filter(
     &self,
-    ids: Vec<u32>,
-  ) -> Result<Vec<Category>, DataAccessError> {
-    let categories = generate_categories_seed();
-    let mut result: Vec<Category> = Vec::new();
-    for id in ids.iter() {
-      let category = categories
-        .iter()
-        .find(|category| category.id == *id)
-        .ok_or(DataAccessError::NotFound)?;
-      result.push(category.clone());
+    filter: &str,
+    limit: u32,
+    start: u32,
+  ) -> Result<Vec<CompactCategory>, DataAccessError> {
+    let query = format!(
+      r#"
+      SELECT slug, name, id.id as id FROM category WHERE {} LIMIT {} START {}
+      "#,
+      filter, limit, start
+    );
+
+    let query_result = self.db.query(&query).await;
+
+    match query_result {
+      Ok(mut query_result) => {
+        let query_result_string = format!("{:?}", query_result);
+        let categories: Result<Vec<CompactCategory>, _> = query_result.take(0);
+        if categories.as_ref().is_err() {
+          tracing::error!(
+            "Error while getting many categories by filter, error: {:?} | query: {}",
+            categories.as_ref(),
+            query_result_string
+          );
+          return Err(DataAccessError::InternalError);
+        }
+        if categories.as_ref().unwrap().len() == 0 {
+          tracing::info!(
+            "No categories found with filter: {} : {:?}",
+            filter,
+            query_result_string
+          );
+          return Err(DataAccessError::NotFound);
+        }
+
+        let category = categories.unwrap();
+
+        Ok(category)
+      }
+      Err(_) => Err(DataAccessError::InternalError),
     }
-    Ok(result)
   }
 
-  pub fn get_one_category_by_id(&self, id: u32) -> Result<Category, DataAccessError> {
-    let categories = generate_categories_seed();
-    let category = categories
-      .iter()
-      .find(|category| category.id == id)
-      .ok_or(DataAccessError::NotFound)?;
-    Ok(category.clone())
+  pub async fn get_many_compact_categories_by_ids(
+    &self,
+    ids: Vec<u32>,
+  ) -> Result<Vec<CompactCategory>, DataAccessError> {
+    self
+      .get_many_compact_categories_by_filter(
+        &format!(
+          "array::any([{}])",
+          ids
+            .iter()
+            .map(|id| format!("id.id={}", id))
+            .collect::<Vec<String>>()
+            .join(", "),
+        ),
+        100,
+        0,
+      )
+      .await
+  }
+
+  pub async fn get_one_category_by_id(&self, id: u32) -> Result<Category, DataAccessError> {
+    let query = format!(
+      r#"
+      SELECT *, id.id as id FROM category:{{ id: {} }}
+      "#,
+      id
+    );
+
+    let query_result = self.db.query(&query).await;
+
+    match query_result {
+      Ok(mut query_result) => {
+        let category: Result<Option<Category>, _> = query_result.take(0);
+        if category.as_ref().is_err() {
+          tracing::error!("Error while getting one category by id: {:?}", query_result);
+          return Err(DataAccessError::InternalError);
+        }
+        if category.as_ref().unwrap().is_none() {
+          // @TODO-ZM: stringify query_result before calling .take
+          tracing::info!("No category found with id: {} : {:?}", id, query_result);
+          return Err(DataAccessError::NotFound);
+        }
+
+        let category = category.unwrap().unwrap();
+
+        Ok(category)
+      }
+      Err(_) => Err(DataAccessError::InternalError),
+    }
   }
 
   pub async fn create_one_category(&self, category: DBCategory) -> Result<u32, DataAccessError> {

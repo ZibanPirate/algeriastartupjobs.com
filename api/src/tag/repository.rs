@@ -8,27 +8,75 @@ use crate::_utils::{
   string::escape_single_quote,
 };
 
-use super::{
-  mocks::generate_tags_seed,
-  model::{DBTag, Tag},
-};
+use super::model::{CompactTag, DBTag};
 
 pub struct TagRepository {
   pub db: Arc<Surreal<Client>>,
 }
 
 impl TagRepository {
-  pub fn get_many_tags_by_ids(&self, ids: Vec<u32>) -> Result<Vec<Tag>, DataAccessError> {
-    let tags = generate_tags_seed();
-    let mut result: Vec<Tag> = Vec::new();
-    for id in ids.iter() {
-      let tag = tags
-        .iter()
-        .find(|tag| tag.id == *id)
-        .ok_or(DataAccessError::NotFound)?;
-      result.push(tag.clone());
+  pub async fn get_many_compact_tags_by_filter(
+    &self,
+    filter: &str,
+    limit: u32,
+    start: u32,
+  ) -> Result<Vec<CompactTag>, DataAccessError> {
+    let query = format!(
+      r#"
+      SELECT slug, name, id.id as id FROM tag WHERE {} LIMIT {} START {}
+      "#,
+      filter, limit, start
+    );
+
+    let query_result = self.db.query(&query).await;
+
+    match query_result {
+      Ok(mut query_result) => {
+        let query_result_string = format!("{:?}", query_result);
+        let tags: Result<Vec<CompactTag>, _> = query_result.take(0);
+        if tags.as_ref().is_err() {
+          tracing::error!(
+            "Error while getting many tags by filter, error: {:?} | query: {}",
+            tags.as_ref(),
+            query_result_string
+          );
+          return Err(DataAccessError::InternalError);
+        }
+        if tags.as_ref().unwrap().len() == 0 {
+          tracing::info!(
+            "No tags found with filter: {} : {:?}",
+            filter,
+            query_result_string
+          );
+          return Err(DataAccessError::NotFound);
+        }
+
+        let tag = tags.unwrap();
+
+        Ok(tag)
+      }
+      Err(_) => Err(DataAccessError::InternalError),
     }
-    Ok(result)
+  }
+
+  pub async fn get_many_compact_tags_by_ids(
+    &self,
+    ids: Vec<u32>,
+  ) -> Result<Vec<CompactTag>, DataAccessError> {
+    self
+      .get_many_compact_tags_by_filter(
+        &format!(
+          "array::any([{}])",
+          ids
+            .iter()
+            .map(|id| format!("id.id={}", id))
+            .collect::<Vec<String>>()
+            .join(", "),
+        ),
+        100,
+        0,
+      )
+      .await
   }
 
   pub async fn create_one_tag(&self, tag: DBTag) -> Result<u32, DataAccessError> {

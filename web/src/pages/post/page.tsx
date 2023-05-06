@@ -42,7 +42,7 @@ export const Page: FC = () => {
   usePageTitle(loadedPost ? getPostLongTitle(loadedPost, loadedPost.poster) : "Loading Job...");
 
   return (
-    <Stack orientation="vertical" stretch align="center" maxWidth={1200} margin="auto">
+    <Stack orientation="vertical" stretch align="center" maxWidth={1600} margin="auto">
       <Stack orientation="horizontal" align="start" stretch={true} gap="3">
         {post === "ERROR" ? (
           <Stack orientation="vertical" margin="3 0 0" flex={3} minWidth="60%">

@@ -1,6 +1,6 @@
 use super::{
   mocks::generate_accounts_seed,
-  model::{Account, AccountType, DBAccount},
+  model::{Account, AccountType, CompactAccount, DBAccount},
 };
 use crate::_utils::{
   database::{db_thing_to_id, DBRecord},
@@ -15,27 +15,99 @@ pub struct AccountRepository {
 }
 
 impl AccountRepository {
-  pub fn get_many_accounts_by_ids(&self, ids: Vec<u32>) -> Result<Vec<Account>, DataAccessError> {
-    let accounts = generate_accounts_seed();
-    let mut result: Vec<Account> = Vec::new();
-    for id in ids.iter() {
-      let account = accounts
-        .iter()
-        .find(|account| account.id == *id)
-        .ok_or(DataAccessError::NotFound)?;
-      result.push(account.clone());
+  pub async fn get_many_compact_accounts_by_filter(
+    &self,
+    filter: &str,
+    limit: u32,
+    start: u32,
+  ) -> Result<Vec<CompactAccount>, DataAccessError> {
+    let query = format!(
+      r#"
+      SELECT slug, type, first_name, last_name, company_name, id.id as id FROM account WHERE {} LIMIT {} START {}
+      "#,
+      filter, limit, start
+    );
+
+    let query_result = self.db.query(&query).await;
+
+    match query_result {
+      Ok(mut query_result) => {
+        let query_result_string = format!("{:?}", query_result);
+        let accounts: Result<Vec<CompactAccount>, _> = query_result.take(0);
+        if accounts.as_ref().is_err() {
+          tracing::error!(
+            "Error while getting many accounts by filter, error: {:?} | query: {}",
+            accounts.as_ref(),
+            query_result_string
+          );
+          return Err(DataAccessError::InternalError);
+        }
+        if accounts.as_ref().unwrap().len() == 0 {
+          tracing::info!(
+            "No accounts found with filter: {} : {:?}",
+            filter,
+            query_result_string
+          );
+          return Err(DataAccessError::NotFound);
+        }
+
+        let account = accounts.unwrap();
+
+        Ok(account)
+      }
+      Err(_) => Err(DataAccessError::InternalError),
     }
-    Ok(result)
   }
 
-  pub fn get_one_account_by_id(&self, id: u32) -> Result<Account, DataAccessError> {
-    let accounts = generate_accounts_seed();
-    for account in accounts {
-      if account.id == id {
-        return Ok(account);
+  pub async fn get_many_compact_accounts_by_ids(
+    &self,
+    ids: Vec<u32>,
+  ) -> Result<Vec<CompactAccount>, DataAccessError> {
+    self
+      .get_many_compact_accounts_by_filter(
+        &format!(
+          "array::any([{}])",
+          ids
+            .iter()
+            .map(|id| format!("id.id={}", id))
+            .collect::<Vec<String>>()
+            .join(", "),
+        ),
+        100,
+        0,
+      )
+      .await
+  }
+
+  pub async fn get_one_account_by_id(&self, id: u32) -> Result<Account, DataAccessError> {
+    let query = format!(
+      r#"
+      SELECT *, id.id as id FROM account:{{ id: {} }}
+      "#,
+      id
+    );
+
+    let query_result = self.db.query(&query).await;
+
+    match query_result {
+      Ok(mut query_result) => {
+        let account: Result<Option<Account>, _> = query_result.take(0);
+        if account.as_ref().is_err() {
+          tracing::error!("Error while getting one account by id: {:?}", query_result);
+          return Err(DataAccessError::InternalError);
+        }
+        if account.as_ref().unwrap().is_none() {
+          // @TODO-ZM: stringify query_result before calling .take
+          tracing::info!("No account found with id: {} : {:?}", id, query_result);
+          return Err(DataAccessError::NotFound);
+        }
+
+        let account = account.unwrap().unwrap();
+
+        Ok(account)
       }
+      Err(_) => Err(DataAccessError::InternalError),
     }
-    Err(DataAccessError::NotFound)
   }
 
   pub async fn create_one_account(&self, account: DBAccount) -> Result<u32, DataAccessError> {

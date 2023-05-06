@@ -10,7 +10,7 @@ use crate::_utils::{
 
 use super::{
   mocks::generate_posts_seed,
-  model::{DBPost, Post},
+  model::{CompactPost, DBPost, Post},
 };
 
 pub struct PostRepository {
@@ -18,8 +18,48 @@ pub struct PostRepository {
 }
 
 impl PostRepository {
-  pub fn get_all_posts(&self) -> Result<Vec<Post>, DataAccessError> {
-    Ok(generate_posts_seed())
+  pub async fn get_many_compact_posts_by_filter(
+    &self,
+    filter: &str,
+    limit: u32,
+    start: u32,
+  ) -> Result<Vec<CompactPost>, DataAccessError> {
+    let query = format!(
+      r#"
+      SELECT slug, title, poster_id, short_description, category_id, tag_ids, id.id as id FROM post WHERE {} LIMIT {} START {}
+      "#,
+      filter, limit, start
+    );
+
+    let query_result = self.db.query(&query).await;
+
+    match query_result {
+      Ok(mut query_result) => {
+        let query_result_string = format!("{:?}", query_result);
+        let posts: Result<Vec<CompactPost>, _> = query_result.take(0);
+        if posts.as_ref().is_err() {
+          tracing::error!(
+            "Error while getting many posts by filter, error: {:?} | query: {}",
+            posts.as_ref(),
+            query_result_string
+          );
+          return Err(DataAccessError::InternalError);
+        }
+        if posts.as_ref().unwrap().len() == 0 {
+          tracing::info!(
+            "No posts found with filter: {} : {:?}",
+            filter,
+            query_result_string
+          );
+          return Err(DataAccessError::NotFound);
+        }
+
+        let post = posts.unwrap();
+
+        Ok(post)
+      }
+      Err(_) => Err(DataAccessError::InternalError),
+    }
   }
 
   pub async fn get_one_post_by_id(&self, id: u32) -> Result<Post, DataAccessError> {
@@ -53,20 +93,30 @@ impl PostRepository {
     }
   }
 
-  pub async fn get_many_similar_posts_by_id(&self, id: u32) -> Result<Vec<Post>, DataAccessError> {
-    let posts = generate_posts_seed();
-    let current_post = self.get_one_post_by_id(id).await.unwrap();
-    let mut similar_posts = Vec::new();
-    for post in posts {
-      if post.id != id
-        && post
-          .tag_ids
-          .iter()
-          .any(|tag_id| current_post.tag_ids.contains(tag_id))
-      {
-        similar_posts.push(post);
-      }
-    }
+  pub async fn get_many_similar_compact_posts_by_id(
+    &self,
+    id: u32,
+    // @TODO-ZM: implement limit and start for all get_many methods
+    limit: u32,
+    start: u32,
+  ) -> Result<Vec<CompactPost>, DataAccessError> {
+    let post = self.get_one_post_by_id(id).await?;
+    let similar_posts = self
+      .get_many_compact_posts_by_filter(
+        &format!(
+          "[{}] ANYINSIDE tag_ids AND id.id != {}",
+          post
+            .tag_ids
+            .iter()
+            .map(|tag_id| tag_id.to_string())
+            .collect::<Vec<String>>()
+            .join(", "),
+          id
+        ),
+        limit,
+        start,
+      )
+      .await?;
 
     Ok(similar_posts)
   }
