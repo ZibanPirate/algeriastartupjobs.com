@@ -13,12 +13,9 @@ use crate::{
     query::{PaginationQuery, PaginationQueryTrait},
     vec::sort_and_dedup_vec,
   },
-  account::model::{AccountTrait, CompactAccount},
+  account::model::AccountTrait,
   category::model::CategoryTrait,
-  tag::model::{CompactTag, TagTrait},
 };
-
-use super::model::{CompactPost, PostTrait};
 
 pub async fn get_all_posts_for_feed(State(app_state): State<AppState>) -> impl IntoResponse {
   let compact_posts = app_state

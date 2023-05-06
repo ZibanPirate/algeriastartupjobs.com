@@ -1,3 +1,6 @@
 target
 ubuntu-target
 surrealdb_data
+
+production.env
+staging.env

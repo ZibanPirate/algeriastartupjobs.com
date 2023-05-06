@@ -10,9 +10,11 @@
 
 ###
 POST {{baseUrl}}/test/seed
+x-admin-auth-code: password123
 
 ###
 POST {{baseUrl}}/test/clean
+x-admin-auth-code: password123
 
 ###
 GET {{dbBaseUrl}}/export

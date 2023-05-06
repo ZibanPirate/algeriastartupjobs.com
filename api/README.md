@@ -23,3 +23,9 @@ Or simply delete the whole file and restart Docker:
 ```sh
 rm ~/.docker/config.json
 ```
+
+### Generate Random password
+
+```sh
+openssl rand -base64 36 | pbcopy
+```

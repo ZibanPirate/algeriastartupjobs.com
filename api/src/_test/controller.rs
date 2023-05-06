@@ -1,18 +1,25 @@
-use axum::{extract::State, response::IntoResponse, Json, Router};
+use axum::{extract::State, http::header::HeaderMap, response::IntoResponse, Json, Router};
 use fake::Fake;
 use hyper::StatusCode;
 use serde_json::json;
 
 use crate::{
   _entry::state::AppState,
-  _utils::string::slugify,
+  _utils::{is_admin::is_admin, string::slugify},
   account::model::{AccountType, DBAccount},
   category::model::DBCategory,
   post::model::DBPost,
   tag::model::DBTag,
 };
 
-pub async fn seed_the_database_with_mocks(State(app_state): State<AppState>) -> impl IntoResponse {
+pub async fn seed_the_database_with_mocks(
+  State(app_state): State<AppState>,
+  headers: HeaderMap,
+) -> impl IntoResponse {
+  if is_admin(&app_state, headers).is_none() {
+    return StatusCode::UNAUTHORIZED.into_response();
+  }
+
   let mut account_ids: Vec<u32> = [].to_vec();
   for index in 0..9 {
     let company_name = fake::faker::company::en::CompanyName().fake::<String>();
@@ -146,7 +153,15 @@ pub async fn seed_the_database_with_mocks(State(app_state): State<AppState>) -> 
   .into_response()
 }
 
-pub async fn clean_the_database_from_mocks(State(app_state): State<AppState>) -> impl IntoResponse {
+pub async fn clean_the_database_from_mocks(
+  State(app_state): State<AppState>,
+  headers: HeaderMap,
+) -> impl IntoResponse {
+  // @TODO-ZM: move this to a middleware with access to the app_state (cloned)
+  if is_admin(&app_state, headers).is_none() {
+    return StatusCode::UNAUTHORIZED.into_response();
+  }
+
   let query = format!(
     r#"
     DELETE account;
