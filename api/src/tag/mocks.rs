@@ -1,7 +1,7 @@
 use super::model::{PartialTag, PartialTagTrait, Tag};
 use titlecase::titlecase;
 
-pub fn generate_one_tag_mock(tag_id: i32) -> Tag {
+pub fn generate_one_tag_mock(tag_id: u32) -> Tag {
   Tag {
     id: tag_id,
     slug: format!("tag_{}", tag_id),
@@ -10,12 +10,12 @@ pub fn generate_one_tag_mock(tag_id: i32) -> Tag {
 }
 
 pub fn generate_many_tag_mocks_with_overwrite<F>(
-  from: i32,
-  to: i32,
+  from: u32,
+  to: u32,
   overwrite: Option<F>,
 ) -> Vec<Tag>
 where
-  F: Fn(i32) -> PartialTag,
+  F: Fn(u32) -> PartialTag,
 {
   let mut tags: Vec<Tag> = Vec::new();
   for i in from..to {
@@ -32,7 +32,7 @@ where
   tags
 }
 
-pub fn generate_many_tag_mocks(from: i32, to: i32) -> Vec<Tag> {
+pub fn generate_many_tag_mocks(from: u32, to: u32) -> Vec<Tag> {
   generate_many_tag_mocks_with_overwrite(
     from,
     to,
@@ -112,7 +112,7 @@ pub fn generate_tags_seed() -> Vec<Tag> {
   let total_tags_len = all_tag_names.len();
   generate_many_tag_mocks_with_overwrite(
     0,
-    total_tags_len as i32,
+    total_tags_len as u32,
     Some(|id| {
       let tag_name = all_tag_names[id as usize];
       PartialTag {

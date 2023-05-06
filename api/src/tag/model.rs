@@ -6,7 +6,7 @@ use utility_types::{omit, partial, pick};
 #[partial(PartialTag)]
 #[derive(Serialize, Deserialize, Clone)]
 pub struct Tag {
-  pub id: i32,
+  pub id: u32,
   pub slug: String,
   pub name: String,
 }

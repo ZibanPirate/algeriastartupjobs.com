@@ -1,19 +1,19 @@
 use serde::{Deserialize, Serialize};
 use utility_types::{omit, partial, pick};
 
-#[omit(DBPost, [id], [Serialize, Deserialize, Clone])]
-#[pick(CompactPost, [id, slug, title, poster_id, short_description, category_id, tag_ids], [Serialize, Deserialize, Clone])]
+#[omit(DBPost, [id], [Debug, Serialize, Deserialize, Clone])]
+#[pick(CompactPost, [id, slug, title, poster_id, short_description, category_id, tag_ids], [Debug, Serialize, Deserialize, Clone])]
 #[partial(PartialPost)]
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Post {
-  pub id: i32,
+  pub id: u32,
   pub slug: String,
   pub title: String,
-  pub poster_id: i32,
+  pub poster_id: u32,
   pub short_description: String,
   pub description: String,
-  pub category_id: i32,
-  pub tag_ids: Vec<i32>,
+  pub category_id: u32,
+  pub tag_ids: Vec<u32>,
 }
 
 pub trait PostTrait {

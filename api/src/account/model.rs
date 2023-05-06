@@ -25,7 +25,7 @@ pub enum AccountType {
 #[partial(PartialAccount)]
 #[derive(Clone, Serialize, Deserialize)]
 pub struct Account {
-  pub id: i32,
+  pub id: u32,
   pub slug: String,
   pub email: String,
   #[serde(flatten)]

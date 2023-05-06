@@ -46,3 +46,15 @@ DB: test
 
 DELETE account;
 DELETE post;
+DELETE tag;
+DELETE category;
+
+###
+POST {{dbBaseUrl}}/sql
+Accept: application/json
+Authorization: Basic root root
+NS: test
+DB: test
+
+SELECT *, id.id as id FROM post:{ id: 100 }
+

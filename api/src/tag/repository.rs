@@ -18,7 +18,7 @@ pub struct TagRepository {
 }
 
 impl TagRepository {
-  pub fn get_many_tags_by_ids(&self, ids: Vec<i32>) -> Result<Vec<Tag>, DataAccessError> {
+  pub fn get_many_tags_by_ids(&self, ids: Vec<u32>) -> Result<Vec<Tag>, DataAccessError> {
     let tags = generate_tags_seed();
     let mut result: Vec<Tag> = Vec::new();
     for id in ids.iter() {

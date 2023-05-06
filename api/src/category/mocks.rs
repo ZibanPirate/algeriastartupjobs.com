@@ -1,7 +1,7 @@
 use super::model::{Category, PartialCategory, PartialCategoryTrait};
 use titlecase::titlecase;
 
-pub fn generate_one_category_mock(category_id: i32) -> Category {
+pub fn generate_one_category_mock(category_id: u32) -> Category {
   Category {
     id: category_id,
     slug: format!("category_{}", category_id),
@@ -11,12 +11,12 @@ pub fn generate_one_category_mock(category_id: i32) -> Category {
 }
 
 pub fn generate_many_category_mocks_with_overwrite<F>(
-  from: i32,
-  to: i32,
+  from: u32,
+  to: u32,
   overwrite: Option<F>,
 ) -> Vec<Category>
 where
-  F: Fn(i32) -> PartialCategory,
+  F: Fn(u32) -> PartialCategory,
 {
   let mut categories: Vec<Category> = Vec::new();
   for i in from..to {
@@ -33,7 +33,7 @@ where
   categories
 }
 
-pub fn generate_many_category_mocks(from: i32, to: i32) -> Vec<Category> {
+pub fn generate_many_category_mocks(from: u32, to: u32) -> Vec<Category> {
   generate_many_category_mocks_with_overwrite(
     from,
     to,
@@ -87,7 +87,7 @@ pub fn generate_categories_seed() -> Vec<Category> {
   let total_categories_len = job_categories.len();
   generate_many_category_mocks_with_overwrite(
     0,
-    total_categories_len as i32,
+    total_categories_len as u32,
     Some(|id| {
       let category_name = job_categories[id as usize];
       PartialCategory {

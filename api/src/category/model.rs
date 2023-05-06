@@ -6,7 +6,7 @@ use utility_types::{omit, partial, pick};
 #[partial(PartialCategory)]
 #[derive(Serialize, Deserialize, Clone)]
 pub struct Category {
-  pub id: i32,
+  pub id: u32,
   pub slug: String,
   pub name: String,
   pub description: String,

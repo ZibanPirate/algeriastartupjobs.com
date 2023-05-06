@@ -23,9 +23,9 @@ pub async fn get_all_posts_for_feed(State(app_state): State<AppState>) -> impl I
   }
   let posts = posts.unwrap();
 
-  let mut unique_category_ids: Vec<i32> = Vec::new();
-  let mut unique_tag_ids: Vec<i32> = Vec::new();
-  let mut unique_poster_ids: Vec<i32> = Vec::new();
+  let mut unique_category_ids: Vec<u32> = Vec::new();
+  let mut unique_tag_ids: Vec<u32> = Vec::new();
+  let mut unique_poster_ids: Vec<u32> = Vec::new();
 
   for post in posts.iter() {
     unique_category_ids.push(post.category_id);
@@ -95,9 +95,9 @@ pub async fn get_all_posts_for_feed(State(app_state): State<AppState>) -> impl I
 
 pub async fn get_one_post_by_id(
   State(app_state): State<AppState>,
-  Path(id): Path<i32>,
+  Path(id): Path<u32>,
 ) -> impl IntoResponse {
-  let post = app_state.post_repository.get_post_by_id(id);
+  let post = app_state.post_repository.get_one_post_by_id(id).await;
 
   if !post.is_ok() {
     match post {
@@ -157,9 +157,9 @@ pub async fn get_one_post_by_id(
 
 pub async fn get_many_similar_posts_by_id(
   State(app_state): State<AppState>,
-  Path(id): Path<i32>,
+  Path(id): Path<u32>,
 ) -> impl IntoResponse {
-  let post = app_state.post_repository.get_post_by_id(id);
+  let post = app_state.post_repository.get_one_post_by_id(id).await;
 
   if !post.is_ok() {
     match post {
@@ -176,7 +176,8 @@ pub async fn get_many_similar_posts_by_id(
 
   let similar_posts = app_state
     .post_repository
-    .get_many_similar_posts_by_id(post.id);
+    .get_many_similar_posts_by_id(post.id)
+    .await;
 
   if !similar_posts.is_ok() {
     // @TODO-ZM: log error reason
@@ -184,9 +185,9 @@ pub async fn get_many_similar_posts_by_id(
   }
   let similar_posts = similar_posts.unwrap();
 
-  let mut unique_category_ids: Vec<i32> = Vec::new();
-  let mut unique_tag_ids: Vec<i32> = Vec::new();
-  let mut unique_poster_ids: Vec<i32> = Vec::new();
+  let mut unique_category_ids: Vec<u32> = Vec::new();
+  let mut unique_tag_ids: Vec<u32> = Vec::new();
+  let mut unique_poster_ids: Vec<u32> = Vec::new();
 
   for post in similar_posts.iter() {
     unique_category_ids.push(post.category_id);

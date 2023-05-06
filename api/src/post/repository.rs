@@ -22,19 +22,40 @@ impl PostRepository {
     Ok(generate_posts_seed())
   }
 
-  pub fn get_post_by_id(&self, id: i32) -> Result<Post, DataAccessError> {
-    let posts = generate_posts_seed();
-    for post in posts {
-      if post.id == id {
-        return Ok(post);
+  pub async fn get_one_post_by_id(&self, id: u32) -> Result<Post, DataAccessError> {
+    let query = format!(
+      r#"
+      SELECT *, id.id as id FROM post:{{ id: {} }}
+      "#,
+      id
+    );
+
+    let query_result = self.db.query(&query).await;
+
+    match query_result {
+      Ok(mut query_result) => {
+        let post: Result<Option<Post>, _> = query_result.take(0);
+        if post.as_ref().is_err() {
+          tracing::error!("Error while getting one post by id: {:?}", query_result);
+          return Err(DataAccessError::InternalError);
+        }
+        if post.as_ref().unwrap().is_none() {
+          // @TODO-ZM: stringify query_result before calling .take
+          tracing::info!("No post found with id: {} : {:?}", id, query_result);
+          return Err(DataAccessError::NotFound);
+        }
+
+        let post = post.unwrap().unwrap();
+
+        Ok(post)
       }
+      Err(_) => Err(DataAccessError::InternalError),
     }
-    Err(DataAccessError::NotFound)
   }
 
-  pub fn get_many_similar_posts_by_id(&self, id: i32) -> Result<Vec<Post>, DataAccessError> {
+  pub async fn get_many_similar_posts_by_id(&self, id: u32) -> Result<Vec<Post>, DataAccessError> {
     let posts = generate_posts_seed();
-    let current_post = self.get_post_by_id(id).unwrap();
+    let current_post = self.get_one_post_by_id(id).await.unwrap();
     let mut similar_posts = Vec::new();
     for post in posts {
       if post.id != id
@@ -63,7 +84,7 @@ impl PostRepository {
         poster_id: {},
         short_description:'{}',
         description:'{}',
-        category_id:'{}',
+        category_id: {},
         tag_ids:[{}],
       }};
 

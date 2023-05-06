@@ -11,7 +11,7 @@ use crate::{
 use super::model::{PartialPost, PartialPostTrait, Post};
 use titlecase::titlecase;
 
-pub fn generate_one_post_mock(post_id: i32) -> Post {
+pub fn generate_one_post_mock(post_id: u32) -> Post {
   Post {
     id: post_id,
     slug: format!("post_{}", post_id),
@@ -25,12 +25,12 @@ pub fn generate_one_post_mock(post_id: i32) -> Post {
 }
 
 pub fn generate_many_post_mocks_with_overwrite<F>(
-  from: i32,
-  to: i32,
+  from: u32,
+  to: u32,
   overwrite: Option<F>,
 ) -> Vec<Post>
 where
-  F: Fn(i32) -> PartialPost,
+  F: Fn(u32) -> PartialPost,
 {
   let mut posts: Vec<Post> = Vec::new();
   for i in from..to {
@@ -47,7 +47,7 @@ where
   posts
 }
 
-pub fn generate_many_post_mocks(from: i32, to: i32) -> Vec<Post> {
+pub fn generate_many_post_mocks(from: u32, to: u32) -> Vec<Post> {
   generate_many_post_mocks_with_overwrite(
     from,
     to,
@@ -501,7 +501,7 @@ If you are interested in this opportunity, please apply online with your resume 
 
   generate_many_post_mocks_with_overwrite(
     0,
-    total_posts_len as i32,
+    total_posts_len as u32,
     Some(|id| {
       let post = &jobs[id as usize];
       let title = titlecase(&post.title);

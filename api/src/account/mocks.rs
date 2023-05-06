@@ -1,7 +1,7 @@
 use super::model::{Account, AccountType, PartialAccount, PartialAccountTrait};
 use titlecase::titlecase;
 
-pub fn generate_one_account_mock(account_id: i32) -> Account {
+pub fn generate_one_account_mock(account_id: u32) -> Account {
   Account {
     id: account_id,
     slug: format!("account_{}", account_id),
@@ -14,12 +14,12 @@ pub fn generate_one_account_mock(account_id: i32) -> Account {
 }
 
 pub fn generate_many_account_mocks_with_overwrite<F>(
-  from: i32,
-  to: i32,
+  from: u32,
+  to: u32,
   overwrite: Option<F>,
 ) -> Vec<Account>
 where
-  F: Fn(i32) -> PartialAccount,
+  F: Fn(u32) -> PartialAccount,
 {
   let mut accounts: Vec<Account> = Vec::new();
   for i in from..to {
@@ -36,7 +36,7 @@ where
   accounts
 }
 
-pub fn generate_many_account_mocks(from: i32, to: i32) -> Vec<Account> {
+pub fn generate_many_account_mocks(from: u32, to: u32) -> Vec<Account> {
   generate_many_account_mocks_with_overwrite(
     from,
     to,
@@ -78,7 +78,7 @@ pub fn generate_accounts_seed() -> Vec<Account> {
 
   generate_many_account_mocks_with_overwrite(
     0,
-    total_accounts_len as i32,
+    total_accounts_len as u32,
     Some(|id| {
       let account_name = all_account_names[id as usize];
       let mut iter = account_name.split_whitespace();
