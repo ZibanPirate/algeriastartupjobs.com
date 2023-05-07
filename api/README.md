@@ -10,6 +10,12 @@ Rust is continuously improving, to make sure it doesn't get `Rust`y, run:
 rustup update
 ```
 
+### Update Dependencies
+
+```sh
+cargo update
+```
+
 ### Fix Docker build issues
 
 Either delete the line with `credsStore` from `~/.docker/config.json`:

@@ -6,7 +6,7 @@
 # staging:
 # @baseUrl = https://staging.api.algeriastartupjobs.com
 # production:
-# @baseUrl = http://production.api.algeriastartupjobs.com
+# @baseUrl = https://production.api.algeriastartupjobs.com
 
 ###
 POST {{baseUrl}}/test/seed

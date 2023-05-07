@@ -53,6 +53,7 @@ locals {
   upload_tmp_name    = "~/upload_tmp"
   app_name           = "algeriastartupjobs-api"
   service_name       = "algeriastartupjobs-api"
+  db_service_name    = "algeriastartupjobs-db"
   stage              = terraform.workspace
   root_domain_name   = "api.algeriastartupjobs.com"
   sub_domain_name    = local.stage
@@ -90,6 +91,7 @@ resource "digitalocean_droplet" "api" {
 
         [Service]
         ExecStart=/home/${var.do_droplet_user}/${local.app_folder_name}/${local.app_name}
+        WorkingDirectory=/home/${var.do_droplet_user}/${local.app_folder_name}
         Restart=always
         RestartSec=5
         User=${var.do_droplet_user}
@@ -97,10 +99,25 @@ resource "digitalocean_droplet" "api" {
         [Install]
         WantedBy=multi-user.target
       path: /etc/systemd/system/${local.service_name}.service
+    - content: |
+        [Unit]
+        Description=Algeria Startup Jobs Database
+        After=network.target
+
+        [Service]
+        ExecStart=sudo surreal start --log trace --user root --pass root --bind 0.0.0.0:7070 file:/surrealdb_data
+        Restart=always
+        RestartSec=5
+        User=${var.do_droplet_user}
+
+        [Install]
+        WantedBy=multi-user.target
+      path: /etc/systemd/system/${local.db_service_name}.service
     runcmd:
       - sudo apt update
       - sudo apt install nginx -y
       - sudo ufw allow 'Nginx HTTP'
+      - curl -sSf https://install.surrealdb.com | sh
       - sudo sh -c "echo '
           server {
               listen 80;
@@ -126,14 +143,15 @@ resource "digitalocean_droplet" "api" {
       - sudo systemctl enable nginx
       - sudo systemctl start nginx
       - sudo systemctl daemon-reload
-      - systemctl start ${local.service_name}
+      - sudo systemctl start ${local.db_service_name}
+      - sudo systemctl start ${local.service_name}
     EOT
 }
 
 resource "ssh_resource" "upload_ssl_certificates_to_vps" {
   triggers = {
     vps_id = digitalocean_droplet.api.id
-    cert   = data.terraform_remote_state.shared.outputs.acme_certificate_api_certificate_pem
+    cert   = sha256(data.terraform_remote_state.shared.outputs.acme_certificate_api_certificate_pem)
   }
 
   host        = digitalocean_droplet.api.ipv4_address
@@ -177,8 +195,12 @@ resource "ssh_resource" "upload_dot_env_to_vps" {
 
   file {
     source      = "${path.module}/../../api/${local.stage}.env"
-    destination = "${local.app_folder}/.env"
+    destination = "${local.upload_tmp_name}.env"
   }
+
+  commands = [
+    "sudo rm ${local.app_folder}/.env || true",
+  ]
 }
 
 
@@ -186,7 +208,7 @@ resource "ssh_resource" "upload_app_to_vps" {
   triggers = {
     always     = timestamp()
     vps_id     = digitalocean_droplet.api.id
-    dor_env_id = ssh_resource.upload_dot_env_to_vps.id
+    dot_env_id = ssh_resource.upload_dot_env_to_vps.id
     app_hash   = filesha256("${path.module}/../../api/ubuntu-target/target/release/${local.app_name}")
   }
 
@@ -202,11 +224,16 @@ resource "ssh_resource" "upload_app_to_vps" {
 
   commands = [
     "sudo systemctl stop ${local.service_name} || true",
+    "sudo systemctl stop ${local.db_service_name} || true",
     "sudo mkdir -p ${local.app_folder} || true",
     "sudo rm ${local.app_folder}/${local.app_name} || true",
     "sudo mv ${local.upload_tmp_name} ${local.app_folder}/${local.app_name} || true",
+    "sudo mv ${local.upload_tmp_name}.env ${local.app_folder}/.env || true",
     "sudo chmod +x ${local.app_folder}/${local.app_name} || true",
+    "sudo systemctl start ${local.db_service_name} || true",
     "sudo systemctl start ${local.service_name} || true",
     "sudo systemctl restart nginx",
   ]
+
+  depends_on = [ssh_resource.upload_dot_env_to_vps]
 }
