@@ -9,13 +9,13 @@ repository = "https://github.com/algeriastartupjobs/algeriastartupjobs.com"
 [dependencies]
 axum = "0.6.16"
 hyper = { version = "0.14.26", features = ["full"] }
-serde = { version = "1.0.160", features = ["derive"] }
+serde = { version = "1", features = ["derive"] }
 tokio = { version = "1.27.0", features = ["full"] }
 tower = "0.4.13"
 tower-http = { version = "0.4.0", features = ["trace", "cors"] }
 tracing = "0.1.37"
 tracing-subscriber = { version = "0.3.16", features = ["env-filter"] }
-serde_json = "1.0"
+serde_json = "1"
 local-ip-address = "0.5.1"
 titlecase = "2.2.1"
 regex = "1.8.1"

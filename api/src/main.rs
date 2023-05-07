@@ -6,6 +6,7 @@ mod category;
 mod config;
 mod post;
 mod tag;
+mod task;
 
 use _entry::app::actual_main;
 

@@ -10,6 +10,7 @@ use crate::{
   _utils::error::BootError, account::repository::AccountRepository,
   category::repository::CategoryRepository, config::service::ConfigService,
   post::repository::PostRepository, tag::repository::TagRepository,
+  task::repository::TaskRepository,
 };
 
 #[derive(Clone)]
@@ -20,6 +21,7 @@ pub struct AppState {
   pub tag_repository: Arc<TagRepository>,
   pub account_repository: Arc<AccountRepository>,
   pub config_service: Arc<ConfigService>,
+  pub task_repository: Arc<TaskRepository>,
 }
 
 pub async fn create_app_state() -> Result<AppState, BootError> {
@@ -63,5 +65,6 @@ pub async fn create_app_state() -> Result<AppState, BootError> {
     tag_repository: Arc::new(TagRepository { db: db.clone() }),
     account_repository: Arc::new(AccountRepository { db: db.clone() }),
     config_service: Arc::new(ConfigService {}),
+    task_repository: Arc::new(TaskRepository { db: db.clone() }),
   })
 }

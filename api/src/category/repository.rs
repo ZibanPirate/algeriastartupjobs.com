@@ -8,10 +8,7 @@ use crate::_utils::{
   string::escape_single_quote,
 };
 
-use super::{
-  mocks::generate_categories_seed,
-  model::{Category, CompactCategory, DBCategory},
-};
+use super::model::{Category, CompactCategory, DBCategory};
 
 pub struct CategoryRepository {
   pub db: Arc<Surreal<Client>>,

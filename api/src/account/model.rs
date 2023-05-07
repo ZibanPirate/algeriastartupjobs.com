@@ -1,6 +1,5 @@
-use strum_macros::Display;
-
 use serde::{Deserialize, Serialize};
+use strum_macros::Display;
 use utility_types::{omit, partial, pick};
 
 #[derive(Debug, Serialize, Deserialize, Display, Clone)]
