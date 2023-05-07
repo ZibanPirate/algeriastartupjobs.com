@@ -10,6 +10,7 @@ use crate::{
   category::model::DBCategory,
   post::model::DBPost,
   tag::model::DBTag,
+  task::model::{DBTask, TaskName, TaskStatus, TaskType},
 };
 
 pub async fn seed_the_database_with_mocks(
@@ -113,6 +114,7 @@ pub async fn seed_the_database_with_mocks(
   }
 
   let mut post_ids: Vec<u32> = [].to_vec();
+  let mut task_ids: Vec<u32> = [].to_vec();
   for index in 0..200 {
     let title = fake::faker::lorem::en::Sentence(3..5).fake::<String>();
     let slug = slugify(&title);
@@ -135,7 +137,27 @@ pub async fn seed_the_database_with_mocks(
       .await;
     match post_id {
       Ok(post_id) => {
-        post_ids.push(post_id);
+        let task_id = app_state
+          .task_repository
+          .create_one_task(DBTask {
+            name: TaskName::Indexing {
+              model_name: "post".to_string(),
+              model_id: post_id,
+            },
+            status: TaskStatus::Pending,
+            r#type: TaskType::Automated,
+          })
+          .await;
+        match task_id {
+          Ok(task_id) => {
+            post_ids.push(post_id);
+            task_ids.push(task_id);
+          }
+          Err(e) => {
+            tracing::error!("error {:?}", e);
+            return StatusCode::INTERNAL_SERVER_ERROR.into_response();
+          }
+        }
       }
       Err(e) => {
         tracing::error!("error {:?}", e);
@@ -149,6 +171,7 @@ pub async fn seed_the_database_with_mocks(
     "category_ids": category_ids,
     "tag_ids": tag_ids,
     "post_ids": post_ids,
+    "task_ids": task_ids,
   }))
   .into_response()
 }
@@ -168,6 +191,7 @@ pub async fn clean_the_database_from_mocks(
     DELETE post;
     DELETE tag;
     DELETE category;
+    DELETE task;
     "#,
   );
 
