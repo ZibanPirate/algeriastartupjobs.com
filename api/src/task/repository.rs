@@ -23,7 +23,7 @@ impl TaskRepository {
   ) -> Result<Vec<CompactTask>, DataAccessError> {
     let query = format!(
       r#"
-      SELECT status, name, id.id as id FROM task WHERE {} LIMIT {} START {}
+      SELECT name, model_name, model_id, status, failure_reason, id.id as id FROM task WHERE {} LIMIT {} START {}
       "#,
       filter, limit, start
     );
@@ -48,7 +48,7 @@ impl TaskRepository {
             filter,
             query_result_string
           );
-          return Err(DataAccessError::NotFound);
+          return Ok(vec![]);
         }
 
         let task = tasks.unwrap();
@@ -57,26 +57,6 @@ impl TaskRepository {
       }
       Err(_) => Err(DataAccessError::InternalError),
     }
-  }
-
-  pub async fn get_many_compact_tasks_by_ids(
-    &self,
-    ids: Vec<u32>,
-  ) -> Result<Vec<CompactTask>, DataAccessError> {
-    self
-      .get_many_compact_tasks_by_filter(
-        &format!(
-          "array::any([{}])",
-          ids
-            .iter()
-            .map(|id| format!("id.id={}", id))
-            .collect::<Vec<String>>()
-            .join(", "),
-        ),
-        100,
-        0,
-      )
-      .await
   }
 
   pub async fn create_one_task(&self, task: DBTask) -> Result<u32, DataAccessError> {

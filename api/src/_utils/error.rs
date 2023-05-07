@@ -10,4 +10,5 @@ pub enum BootError {
   DBSetupError,
   DBLoginError,
   DBNamespaceError,
+  CronJobSetupError,
 }

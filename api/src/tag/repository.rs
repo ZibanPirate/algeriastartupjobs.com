@@ -48,7 +48,7 @@ impl TagRepository {
             filter,
             query_result_string
           );
-          return Err(DataAccessError::NotFound);
+          return Ok(vec![]);
         }
 
         let tag = tags.unwrap();

@@ -24,17 +24,17 @@ pub enum TaskName {
   Indexing { model_name: String, model_id: u32 },
 }
 
-#[omit(DBTask, [id])]
 #[pick(CompactTask, [id, name, status], [Debug, Serialize, Deserialize, Clone])]
 #[partial(PartialTask)]
 #[derive(Debug, Serialize, Deserialize, Clone)]
+#[omit(DBTask, [id])] // @TODO-ZM: move this down for the other models too
 pub struct Task {
   pub id: u32,
-  // #[serde(flatten)] @TODO-ZM: wtf is going on here?
+  #[serde(flatten)]
   pub name: TaskName,
-  // #[serde(flatten)]
+  #[serde(flatten)]
   pub r#type: TaskType,
-  // #[serde(flatten)]
+  #[serde(flatten)]
   pub status: TaskStatus,
 }
 

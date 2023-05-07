@@ -45,7 +45,7 @@ impl AccountRepository {
             filter,
             query_result_string
           );
-          return Err(DataAccessError::NotFound);
+          return Ok(vec![]);
         }
 
         let account = accounts.unwrap();

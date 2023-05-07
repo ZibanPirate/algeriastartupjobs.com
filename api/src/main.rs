@@ -5,6 +5,7 @@ mod account;
 mod category;
 mod config;
 mod post;
+mod search;
 mod tag;
 mod task;
 

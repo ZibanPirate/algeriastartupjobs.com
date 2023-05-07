@@ -1,11 +1,13 @@
-use axum::{routing::get, Json, Router};
-use local_ip_address::local_ip;
-use serde_json::json;
+use std::sync::Arc;
 
 use crate::{
   _test::controller::create_test_router, _utils::error::BootError,
-  post::controller::create_post_router,
+  post::controller::create_post_router, search::cron_job::SearchCronJob,
 };
+use axum::{routing::get, Json, Router};
+use local_ip_address::local_ip;
+use serde_json::json;
+use tokio_cron_scheduler::JobScheduler;
 
 use super::{
   layers::{
@@ -18,6 +20,10 @@ use super::{
 
 pub async fn actual_main() {
   enable_tracing();
+  // setup cron jobs
+  let cron_jobs = create_cron_jobs().await.unwrap();
+  cron_jobs.start().await.unwrap();
+
   // create the app router
   let app = create_app().await.unwrap();
 
@@ -65,4 +71,28 @@ async fn create_app() -> Result<Router, BootError> {
     .with_state(app_state);
   let app = app.layer(cors_layer).layer(trace_layer);
   Ok(app)
+}
+
+async fn create_cron_jobs() -> Result<JobScheduler, BootError> {
+  let sched = JobScheduler::new().await;
+  if sched.is_err() {
+    return Err(BootError::CronJobSetupError);
+  }
+  let sched = sched.unwrap();
+
+  let app_state = Arc::new(create_app_state().await.unwrap());
+  let search_cron_job = Arc::new(SearchCronJob {
+    app_state: app_state.clone(),
+  });
+
+  let registration_result = sched.add(search_cron_job.create_cron_job().unwrap()).await;
+  if registration_result.is_err() {
+    tracing::error!(
+      "Error while registering search cron job: {:?}",
+      registration_result.err()
+    );
+    return Err(BootError::CronJobSetupError);
+  }
+
+  Ok(sched)
 }

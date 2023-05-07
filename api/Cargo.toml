@@ -27,6 +27,7 @@ rand = "0.8"
 strum_macros = "0.24.3"
 slug = "0.1.4"
 dotenv = "0.15.0"
+tokio-cron-scheduler = "0.9.4"
 
 [dev-dependencies]
 cargo-watch = "8.4.0"

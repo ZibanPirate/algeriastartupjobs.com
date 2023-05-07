@@ -48,7 +48,7 @@ impl CategoryRepository {
             filter,
             query_result_string
           );
-          return Err(DataAccessError::NotFound);
+          return Ok(vec![]);
         }
 
         let category = categories.unwrap();

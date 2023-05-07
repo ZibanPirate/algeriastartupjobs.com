@@ -48,8 +48,7 @@ impl PostRepository {
             filter,
             query_result_string
           );
-          // @TODO-ZM: return empty array instead of error
-          return Err(DataAccessError::NotFound);
+          return Ok(vec![]);
         }
 
         let post = posts.unwrap();
