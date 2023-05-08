@@ -23,3 +23,6 @@ GET {{baseUrl}}/posts/1/similar?per_page=10&page=0
 
 ### Non-existing post
 GET {{baseUrl}}/posts/10000/similar?per_page=10&page=0
+
+### Search "est" jobs
+GET {{baseUrl}}/search/posts?query=est&per_page=10&page=0

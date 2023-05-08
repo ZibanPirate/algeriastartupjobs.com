@@ -3,7 +3,7 @@ use std::sync::Arc;
 use crate::{
   _utils::{error::SearchError, string::escape_double_quote},
   config::service::ConfigService,
-  post::model::{CompactPost, Post},
+  post::model::Post,
 };
 
 use super::model::SearchResult;
@@ -113,5 +113,58 @@ impl SearchService {
     tracing::debug!("result of indexing: {}", res.text().await.unwrap());
 
     Ok(())
+  }
+
+  pub async fn search_posts(&self, query: &String) -> Result<Vec<u32>, SearchError> {
+    let client = reqwest::Client::new();
+    // TODO-ZM: return only ids
+    let res = client
+      .post(format!(
+        "{}/api/v1/posts/search",
+        self.config_service.get_config().search_url
+      ))
+      .header("content-type", "application/json")
+      .body(format!(
+        r#"{{
+          "query": "{}"
+        }}"#,
+        escape_double_quote(&query)
+      ))
+      .send()
+      .await;
+
+    if res.is_err() {
+      tracing::error!("Failed to perform the search: {}", res.err().unwrap());
+      return Err(SearchError::InternalError);
+    }
+    let res = res.unwrap();
+
+    if !res.status().is_success() {
+      tracing::error!(
+        "Failed to perform the search: {}, body: {}",
+        res.status(),
+        res.text().await.unwrap()
+      );
+      return Err(SearchError::InternalError);
+    }
+    let res = res.json::<SearchResult>().await;
+
+    if res.is_err() {
+      tracing::error!("Failed to parse the search result: {}", res.err().unwrap());
+      return Err(SearchError::InternalError);
+    }
+    let res = res.unwrap();
+
+    let record_ids = res.hits.iter().map(|hit| hit.id).collect::<Vec<u32>>();
+
+    // deduplicate ids
+    let record_ids = record_ids
+      .iter()
+      .cloned()
+      .collect::<std::collections::HashSet<u32>>()
+      .into_iter()
+      .collect::<Vec<u32>>();
+
+    Ok(record_ids)
   }
 }

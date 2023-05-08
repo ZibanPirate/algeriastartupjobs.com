@@ -1,8 +1,10 @@
 use std::sync::Arc;
 
 use crate::{
-  _test::controller::create_test_router, _utils::error::BootError,
-  post::controller::create_post_router, search::cron_job::SearchCronJob,
+  _test::controller::create_test_router,
+  _utils::error::BootError,
+  post::controller::create_post_router,
+  search::{controller::create_search_router, cron_job::SearchCronJob},
 };
 use axum::{routing::get, Json, Router};
 use local_ip_address::local_ip;
@@ -56,6 +58,7 @@ async fn create_app() -> Result<Router, BootError> {
   let app = Router::new();
   let app = app
     .nest("/posts", create_post_router())
+    .nest("/search", create_search_router())
     // @TODO-ZM: route this only on development
     // @TODO-ZM: make this Admin-only
     .nest("/test", create_test_router())

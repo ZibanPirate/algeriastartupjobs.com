@@ -1,10 +1,12 @@
-#[derive(serde::Deserialize, Debug)]
+use serde::{Deserialize, Serialize};
+
+#[derive(Serialize, Deserialize, Debug)]
 pub struct SearchRecord {
   pub id: u32,
 }
 
-#[derive(serde::Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug)]
 pub struct SearchResult<T = SearchRecord> {
-  num_hits: u64,
-  hits: Vec<T>,
+  pub num_hits: u64,
+  pub hits: Vec<T>,
 }

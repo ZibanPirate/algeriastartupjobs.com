@@ -61,6 +61,8 @@ async fn run(app_state: Arc<AppState>) {
     return;
   }
 
+  // @TODO-ZM: delete indexing tasks
+
   tracing::info!("✅ Indexing done");
 }
 

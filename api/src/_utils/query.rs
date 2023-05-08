@@ -6,6 +6,11 @@ pub struct PaginationQuery {
   per_page: u32,
 }
 
+#[derive(Deserialize)]
+pub struct SearchQuery {
+  pub query: String,
+}
+
 pub struct DBPaginationQuery {
   pub limit: u32,
   pub start: u32,
