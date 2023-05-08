@@ -66,7 +66,7 @@ export const Page: FC = () => {
             )}
             <Text variant="v4" vtName={`post-description-${loadedPost?.id}`}>
               {loadedPost?.description ? (
-                <pre style={{ whiteSpace: "pre-line", maxWidth: 600 }}>
+                <pre className="fade-in-up" style={{ whiteSpace: "pre-line", maxWidth: 600 }}>
                   {loadedPost.description}
                 </pre>
               ) : (
