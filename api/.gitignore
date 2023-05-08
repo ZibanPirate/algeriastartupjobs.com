@@ -1,6 +1,7 @@
 target
 ubuntu-target
 surrealdb_data
+quickwit_data
 
 production.env
 staging.env
