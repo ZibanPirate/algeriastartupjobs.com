@@ -9,7 +9,7 @@ use surrealdb::{
 use crate::{
   _utils::error::BootError, account::repository::AccountRepository,
   category::repository::CategoryRepository, config::service::ConfigService,
-  post::repository::PostRepository, tag::repository::TagRepository,
+  post::repository::PostRepository, search::service::SearchService, tag::repository::TagRepository,
   task::repository::TaskRepository,
 };
 
@@ -22,6 +22,7 @@ pub struct AppState {
   pub account_repository: Arc<AccountRepository>,
   pub config_service: Arc<ConfigService>,
   pub task_repository: Arc<TaskRepository>,
+  pub search_service: Arc<SearchService>,
 }
 
 pub async fn create_app_state() -> Result<AppState, BootError> {
@@ -57,6 +58,7 @@ pub async fn create_app_state() -> Result<AppState, BootError> {
   }
 
   let db = Arc::new(db);
+  let config_service = Arc::new(ConfigService {});
 
   Ok(AppState {
     db: db.clone(),
@@ -64,7 +66,10 @@ pub async fn create_app_state() -> Result<AppState, BootError> {
     category_repository: Arc::new(CategoryRepository { db: db.clone() }),
     tag_repository: Arc::new(TagRepository { db: db.clone() }),
     account_repository: Arc::new(AccountRepository { db: db.clone() }),
-    config_service: Arc::new(ConfigService {}),
+    config_service: config_service.clone(),
     task_repository: Arc::new(TaskRepository { db: db.clone() }),
+    search_service: Arc::new(SearchService {
+      config_service: config_service.clone(),
+    }),
   })
 }

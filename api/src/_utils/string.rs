@@ -14,3 +14,7 @@ pub fn slugify(s: &String) -> String {
 pub fn escape_single_quote(s: &String) -> String {
   s.replace("'", "\\'")
 }
+
+pub fn escape_double_quote(s: &String) -> String {
+  s.replace("\"", "\\\"")
+}

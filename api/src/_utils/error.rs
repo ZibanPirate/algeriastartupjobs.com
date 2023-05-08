@@ -12,3 +12,8 @@ pub enum BootError {
   DBNamespaceError,
   CronJobSetupError,
 }
+
+#[derive(Debug)]
+pub enum SearchError {
+  InternalError,
+}

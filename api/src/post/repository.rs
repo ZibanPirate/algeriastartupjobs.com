@@ -59,6 +59,43 @@ impl PostRepository {
     }
   }
 
+  pub async fn get_many_posts_by_ids(&self, ids: Vec<u32>) -> Result<Vec<Post>, DataAccessError> {
+    let query = format!(
+      r#"
+      SELECT *, id.id as id FROM post WHERE {}
+      "#,
+      format!(
+        "array::any([{}])",
+        ids
+          .iter()
+          .map(|id| format!("id.id={}", id))
+          .collect::<Vec<String>>()
+          .join(", "),
+      )
+    );
+
+    let query_result = self.db.query(&query).await;
+
+    match query_result {
+      Ok(mut query_result) => {
+        let posts: Result<Vec<Post>, _> = query_result.take(0);
+        if posts.as_ref().is_err() {
+          tracing::error!("Error while getting many posts by ids: {:?}", query_result);
+          return Err(DataAccessError::InternalError);
+        }
+        if posts.as_ref().unwrap().len() == 0 {
+          tracing::info!("No posts found with ids: {:?} : {:?}", ids, query_result);
+          return Ok(vec![]);
+        }
+
+        let post = posts.unwrap();
+
+        Ok(post)
+      }
+      Err(_) => Err(DataAccessError::InternalError),
+    }
+  }
+
   pub async fn get_one_post_by_id(&self, id: u32) -> Result<Post, DataAccessError> {
     let query = format!(
       r#"
