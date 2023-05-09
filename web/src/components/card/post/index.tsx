@@ -41,7 +41,7 @@ export const PostCard: FC<PostCardProps> = ({ margin, post, stretch }) => {
       </div>
       {post.tags.length > 0 && (
         <div style={{ viewTransitionName: `post-tags-${post.id}` }}>
-          <Stack orientation="horizontal" margin="1 0 0">
+          <Stack orientation="horizontal" margin="1 0 0" maxWidth={400}>
             {post.tags.slice(0, 3).map((tag) => (
               <Tag variant="v5" key={tag.id}>
                 {tag.name}
