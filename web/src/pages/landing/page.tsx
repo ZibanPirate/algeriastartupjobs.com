@@ -10,15 +10,16 @@ import { GlobalSearch } from "src/components/search/global";
 import { PostCard } from "src/components/card/post";
 import { Button } from "src/components/button";
 import { Skeleton } from "src/components/skeleton";
+import { getStateActions } from "src/state";
 
 export const Page: FC = () => {
   usePageTitle("Join a startup in Algeria");
 
-  const { posts } = useSliceSelector("landingPage");
+  const { posts, query } = useSliceSelector("landingPage");
 
   useEffect(() => {
     fetchPostsForLandingPage();
-  }, []);
+  }, [query]);
 
   return (
     <Stack orientation="vertical" maxWidth={1600} margin="auto">
@@ -36,7 +37,11 @@ export const Page: FC = () => {
       </Stack>
       {/* Global Search */}
       <Stack orientation="vertical" margin="1 0 2" stretch={true} align="center">
-        <GlobalSearch margin="0 1" />
+        <GlobalSearch
+          margin="0 1"
+          value={query}
+          setValue={(value) => getStateActions().landingPage.set({ query: value })}
+        />
       </Stack>
       {/* Posts */}
       <Stack orientation="vertical" margin="0 0 3" stretch={true} align="center">

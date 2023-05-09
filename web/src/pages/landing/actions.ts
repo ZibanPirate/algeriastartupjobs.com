@@ -10,17 +10,18 @@ import { LandingPageState } from "./state";
 export const fetchPostsForLandingPage = async (): Promise<void> => {
   const { landingPage, postEntities, categoryEntities, tagEntities, accountEntities } =
     getStateActions();
-  const { posts } = getState().landingPage;
+  const { posts, query } = getState().landingPage;
   if (posts === "ERROR") landingPage.set({ posts: null });
 
   try {
+    const endpoint = query.trim().length >= 3 ? `/search/posts?query=${query}` : "/posts/feed";
     // @TODO-ZM: auto-generate types for API endpoints
     const { data } = await Axios.get<{
       posts: CompactPost[];
       categories: CompactCategory[];
       tags: CompactTag[];
       posters: CompactAccount[];
-    }>(getConfig().api.base_url + "/posts/feed");
+    }>(getConfig().api.base_url + endpoint);
 
     const posts: LandingPageState["posts"] = data.posts.map((post) => {
       const { category_id, tag_ids, poster_id, ...lonePost } = post;
