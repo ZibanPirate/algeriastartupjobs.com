@@ -21,6 +21,8 @@ impl SearchService {
         self.config_service.get_config().search_url
       ))
       .header("content-type", "application/yaml")
+      // @TODO-ZM: add more weight to title
+      // @TODO-ZM: index tags and poster and category as text instead of ids
       .body(
         r#"
         version: 0.5

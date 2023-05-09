@@ -88,6 +88,7 @@ async fn create_cron_jobs() -> Result<JobScheduler, BootError> {
     app_state: app_state.clone(),
   });
 
+  // @TODO-ZM: add un-indexing cron job
   let registration_result = sched.add(search_cron_job.create_cron_job().unwrap()).await;
   if registration_result.is_err() {
     tracing::error!(
