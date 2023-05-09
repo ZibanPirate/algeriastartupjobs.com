@@ -1,4 +1,4 @@
-import { FC, PropsWithChildren } from "react";
+import { FC, PropsWithChildren, forwardRef } from "react";
 import "./style.css";
 import { FontVariantProps, StyleProps, marginToClasses } from "src/utils/props/style";
 import { NavLink as RL, LinkProps as RLP } from "react-router-dom";
@@ -9,18 +9,29 @@ interface LinkProps extends PropsWithChildren, StyleProps, FontVariantProps, RLP
   className?: string;
 }
 
-export const Link: FC<LinkProps> = ({ children, variant, margin, back, className, ...props }) => {
-  const classes = [className, "link", `font-variant-${variant}`, ...marginToClasses(margin)].filter(
-    Boolean
-  );
+export const Link = forwardRef<HTMLAnchorElement, LinkProps>(
+  ({ children, variant, margin, back, className, ...props }, ref) => {
+    const classes = [
+      className,
+      "link",
+      `font-variant-${variant}`,
+      ...marginToClasses(margin),
+    ].filter(Boolean);
 
-  const willGoBack = back && !isNavigatingBackLeavesWebsite();
+    const willGoBack = back && !isNavigatingBackLeavesWebsite();
 
-  const to = willGoBack ? (-1 as unknown as string) : props.to;
+    const to = willGoBack ? (-1 as unknown as string) : props.to;
 
-  return (
-    <RL className={classes.join(" ")} preventScrollReset={willGoBack} {...props} to={to}>
-      {children}
-    </RL>
-  );
-};
+    return (
+      <RL
+        className={classes.join(" ")}
+        preventScrollReset={willGoBack}
+        {...props}
+        to={to}
+        ref={ref}
+      >
+        {children}
+      </RL>
+    );
+  }
+);

@@ -55,13 +55,21 @@ export const Page: FC = () => {
             </Button>
           </Stack>
         ) : (
-          <Stack orientation="horizontal" gap="1" margin="0 1" align="stretch">
-            {posts
-              ? posts.map((post) => <PostCard key={post.id} post={post} />)
-              : "|"
-                  .repeat(4)
-                  .split("|")
-                  .map(() => <Skeleton variant="v3" width="20rem" maxWidth="80vw" height="6rem" />)}
+          <Stack orientation="horizontal" gap="1" margin="0 1" align="stretch" animation={true}>
+            {posts ? (
+              posts.length > 0 ? (
+                posts.map((post) => <PostCard key={post.id} post={post} />)
+              ) : (
+                <Text variant="v5" margin="1">
+                  No posts found
+                </Text>
+              )
+            ) : (
+              "|"
+                .repeat(4)
+                .split("|")
+                .map(() => <Skeleton variant="v3" width="20rem" maxWidth="80vw" height="6rem" />)
+            )}
           </Stack>
         )}
       </Stack>
