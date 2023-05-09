@@ -1,6 +1,6 @@
 FROM quickwit/quickwit
 
-EXPOSE 6060
+EXPOSE 7280
 
 VOLUME /quickwit/qwdata
 

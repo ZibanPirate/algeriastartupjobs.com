@@ -91,7 +91,7 @@
       "command": [
         "docker rm -f $(docker ps -aqf \"name=ajs-search-quickwit\") || true",
         "&& DOCKER_DEFAULT_PLATFORM=linux/amd64 docker build -t ajs-search-quickwit -f quickwit.Dockerfile .",
-        "&& docker run -d --name=ajs-search-quickwit -p 6060:7280 -v ./quickwit_data:/quickwit/qwdata ajs-search-quickwit"
+        "&& docker run -d --name=ajs-search-quickwit -p 7280:7280 -v ./quickwit_data:/quickwit/qwdata ajs-search-quickwit"
       ],
       "problemMatcher": [],
       "options": { "cwd": "${workspaceFolder}/api" }
