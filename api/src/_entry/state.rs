@@ -59,17 +59,33 @@ pub async fn create_app_state() -> Result<AppState, BootError> {
 
   let db = Arc::new(db);
   let config_service = Arc::new(ConfigService {});
+  let search_service = Arc::new(SearchService {
+    config_service: Arc::clone(&config_service),
+  });
+  let post_repository = Arc::new(PostRepository {
+    db: Arc::clone(&db),
+  });
+  let category_repository = Arc::new(CategoryRepository {
+    db: Arc::clone(&db),
+  });
+  let tag_repository = Arc::new(TagRepository {
+    db: Arc::clone(&db),
+  });
+  let account_repository = Arc::new(AccountRepository {
+    db: Arc::clone(&db),
+  });
+  let task_repository = Arc::new(TaskRepository {
+    db: Arc::clone(&db),
+  });
 
   Ok(AppState {
-    db: db.clone(),
-    post_repository: Arc::new(PostRepository { db: db.clone() }),
-    category_repository: Arc::new(CategoryRepository { db: db.clone() }),
-    tag_repository: Arc::new(TagRepository { db: db.clone() }),
-    account_repository: Arc::new(AccountRepository { db: db.clone() }),
-    config_service: config_service.clone(),
-    task_repository: Arc::new(TaskRepository { db: db.clone() }),
-    search_service: Arc::new(SearchService {
-      config_service: config_service.clone(),
-    }),
+    db: Arc::clone(&db),
+    post_repository: Arc::clone(&post_repository),
+    category_repository: Arc::clone(&category_repository),
+    tag_repository: Arc::clone(&tag_repository),
+    account_repository: Arc::clone(&account_repository),
+    config_service: Arc::clone(&config_service),
+    task_repository: Arc::clone(&task_repository),
+    search_service: Arc::clone(&search_service),
   })
 }

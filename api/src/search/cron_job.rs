@@ -1,13 +1,13 @@
 use crate::{_entry::state::AppState, _utils::error::BootError, task::model::TaskName};
-use std::{sync::Arc, time::Duration};
+use std::time::Duration;
 use tokio_cron_scheduler::Job;
 
 pub struct SearchCronJob {
-  pub app_state: Arc<AppState>,
+  pub app_state: AppState,
 }
 
 // @TODO-ZM: set concurrency to 1
-async fn run(app_state: Arc<AppState>) {
+async fn run(app_state: AppState) {
   tracing::info!("Indexing");
   app_state.search_service.setup_search().await;
 
@@ -61,8 +61,6 @@ async fn run(app_state: Arc<AppState>) {
     return;
   }
 
-  // @TODO-ZM: delete indexing tasks
-
   tracing::info!("✅ Indexing done");
 }
 
@@ -74,7 +72,7 @@ impl SearchCronJob {
       let app_state = app_state.clone();
 
       Box::pin(async move {
-        run(app_state).await;
+        run(app_state.clone()).await;
       })
     });
 

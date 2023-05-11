@@ -17,17 +17,20 @@ use super::{
     trace::{create_trace_layer, enable_tracing},
   },
   servers::{local::run_local_server, loopback::run_loopback_server},
-  state::create_app_state,
+  state::{create_app_state, AppState},
 };
 
 pub async fn actual_main() {
   enable_tracing();
+  // create a shared-by-reference state
+  let app_state = create_app_state().await.unwrap();
+
   // setup cron jobs
-  let cron_jobs = create_cron_jobs().await.unwrap();
+  let cron_jobs = create_cron_jobs(app_state.clone()).await.unwrap();
   cron_jobs.start().await.unwrap();
 
   // create the app router
-  let app = create_app().await.unwrap();
+  let app = create_app(app_state.clone()).await.unwrap();
 
   // get the local IP address of the system
   match local_ip() {
@@ -49,9 +52,7 @@ pub async fn actual_main() {
 }
 
 // create and configure the app router
-async fn create_app() -> Result<Router, BootError> {
-  let app_state = create_app_state().await.unwrap();
-
+async fn create_app(app_state: AppState) -> Result<Router, BootError> {
   let cors_layer = create_cors_layer();
   let trace_layer = create_trace_layer();
 
@@ -76,17 +77,14 @@ async fn create_app() -> Result<Router, BootError> {
   Ok(app)
 }
 
-async fn create_cron_jobs() -> Result<JobScheduler, BootError> {
+async fn create_cron_jobs(app_state: AppState) -> Result<JobScheduler, BootError> {
   let sched = JobScheduler::new().await;
   if sched.is_err() {
     return Err(BootError::CronJobSetupError);
   }
   let sched = sched.unwrap();
 
-  let app_state = Arc::new(create_app_state().await.unwrap());
-  let search_cron_job = Arc::new(SearchCronJob {
-    app_state: app_state.clone(),
-  });
+  let search_cron_job = Arc::new(SearchCronJob { app_state });
 
   // @TODO-ZM: add un-indexing cron job
   let registration_result = sched.add(search_cron_job.create_cron_job().unwrap()).await;
