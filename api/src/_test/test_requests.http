@@ -91,3 +91,12 @@ DB: test
 LET $tag_ids = (SELECT tag_ids FROM post:{ id: 100 }).tag_ids;
 SELECT title, tag_ids, id.id as id FROM post WHERE $tag_ids ANYINSIDE tag_ids LIMIT 10 START 0
 
+###
+POST {{dbBaseUrl}}/sql
+Accept: application/json
+Authorization: Basic root root
+NS: test
+DB: test
+
+SELECT count() FROM task WHERE status!="Completed" GROUP BY count;
+SELECT count() FROM task GROUP BY count;

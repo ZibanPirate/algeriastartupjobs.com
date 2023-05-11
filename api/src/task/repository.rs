@@ -8,7 +8,7 @@ use crate::_utils::{
   string::escape_single_quote,
 };
 
-use super::model::{CompactTask, DBTask, TaskName, TaskStatus, TaskType};
+use super::model::{CompactTask, DBTask, PartialTask, TaskName, TaskStatus, TaskType};
 
 pub struct TaskRepository {
   pub db: Arc<Surreal<Client>>,
@@ -146,5 +146,107 @@ impl TaskRepository {
         return Err(DataAccessError::CreationError);
       }
     }
+  }
+
+  pub async fn update_many_tasks_by_filter(
+    &self,
+    filter: &str,
+    task: PartialTask,
+  ) -> Result<(), DataAccessError> {
+    let query = format!(
+      r#"
+      UPDATE task MERGE {{
+        {}
+        {}
+        {}
+     }} WHERE {} RETURN NONE;
+      "#,
+      match task.name {
+        Some(name) => match name.clone() {
+          TaskName::Indexing {
+            model_name,
+            model_id,
+          } => format!(
+            r#"
+            name: '{}',
+            model_name: '{}',
+            model_id: {},
+            "#,
+            escape_single_quote(&name.to_string()),
+            model_name,
+            model_id
+          ),
+        },
+        None => "".to_string(),
+      },
+      match task.r#type {
+        Some(r#type) => match r#type.clone() {
+          TaskType::Manual { manual_task_owner } => format!(
+            r#"
+            type: '{}',
+            manual_task_owner: '{}',
+            "#,
+            escape_single_quote(&r#type.to_string()),
+            manual_task_owner,
+          ),
+          TaskType::Automated {} => format!(
+            r#"
+            type: '{}',
+            "#,
+            escape_single_quote(&r#type.to_string()),
+          ),
+        },
+        None => "".to_string(),
+      },
+      match task.status {
+        Some(status) => match status.clone() {
+          TaskStatus::Failed { failure_reason } => format!(
+            r#"
+            status: '{}',
+            failure_reason: '{}',
+            "#,
+            escape_single_quote(&status.to_string()),
+            escape_single_quote(&failure_reason),
+          ),
+          TaskStatus::Completed | TaskStatus::InProgress | TaskStatus::Pending => format!(
+            r#"
+            status: '{}',
+            "#,
+            escape_single_quote(&status.to_string()),
+          ),
+        },
+        None => "".to_string(),
+      },
+      filter,
+    );
+
+    let query_result = self.db.query(&query).await;
+    match query_result {
+      Ok(_) => Ok(()),
+      Err(e) => {
+        tracing::error!("failed to update task {:?}, query {:?}", e, &query);
+        return Err(DataAccessError::UpdateError);
+      }
+    }
+  }
+
+  pub async fn update_many_tasks_by_ids(
+    &self,
+    ids: Vec<u32>,
+    partial_task: PartialTask,
+  ) -> Result<(), DataAccessError> {
+    self
+      .update_many_tasks_by_filter(
+        &format!(
+          "array::any([{}])",
+          ids
+            .iter()
+            .map(|id| format!("id.id={}", id))
+            .collect::<Vec<String>>()
+            .join(", "),
+        ),
+        partial_task,
+      )
+      .await
   }
 }

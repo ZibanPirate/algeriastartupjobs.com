@@ -2,6 +2,7 @@
 pub enum DataAccessError {
   NotFound,
   CreationError,
+  UpdateError,
   InternalError,
 }
 

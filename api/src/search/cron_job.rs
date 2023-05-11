@@ -1,4 +1,8 @@
-use crate::{_entry::state::AppState, _utils::error::BootError, task::model::TaskName};
+use crate::{
+  _entry::state::AppState,
+  _utils::error::BootError,
+  task::model::{PartialTask, TaskName, TaskStatus},
+};
 use std::{
   sync::{
     atomic::{AtomicBool, Ordering},
@@ -35,8 +39,10 @@ async fn run(app_state: AppState) {
 
   tracing::info!("Found {} indexing tasks", tasks.len());
 
+  let mut task_ids: Vec<u32> = [].to_vec();
   let mut post_ids = vec![];
   for task in tasks {
+    task_ids.push(task.id);
     match task.name {
       TaskName::Indexing {
         model_name,
@@ -64,6 +70,24 @@ async fn run(app_state: AppState) {
   let indexing_result = app_state.search_service.index_posts(posts).await;
   if indexing_result.is_err() {
     tracing::error!("Error while indexing posts");
+    return;
+  }
+
+  let task_status_update_result = app_state
+    .task_repository
+    .update_many_tasks_by_ids(
+      task_ids,
+      PartialTask {
+        id: None,
+        name: None,
+        r#type: None,
+        status: Some(TaskStatus::Completed),
+      },
+    )
+    .await;
+
+  if task_status_update_result.is_err() {
+    tracing::error!("Error while updating indexing tasks");
     return;
   }
 

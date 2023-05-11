@@ -1,4 +1,4 @@
-use std::sync::{Arc, Mutex};
+use std::sync::Arc;
 
 use surrealdb::{
   engine::remote::ws::{Client, Ws},
