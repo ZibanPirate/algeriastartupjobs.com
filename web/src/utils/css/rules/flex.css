@@ -31,6 +31,10 @@
   align-items: stretch;
 }
 
+.flex-align-stretch > * {
+  flex: auto;
+}
+
 .flex-gap-0 {
   gap: 0;
 }
