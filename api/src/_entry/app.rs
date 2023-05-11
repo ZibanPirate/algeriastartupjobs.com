@@ -22,6 +22,7 @@ use super::{
 
 pub async fn actual_main() {
   enable_tracing();
+
   // create a shared-by-reference state
   let app_state = create_app_state().await.unwrap();
 
@@ -61,7 +62,6 @@ async fn create_app(app_state: AppState) -> Result<Router, BootError> {
     .nest("/posts", create_post_router())
     .nest("/search", create_search_router())
     // @TODO-ZM: route this only on development
-    // @TODO-ZM: make this Admin-only
     .nest("/test", create_test_router())
     .route(
       "/",

@@ -1,19 +1,25 @@
 use crate::{_entry::state::AppState, _utils::error::BootError, task::model::TaskName};
-use std::time::Duration;
+use std::{
+  sync::{
+    atomic::{AtomicBool, Ordering},
+    Arc,
+  },
+  time::Duration,
+};
 use tokio_cron_scheduler::Job;
 
 pub struct SearchCronJob {
   pub app_state: AppState,
 }
 
-// @TODO-ZM: set concurrency to 1
 async fn run(app_state: AppState) {
-  tracing::info!("Indexing");
+  tracing::info!("🚀 Indexing");
+
   app_state.search_service.setup_search().await;
 
   let tasks = app_state
     .task_repository
-    .get_many_compact_tasks_by_filter("name='Indexing'", 10, 0)
+    .get_many_compact_tasks_by_filter("name='Indexing' AND status='Pending'", 10, 0)
     .await;
 
   if tasks.is_err() {
@@ -67,13 +73,22 @@ async fn run(app_state: AppState) {
 impl SearchCronJob {
   pub fn create_cron_job(&self) -> Result<Job, BootError> {
     let app_state = self.app_state.clone();
+    let is_job_running = Arc::new(AtomicBool::new(false));
 
-    let job = Job::new_one_shot_async(Duration::from_secs(1), move |_, __| {
+    let job = Job::new_repeated_async(Duration::from_secs(5), move |_, __| {
       let app_state = app_state.clone();
+      let is_job_running = is_job_running.clone();
 
-      Box::pin(async move {
-        run(app_state.clone()).await;
-      })
+      return Box::pin(async move {
+        let compare_and_swap_result =
+          is_job_running.compare_exchange(false, true, Ordering::Relaxed, Ordering::Relaxed);
+        if compare_and_swap_result.is_ok() && compare_and_swap_result.unwrap() == false {
+          run(app_state.clone()).await;
+          is_job_running.store(false, Ordering::Relaxed);
+        } else {
+          tracing::info!("⏭️  Indexing job is already running, skipping");
+        }
+      });
     });
 
     if job.is_err() {
