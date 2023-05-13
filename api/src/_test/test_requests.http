@@ -19,15 +19,15 @@ x-admin-auth-code: password123
 ###
 GET {{dbBaseUrl}}/export
 Authorization: Basic root root
-NS: test
-DB: test
+NS: asj
+DB: main
 
 ###
 POST {{dbBaseUrl}}/sql
 Accept: application/json
 Authorization: Basic root root
-NS: test
-DB: test
+NS: asj
+DB: main
 
 BEGIN TRANSACTION;
 
@@ -46,8 +46,8 @@ COMMIT TRANSACTION;
 POST {{dbBaseUrl}}/sql
 Accept: application/json
 Authorization: Basic root root
-NS: test
-DB: test
+NS: asj
+DB: main
 
 DELETE account;
 DELETE post;
@@ -58,8 +58,8 @@ DELETE category;
 POST {{dbBaseUrl}}/sql
 Accept: application/json
 Authorization: Basic root root
-NS: test
-DB: test
+NS: asj
+DB: main
 
 SELECT *, id.id as id FROM post:{ id: 100 }
 
@@ -67,8 +67,8 @@ SELECT *, id.id as id FROM post:{ id: 100 }
 POST {{dbBaseUrl}}/sql
 Accept: application/json
 Authorization: Basic root root
-NS: test
-DB: test
+NS: asj
+DB: main
 
 SELECT slug, title, poster_id, short_description, category_id, tag_ids, id.id as id FROM post WHERE true LIMIT 10 START 0
 
@@ -76,8 +76,8 @@ SELECT slug, title, poster_id, short_description, category_id, tag_ids, id.id as
 POST {{dbBaseUrl}}/sql
 Accept: application/json
 Authorization: Basic root root
-NS: test
-DB: test
+NS: asj
+DB: main
 
 SELECT name, slug, id.id as id FROM tag WHERE array::any([id.id=10, id.id=11]) LIMIT 10 START 0
 
@@ -85,8 +85,8 @@ SELECT name, slug, id.id as id FROM tag WHERE array::any([id.id=10, id.id=11]) L
 POST {{dbBaseUrl}}/sql
 Accept: application/json
 Authorization: Basic root root
-NS: test
-DB: test
+NS: asj
+DB: main
 
 LET $tag_ids = (SELECT tag_ids FROM post:{ id: 100 }).tag_ids;
 SELECT title, tag_ids, id.id as id FROM post WHERE $tag_ids ANYINSIDE tag_ids LIMIT 10 START 0
@@ -95,8 +95,8 @@ SELECT title, tag_ids, id.id as id FROM post WHERE $tag_ids ANYINSIDE tag_ids LI
 POST {{dbBaseUrl}}/sql
 Accept: application/json
 Authorization: Basic root root
-NS: test
-DB: test
+NS: asj
+DB: main
 
 SELECT count() FROM task WHERE status!="Completed" GROUP BY count;
 SELECT count() FROM task GROUP BY count;
@@ -120,5 +120,26 @@ DB: search
 
 INSERT INTO word [ { id: { word: "to" }, in: [{"model_id":108,"appear_in":"post_short_description"},{"model_id":111,"appear_in":"post_short_description"},{"model_id":111,"appear_in":"post_short_description"},{"model_id":112,"appear_in":"post_short_description"},{"model_id":113,"appear_in":"post_short_description"}] } ]
 ON DUPLICATE KEY UPDATE in+=[{"model_id":108,"appear_in":"post_short_description"},{"model_id":111,"appear_in":"post_short_description"},{"model_id":111,"appear_in":"post_short_description"},{"model_id":112,"appear_in":"post_short_description"},{"model_id":113,"appear_in":"post_short_description"}]
+
+###
+
+POST {{dbBaseUrl}}/sql
+Accept: application/json
+Authorization: Basic root root
+NS: asj
+DB: search
+
+DEFINE INDEX word_appearence_in_model ON TABLE word FIELDS in[*].model_id;
+DEFINE INDEX word ON TABLE word FIELDS id.word;
+
+###
+
+POST {{dbBaseUrl}}/sql
+Accept: application/json
+Authorization: Basic root root
+NS: asj
+DB: search
+
+INFO FOR TABLE word
 
 ###

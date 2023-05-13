@@ -93,8 +93,10 @@ impl SearchService {
       // @TODO-ZM: populate category by category_id and index it.
     }
 
-    for word_index in word_indexes {
-      let word = word_index.word;
+    let word_indexes_length = word_indexes.len();
+    for index in 0..word_indexes_length {
+      let word_index = &word_indexes[index];
+      let word = &word_index.word;
       let appear_in = serde_json::to_string(&word_index.r#in).unwrap();
 
       let query = format!(
@@ -108,6 +110,12 @@ impl SearchService {
       );
 
       let res = self.search_db.query(&query).await;
+
+      tracing::info!(
+        "Indexing {} words... {:.2}%",
+        word_indexes_length,
+        ((index + 1) as f32 / word_indexes_length as f32) * 100.0,
+      );
 
       if res.is_err() {
         tracing::error!("Failed to index the word: {}", res.err().unwrap());
