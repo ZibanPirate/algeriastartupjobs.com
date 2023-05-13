@@ -22,8 +22,21 @@ pub struct AppState {
 }
 
 pub async fn create_app_state() -> Result<AppState, BootError> {
-  let main_db = Arc::new(create_db_client("asj".to_string(), "main".to_string()).await?);
-  let search_db = Arc::new(create_db_client("asj".to_string(), "search".to_string()).await?);
+  let main_db = Arc::new(create_db_client("asj".to_string(), "main".to_string(), None).await?);
+  let search_db = Arc::new(
+    create_db_client(
+      "asj".to_string(),
+      "search".to_string(),
+      Some(
+        r#"
+        DEFINE INDEX word_appearance_in_model ON TABLE word FIELDS in[*].model_id;
+        DEFINE INDEX word ON TABLE word FIELDS id.word;
+      "#
+        .to_string(),
+      ),
+    )
+    .await?,
+  );
 
   let config_service = Arc::new(ConfigService::new());
   let search_service = Arc::new(SearchService::new(

@@ -288,6 +288,8 @@ pub async fn clean_the_database_from_mocks(
   let search_db_query = format!(
     r#"
     DELETE word;
+    REMOVE INDEX word_appearance_in_model ON TABLE word;
+    REMOVE INDEX word ON TABLE word;
     "#,
   );
 

@@ -9,6 +9,7 @@ use crate::_utils::error::BootError;
 pub async fn create_db_client(
   namespace: String,
   database: String,
+  setup_query: Option<String>,
 ) -> Result<Surreal<Client>, BootError> {
   tracing::info!(
     "Setting up the database client for the namespace: {} and database: {}",
@@ -44,6 +45,17 @@ pub async fn create_db_client(
       db_namespace.err().unwrap()
     );
     return Err(BootError::DBNamespaceError);
+  }
+
+  if setup_query.is_some() {
+    let setup_query_result = db.query(setup_query.unwrap()).await;
+    if setup_query_result.is_err() {
+      tracing::error!(
+        "Failed to setup the database: {}",
+        setup_query_result.err().unwrap()
+      );
+      return Err(BootError::DBSetupError);
+    }
   }
 
   Ok(db)
