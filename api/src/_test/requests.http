@@ -8,7 +8,6 @@
 ###
 GET {{baseUrl}}/posts/feed
 
-
 ###
 GET {{baseUrl}}/posts/0
 
@@ -24,5 +23,5 @@ GET {{baseUrl}}/posts/1/similar?per_page=10&page=0
 ### Non-existing post
 GET {{baseUrl}}/posts/10000/similar?per_page=10&page=0
 
-### Search "est" jobs
-GET {{baseUrl}}/search/posts?query=est&per_page=10&page=0
+### Search "software" jobs
+GET {{baseUrl}}/search/posts?query=software&per_page=10&page=0

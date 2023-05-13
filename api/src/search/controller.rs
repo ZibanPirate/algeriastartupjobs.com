@@ -28,7 +28,9 @@ pub async fn search_posts(
   if !compact_posts.is_ok() {
     return StatusCode::INTERNAL_SERVER_ERROR.into_response();
   }
-  let compact_posts = compact_posts.unwrap();
+  let mut compact_posts = compact_posts.unwrap();
+
+  compact_posts.sort_by_key(|post| post_ids.iter().position(|&id| id == post.id).unwrap());
 
   let mut unique_category_ids: Vec<u32> = Vec::new();
   let mut unique_tag_ids: Vec<u32> = Vec::new();

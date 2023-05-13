@@ -143,3 +143,29 @@ DB: search
 INFO FOR TABLE word
 
 ###
+
+POST {{dbBaseUrl}}/sql
+Accept: application/json
+Authorization: Basic root root
+NS: asj
+DB: search
+
+SELECT math::sum(score) as score, in.model_id as id FROM (
+  SELECT in, word, (
+      IF in.appear_in="post_title" THEN
+        100
+      ELSE IF in.appear_in="post_short_description" THEN
+        25
+      ELSE IF in.appear_in="post_tags" THEN
+        5
+      ELSE
+        1
+      END
+    ) as score FROM (
+    SELECT count() as count, in.model_id, in.appear_in, word FROM (
+      SELECT in, id.word as word FROM word WHERE id.word IN ["designer" ,"software"] SPLIT in
+    ) GROUP BY in.model_id, in.appear_in, word
+  )
+) GROUP BY id ORDER BY score NUMERIC DESC LIMIT 100 START 0;
+
+###

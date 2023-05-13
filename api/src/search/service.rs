@@ -1,20 +1,21 @@
-use std::sync::Arc;
-
-use serde::{Deserialize, Serialize};
-use surrealdb::{engine::remote::ws::Client, Surreal};
-
 use crate::{
   _utils::{error::SearchError, string::escape_double_quote},
   config::service::ConfigService,
   post::model::Post,
 };
+use serde::{Deserialize, Serialize};
+use std::sync::Arc;
+use surrealdb::{engine::remote::ws::Client, Surreal};
 
-use super::model::SearchResult;
+#[derive(Debug, Deserialize)]
+struct SearchRecord {
+  id: u32,
+  score: u32,
+}
 
 #[derive(Debug, Serialize, Deserialize)]
 struct WordIn {
   model_id: u32,
-  model_name: String,
   appear_in: String,
 }
 
@@ -34,7 +35,6 @@ fn add_word_appearance_to_word_indexes(
     if word_index.word == *word {
       word_index.r#in.push(WordIn {
         model_id,
-        model_name: "post".to_string(),
         appear_in,
       });
       return;
@@ -45,7 +45,6 @@ fn add_word_appearance_to_word_indexes(
     word: word.to_string(),
     r#in: vec![WordIn {
       model_id,
-      model_name: "post".to_string(),
       appear_in,
     }],
   });
@@ -129,56 +128,53 @@ impl SearchService {
     Ok(())
   }
 
+  // @TODO-ZM: add pagination
   pub async fn search_posts(&self, query: &String) -> Result<Vec<u32>, SearchError> {
-    let client = reqwest::Client::new();
-    // TODO-ZM: return only ids
-    let res = client
-      .post(format!(
-        "{}/api/v1/posts/search",
-        self.config_service.get_config().search_url
-      ))
-      .header("content-type", "application/json")
-      .body(format!(
-        r#"{{
-          "query": "{}"
-        }}"#,
-        escape_double_quote(&query)
-      ))
-      .send()
-      .await;
+    let query = format!(
+      r#"
+      SELECT math::sum(score) as score, in.model_id as id FROM (
+        SELECT in, word, (
+            IF in.appear_in="post_title" THEN
+              100
+            ELSE IF in.appear_in="post_short_description" THEN
+              25
+            ELSE IF in.appear_in="post_tags" THEN
+              5
+            ELSE
+              1
+            END
+          ) as score FROM (
+          SELECT count() as count, in.model_id, in.appear_in, word FROM (
+            SELECT in, id.word as word FROM word WHERE id.word IN [{}] SPLIT in
+          ) GROUP BY in.model_id, in.appear_in, word
+        )
+      ) GROUP BY id ORDER BY score NUMERIC DESC LIMIT 100 START 0;
+      "#,
+      query
+        .split(" ")
+        .map(|word| format!(r#""{}""#, escape_double_quote(&word.to_lowercase())))
+        .collect::<Vec<String>>()
+        .join(", ")
+    );
 
-    if res.is_err() {
-      tracing::error!("Failed to perform the search: {}", res.err().unwrap());
-      return Err(SearchError::InternalError);
+    let query_result = self.search_db.query(&query).await;
+
+    match query_result {
+      Ok(mut query_result) => {
+        let record: Result<Vec<SearchRecord>, _> = query_result.take(0);
+
+        match record {
+          Ok(record) => Ok(record.iter().map(|r| r.id).collect()),
+          Err(err) => {
+            tracing::error!("Failed to parse the query result, {}", err);
+            Err(SearchError::InternalError)
+          }
+        }
+      }
+      Err(err) => {
+        tracing::error!("Failed to search the query, {}", err);
+        Err(SearchError::InternalError)
+      }
     }
-    let res = res.unwrap();
-
-    if !res.status().is_success() {
-      tracing::error!(
-        "Failed to perform the search: {}, body: {}",
-        res.status(),
-        res.text().await.unwrap()
-      );
-      return Err(SearchError::InternalError);
-    }
-    let res = res.json::<SearchResult>().await;
-
-    if res.is_err() {
-      tracing::error!("Failed to parse the search result: {}", res.err().unwrap());
-      return Err(SearchError::InternalError);
-    }
-    let res = res.unwrap();
-
-    let record_ids = res.hits.iter().map(|hit| hit.id).collect::<Vec<u32>>();
-
-    // deduplicate ids
-    let record_ids = record_ids
-      .iter()
-      .cloned()
-      .collect::<std::collections::HashSet<u32>>()
-      .into_iter()
-      .collect::<Vec<u32>>();
-
-    Ok(record_ids)
   }
 }
