@@ -1,5 +1,8 @@
 use std::sync::Arc;
 
+use serde::{Deserialize, Serialize};
+use surrealdb::{engine::remote::ws::Client, Surreal};
+
 use crate::{
   _utils::{error::SearchError, string::escape_double_quote},
   config::service::ConfigService,
@@ -8,115 +11,109 @@ use crate::{
 
 use super::model::SearchResult;
 
+#[derive(Debug, Serialize, Deserialize)]
+struct WordIn {
+  model_id: u32,
+  appear_in: String,
+}
+
+#[derive(Debug)]
+struct WordIndex {
+  word: String,
+  r#in: Vec<WordIn>,
+}
+
+fn add_word_appearance_to_word_indexes(
+  word: &String,
+  word_indexes: &mut Vec<WordIndex>,
+  model_id: u32,
+  appear_in: String,
+) {
+  for word_index in word_indexes.iter_mut() {
+    if word_index.word == *word {
+      word_index.r#in.push(WordIn {
+        model_id,
+        appear_in,
+      });
+      return;
+    }
+  }
+
+  word_indexes.push(WordIndex {
+    word: word.to_string(),
+    r#in: vec![WordIn {
+      model_id,
+      appear_in,
+    }],
+  });
+}
+
 pub struct SearchService {
-  pub config_service: Arc<ConfigService>,
+  search_db: Arc<Surreal<Client>>,
+  config_service: Arc<ConfigService>,
 }
 
 impl SearchService {
-  pub fn new(config_service: Arc<ConfigService>) -> Self {
-    Self { config_service }
-  }
-
-  pub async fn setup_search(&self) {
-    let client = reqwest::Client::new();
-    let res = client
-      .post(format!(
-        "{}/api/v1/indexes",
-        self.config_service.get_config().search_url
-      ))
-      .header("content-type", "application/yaml")
-      // @TODO-ZM: add more weight to title
-      // @TODO-ZM: index tags and poster and category as text instead of ids
-      .body(
-        r#"
-        version: 0.5
-
-        index_id: posts
-
-        doc_mapping:
-          field_mappings:
-            - name: id
-              type: u64
-            - name: title
-              type: text
-              tokenizer: default
-              record: position
-            - name: short_description
-              type: text
-              tokenizer: default
-              record: position
-            - name: description
-              type: text
-              tokenizer: default
-              record: position
-            - name: poster_id
-              type: u64
-            - name: category_id
-              type: u64
-              # add tag_ids
-          tag_fields: [poster_id, category_id]
-
-        search_settings:
-          default_search_fields: [title, description]
-        "#,
-      )
-      .send()
-      .await;
-
-    if res.is_err() {
-      tracing::error!("Failed to setup the search: {}", res.err().unwrap());
-      return;
+  pub fn new(config_service: Arc<ConfigService>, search_db: Arc<Surreal<Client>>) -> Self {
+    Self {
+      config_service,
+      search_db,
     }
-    let res = res.unwrap();
-
-    if !res.status().is_success() {
-      tracing::error!(
-        "Failed to setup the search: {}, body: {}",
-        res.status(),
-        res.text().await.unwrap()
-      );
-    }
-    tracing::info!("Post index created");
   }
 
   pub async fn index_posts(&self, posts: Vec<Post>) -> Result<(), SearchError> {
-    let posts_in_ndjson_format = posts
-      .iter()
-      .map(|post| {
-        serde_json::to_string(&post)
-          .unwrap()
-          .replace("\n", "")
-          .replace("\r", "")
-      })
-      .collect::<Vec<String>>()
-      .join("\n");
+    let mut word_indexes: Vec<WordIndex> = vec![];
+    for post in posts {
+      // @TODO-ZM: use regex \d to split the string
+      post.title.split(" ").for_each(|word| {
+        let word = word.to_lowercase();
 
-    let client = reqwest::Client::new();
-    let res = client
-      .post(format!(
-        "{}/api/v1/posts/ingest",
-        self.config_service.get_config().search_url
-      ))
-      .body(posts_in_ndjson_format)
-      .send()
-      .await;
+        add_word_appearance_to_word_indexes(
+          &word,
+          &mut word_indexes,
+          post.id,
+          "post_title".to_string(),
+        );
+      });
 
-    if res.is_err() {
-      tracing::error!("Failed to index the posts: {}", res.err().unwrap());
-      return Err(SearchError::InternalError);
+      post.short_description.split(" ").for_each(|word| {
+        let word = word.to_lowercase();
+
+        add_word_appearance_to_word_indexes(
+          &word,
+          &mut word_indexes,
+          post.id,
+          "post_short_description".to_string(),
+        );
+      });
+
+      // @TODO-ZM: add post description to the index
+      // @TODO-ZM: populate tags by tag_ids and index them.
+      // @TODO-ZM: populate poster by poster_id and index it.
+      // @TODO-ZM: populate category by category_id and index it.
     }
-    let res = res.unwrap();
 
-    if !res.status().is_success() {
-      tracing::error!(
-        "Failed to index the posts: {}, body: {}",
-        res.status(),
-        res.text().await.unwrap()
+    for word_index in word_indexes {
+      let word = word_index.word;
+      let appear_in = serde_json::to_string(&word_index.r#in).unwrap();
+
+      let query = format!(
+        r#"
+        INSERT INTO word [ {{ id: {{ word: "{}" }}, in: {} }} ]
+        ON DUPLICATE KEY UPDATE in+={}
+        "#,
+        escape_double_quote(&word),
+        appear_in,
+        appear_in
       );
-      return Err(SearchError::InternalError);
-    }
 
-    tracing::debug!("result of indexing: {}", res.text().await.unwrap());
+      let res = self.search_db.query(&query).await;
+
+      if res.is_err() {
+        tracing::error!("Failed to index the word: {}", res.err().unwrap());
+        return Err(SearchError::InternalError);
+      }
+    }
 
     Ok(())
   }

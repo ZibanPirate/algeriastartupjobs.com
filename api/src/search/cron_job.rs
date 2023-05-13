@@ -19,8 +19,6 @@ pub struct SearchCronJob {
 async fn run(app_state: AppState) {
   tracing::info!("🚀 Indexing");
 
-  app_state.search_service.setup_search().await;
-
   let tasks = app_state
     .task_repository
     .get_many_compact_tasks_by_filter("name='Indexing' AND status='Pending'", 10, 0)
@@ -57,6 +55,7 @@ async fn run(app_state: AppState) {
   }
 
   tracing::info!("indexing {} posts", post_ids.len());
+
   let posts = app_state
     .post_repository
     .get_many_posts_by_ids(post_ids)
@@ -110,7 +109,7 @@ impl SearchCronJob {
           run(app_state.clone()).await;
           is_job_running.store(false, Ordering::Relaxed);
         } else {
-          tracing::info!("⏭️  Indexing job is already running, skipping");
+          tracing::info!("⏳ Still indexing... ");
         }
       });
     });

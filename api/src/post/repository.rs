@@ -11,12 +11,12 @@ use crate::_utils::{
 use super::model::{CompactPost, DBPost, Post};
 
 pub struct PostRepository {
-  pub db: Arc<Surreal<Client>>,
+  main_db: Arc<Surreal<Client>>,
 }
 
 impl PostRepository {
-  pub fn new(db: Arc<Surreal<Client>>) -> Self {
-    Self { db }
+  pub fn new(main_db: Arc<Surreal<Client>>) -> Self {
+    Self { main_db }
   }
 
   pub async fn get_many_compact_posts_by_filter(
@@ -32,7 +32,7 @@ impl PostRepository {
       filter, limit, start
     );
 
-    let query_result = self.db.query(&query).await;
+    let query_result = self.main_db.query(&query).await;
 
     match query_result {
       Ok(mut query_result) => {
@@ -78,7 +78,7 @@ impl PostRepository {
       )
     );
 
-    let query_result = self.db.query(&query).await;
+    let query_result = self.main_db.query(&query).await;
 
     match query_result {
       Ok(mut query_result) => {
@@ -108,7 +108,7 @@ impl PostRepository {
       id
     );
 
-    let query_result = self.db.query(&query).await;
+    let query_result = self.main_db.query(&query).await;
 
     match query_result {
       Ok(mut query_result) => {
@@ -192,7 +192,7 @@ impl PostRepository {
         .join(", ")
     );
 
-    let query_result = self.db.query(&query).await;
+    let query_result = self.main_db.query(&query).await;
     match query_result {
       Ok(mut query_result) => {
         let record: Result<Option<DBRecord>, _> = query_result.take(1);

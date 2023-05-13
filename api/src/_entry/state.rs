@@ -26,7 +26,10 @@ pub async fn create_app_state() -> Result<AppState, BootError> {
   let search_db = Arc::new(create_db_client("asj".to_string(), "search".to_string()).await?);
 
   let config_service = Arc::new(ConfigService::new());
-  let search_service = Arc::new(SearchService::new(Arc::clone(&config_service)));
+  let search_service = Arc::new(SearchService::new(
+    Arc::clone(&config_service),
+    Arc::clone(&search_db),
+  ));
   let post_repository = Arc::new(PostRepository::new(Arc::clone(&main_db)));
   let category_repository = Arc::new(CategoryRepository::new(Arc::clone(&main_db)));
   let tag_repository = Arc::new(TagRepository::new(Arc::clone(&main_db)));

@@ -100,3 +100,25 @@ DB: test
 
 SELECT count() FROM task WHERE status!="Completed" GROUP BY count;
 SELECT count() FROM task GROUP BY count;
+
+###
+POST {{dbBaseUrl}}/sql
+Accept: application/json
+Authorization: Basic root root
+NS: asj
+DB: search
+
+SELECT * from word
+
+###
+
+POST {{dbBaseUrl}}/sql
+Accept: application/json
+Authorization: Basic root root
+NS: asj
+DB: search
+
+INSERT INTO word [ { id: { word: "to" }, in: [{"model_id":108,"appear_in":"post_short_description"},{"model_id":111,"appear_in":"post_short_description"},{"model_id":111,"appear_in":"post_short_description"},{"model_id":112,"appear_in":"post_short_description"},{"model_id":113,"appear_in":"post_short_description"}] } ]
+ON DUPLICATE KEY UPDATE in+=[{"model_id":108,"appear_in":"post_short_description"},{"model_id":111,"appear_in":"post_short_description"},{"model_id":111,"appear_in":"post_short_description"},{"model_id":112,"appear_in":"post_short_description"},{"model_id":113,"appear_in":"post_short_description"}]
+
+###

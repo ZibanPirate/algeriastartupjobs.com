@@ -11,12 +11,12 @@ use crate::_utils::{
 use super::model::{CompactTask, DBTask, PartialTask, TaskName, TaskStatus, TaskType};
 
 pub struct TaskRepository {
-  pub db: Arc<Surreal<Client>>,
+  main_db: Arc<Surreal<Client>>,
 }
 
 impl TaskRepository {
-  pub fn new(db: Arc<Surreal<Client>>) -> Self {
-    Self { db }
+  pub fn new(main_db: Arc<Surreal<Client>>) -> Self {
+    Self { main_db }
   }
 
   pub async fn get_many_compact_tasks_by_filter(
@@ -32,7 +32,7 @@ impl TaskRepository {
       filter, limit, start
     );
 
-    let query_result = self.db.query(&query).await;
+    let query_result = self.main_db.query(&query).await;
 
     match query_result {
       Ok(mut query_result) => {
@@ -117,7 +117,7 @@ impl TaskRepository {
       }
     );
 
-    let query_result = self.db.query(&query).await;
+    let query_result = self.main_db.query(&query).await;
     match query_result {
       Ok(mut query_result) => {
         let record: Result<Option<DBRecord>, _> = query_result.take(1);
@@ -224,7 +224,7 @@ impl TaskRepository {
       filter,
     );
 
-    let query_result = self.db.query(&query).await;
+    let query_result = self.main_db.query(&query).await;
     match query_result {
       Ok(_) => Ok(()),
       Err(e) => {

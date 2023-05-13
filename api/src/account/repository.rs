@@ -8,12 +8,12 @@ use std::sync::Arc;
 use surrealdb::{engine::remote::ws::Client, Surreal};
 
 pub struct AccountRepository {
-  pub db: Arc<Surreal<Client>>,
+  main_db: Arc<Surreal<Client>>,
 }
 
 impl AccountRepository {
-  pub fn new(db: Arc<Surreal<Client>>) -> Self {
-    Self { db }
+  pub fn new(main_db: Arc<Surreal<Client>>) -> Self {
+    Self { main_db }
   }
 
   pub async fn get_many_compact_accounts_by_filter(
@@ -29,7 +29,7 @@ impl AccountRepository {
       filter, limit, start
     );
 
-    let query_result = self.db.query(&query).await;
+    let query_result = self.main_db.query(&query).await;
 
     match query_result {
       Ok(mut query_result) => {
@@ -88,7 +88,7 @@ impl AccountRepository {
       id
     );
 
-    let query_result = self.db.query(&query).await;
+    let query_result = self.main_db.query(&query).await;
 
     match query_result {
       Ok(mut query_result) => {
@@ -149,7 +149,7 @@ impl AccountRepository {
       },
     );
 
-    let query_result = self.db.query(&query).await;
+    let query_result = self.main_db.query(&query).await;
     match query_result {
       Ok(mut query_result) => {
         let record: Result<Option<DBRecord>, _> = query_result.take(1);
