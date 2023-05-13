@@ -14,6 +14,7 @@ use super::model::SearchResult;
 #[derive(Debug, Serialize, Deserialize)]
 struct WordIn {
   model_id: u32,
+  model_name: String,
   appear_in: String,
 }
 
@@ -33,6 +34,7 @@ fn add_word_appearance_to_word_indexes(
     if word_index.word == *word {
       word_index.r#in.push(WordIn {
         model_id,
+        model_name: "post".to_string(),
         appear_in,
       });
       return;
@@ -43,6 +45,7 @@ fn add_word_appearance_to_word_indexes(
     word: word.to_string(),
     r#in: vec![WordIn {
       model_id,
+      model_name: "post".to_string(),
       appear_in,
     }],
   });
