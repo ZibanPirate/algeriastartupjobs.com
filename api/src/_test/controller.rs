@@ -276,7 +276,7 @@ pub async fn clean_the_database_from_mocks(
     return StatusCode::UNAUTHORIZED.into_response();
   }
 
-  let query = format!(
+  let main_db_query = format!(
     r#"
     DELETE account;
     DELETE post;
@@ -285,13 +285,20 @@ pub async fn clean_the_database_from_mocks(
     DELETE task;
     "#,
   );
+  let search_db_query = format!(
+    r#"
+    DELETE word;
+    "#,
+  );
 
-  let query_result = app_state.main_db.query(query.as_str()).await;
+  let main_db_query_result = app_state.main_db.query(main_db_query.as_str()).await;
+  let search_db_query_result = app_state.search_db.query(search_db_query.as_str()).await;
 
-  match query_result {
-    Ok(_) => return StatusCode::NO_CONTENT.into_response(),
-    Err(_) => return StatusCode::INTERNAL_SERVER_ERROR.into_response(),
+  if main_db_query_result.is_err() || search_db_query_result.is_err() {
+    return StatusCode::INTERNAL_SERVER_ERROR.into_response();
   }
+
+  StatusCode::OK.into_response()
 }
 
 pub fn create_test_router() -> Router<AppState> {
