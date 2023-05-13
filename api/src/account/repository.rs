@@ -12,6 +12,10 @@ pub struct AccountRepository {
 }
 
 impl AccountRepository {
+  pub fn new(db: Arc<Surreal<Client>>) -> Self {
+    Self { db }
+  }
+
   pub async fn get_many_compact_accounts_by_filter(
     &self,
     filter: &str,

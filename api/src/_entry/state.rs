@@ -1,21 +1,17 @@
-use std::sync::Arc;
-
-use surrealdb::{
-  engine::remote::ws::{Client, Ws},
-  opt::auth::Root,
-  Surreal,
-};
-
+use super::database::create_db_client;
 use crate::{
   _utils::error::BootError, account::repository::AccountRepository,
   category::repository::CategoryRepository, config::service::ConfigService,
   post::repository::PostRepository, search::service::SearchService, tag::repository::TagRepository,
   task::repository::TaskRepository,
 };
+use std::sync::Arc;
+use surrealdb::{engine::remote::ws::Client, Surreal};
 
 #[derive(Clone)]
 pub struct AppState {
-  pub db: Arc<Surreal<Client>>,
+  pub main_db: Arc<Surreal<Client>>,
+  pub search_db: Arc<Surreal<Client>>,
   pub post_repository: Arc<PostRepository>,
   pub category_repository: Arc<CategoryRepository>,
   pub tag_repository: Arc<TagRepository>,
@@ -26,60 +22,20 @@ pub struct AppState {
 }
 
 pub async fn create_app_state() -> Result<AppState, BootError> {
-  let db = Surreal::new::<Ws>("127.0.0.1:7070").await;
-  if db.is_err() {
-    tracing::error!("Failed to setup the database: {}", db.err().unwrap());
-    return Err(BootError::DBSetupError);
-  }
-  let db = db.unwrap();
+  let main_db = Arc::new(create_db_client("asj".to_string(), "main".to_string()).await?);
+  let search_db = Arc::new(create_db_client("asj".to_string(), "search".to_string()).await?);
 
-  let db_login = db
-    .signin(Root {
-      username: "root",
-      password: "root",
-    })
-    .await;
-
-  if db_login.is_err() {
-    tracing::error!(
-      "Failed to login to the database: {}",
-      db_login.err().unwrap()
-    );
-    return Err(BootError::DBLoginError);
-  }
-
-  let db_namespace = db.use_ns("test").use_db("test").await;
-  if db_namespace.is_err() {
-    tracing::error!(
-      "Failed to use the namespace and database: {}",
-      db_namespace.err().unwrap()
-    );
-    return Err(BootError::DBNamespaceError);
-  }
-
-  let db = Arc::new(db);
-  let config_service = Arc::new(ConfigService {});
-  let search_service = Arc::new(SearchService {
-    config_service: Arc::clone(&config_service),
-  });
-  let post_repository = Arc::new(PostRepository {
-    db: Arc::clone(&db),
-  });
-  let category_repository = Arc::new(CategoryRepository {
-    db: Arc::clone(&db),
-  });
-  let tag_repository = Arc::new(TagRepository {
-    db: Arc::clone(&db),
-  });
-  let account_repository = Arc::new(AccountRepository {
-    db: Arc::clone(&db),
-  });
-  let task_repository = Arc::new(TaskRepository {
-    db: Arc::clone(&db),
-  });
+  let config_service = Arc::new(ConfigService::new());
+  let search_service = Arc::new(SearchService::new(Arc::clone(&config_service)));
+  let post_repository = Arc::new(PostRepository::new(Arc::clone(&main_db)));
+  let category_repository = Arc::new(CategoryRepository::new(Arc::clone(&main_db)));
+  let tag_repository = Arc::new(TagRepository::new(Arc::clone(&main_db)));
+  let account_repository = Arc::new(AccountRepository::new(Arc::clone(&main_db)));
+  let task_repository = Arc::new(TaskRepository::new(Arc::clone(&main_db)));
 
   Ok(AppState {
-    db: Arc::clone(&db),
+    main_db: Arc::clone(&main_db),
+    search_db: Arc::clone(&search_db),
     post_repository: Arc::clone(&post_repository),
     category_repository: Arc::clone(&category_repository),
     tag_repository: Arc::clone(&tag_repository),

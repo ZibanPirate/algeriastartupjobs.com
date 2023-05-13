@@ -15,6 +15,10 @@ pub struct TaskRepository {
 }
 
 impl TaskRepository {
+  pub fn new(db: Arc<Surreal<Client>>) -> Self {
+    Self { db }
+  }
+
   pub async fn get_many_compact_tasks_by_filter(
     &self,
     filter: &str,

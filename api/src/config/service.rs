@@ -23,6 +23,10 @@ pub struct Config {
 pub struct ConfigService {}
 
 impl ConfigService {
+  pub fn new() -> Self {
+    Self {}
+  }
+
   // @TODO-ZM: memoize get_config
   pub fn get_config(&self) -> Config {
     // Load the .env file

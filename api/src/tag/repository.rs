@@ -15,6 +15,10 @@ pub struct TagRepository {
 }
 
 impl TagRepository {
+  pub fn new(db: Arc<Surreal<Client>>) -> Self {
+    Self { db }
+  }
+
   pub async fn get_many_compact_tags_by_filter(
     &self,
     filter: &str,

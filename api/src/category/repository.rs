@@ -15,6 +15,10 @@ pub struct CategoryRepository {
 }
 
 impl CategoryRepository {
+  pub fn new(db: Arc<Surreal<Client>>) -> Self {
+    Self { db }
+  }
+
   pub async fn get_many_compact_categories_by_filter(
     &self,
     filter: &str,

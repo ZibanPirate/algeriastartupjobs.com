@@ -13,6 +13,10 @@ pub struct SearchService {
 }
 
 impl SearchService {
+  pub fn new(config_service: Arc<ConfigService>) -> Self {
+    Self { config_service }
+  }
+
   pub async fn setup_search(&self) {
     let client = reqwest::Client::new();
     let res = client

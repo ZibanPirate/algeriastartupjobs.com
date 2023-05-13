@@ -15,6 +15,10 @@ pub struct PostRepository {
 }
 
 impl PostRepository {
+  pub fn new(db: Arc<Surreal<Client>>) -> Self {
+    Self { db }
+  }
+
   pub async fn get_many_compact_posts_by_filter(
     &self,
     filter: &str,

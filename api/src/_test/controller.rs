@@ -286,7 +286,7 @@ pub async fn clean_the_database_from_mocks(
     "#,
   );
 
-  let query_result = app_state.db.query(query.as_str()).await;
+  let query_result = app_state.main_db.query(query.as_str()).await;
 
   match query_result {
     Ok(_) => return StatusCode::NO_CONTENT.into_response(),
