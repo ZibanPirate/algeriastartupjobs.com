@@ -28,6 +28,8 @@ strum_macros = "0.24.3"
 slug = "0.1.4"
 dotenv = "0.15.0"
 tokio-cron-scheduler = "0.9.4"
+bk-tree = "0.5.0"
+itertools = "0.10.5"
 
 [dev-dependencies]
 cargo-watch = "8.4.0"

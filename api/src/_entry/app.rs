@@ -87,10 +87,23 @@ async fn create_cron_jobs(app_state: AppState) -> Result<JobScheduler, BootError
   let search_cron_job = Arc::new(SearchCronJob { app_state });
 
   // @TODO-ZM: add un-indexing cron job
-  let registration_result = sched.add(search_cron_job.create_cron_job().unwrap()).await;
+  let registration_result = sched
+    .add(search_cron_job.create_indexing_cron_job().unwrap())
+    .await;
   if registration_result.is_err() {
     tracing::error!(
       "Error while registering search cron job: {:?}",
+      registration_result.err()
+    );
+    return Err(BootError::CronJobSetupError);
+  }
+
+  let registration_result = sched
+    .add(search_cron_job.create_bk_tree_refresher_cron_job().unwrap())
+    .await;
+  if registration_result.is_err() {
+    tracing::error!(
+      "Error while registering bk-tree refresher cron job: {:?}",
       registration_result.err()
     );
     return Err(BootError::CronJobSetupError);

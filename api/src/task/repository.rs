@@ -89,6 +89,7 @@ impl TaskRepository {
           model_name.to_string(),
           model_id
         ),
+        _ => "".to_string(),
       },
       escape_single_quote(&task.r#type.to_string()),
       match &task.r#type {
@@ -174,6 +175,12 @@ impl TaskRepository {
             escape_single_quote(&name.to_string()),
             model_name,
             model_id
+          ),
+          _ => format!(
+            r#"
+            name: '{}',
+            "#,
+            escape_single_quote(&name.to_string()),
           ),
         },
         None => "".to_string(),

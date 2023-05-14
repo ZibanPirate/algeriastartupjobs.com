@@ -22,6 +22,7 @@ pub enum TaskType {
 #[serde(tag = "name")] // to flatten the enum to the parent struct
 pub enum TaskName {
   Indexing { model_name: String, model_id: u32 },
+  RefreshingBKTree,
 }
 
 #[pick(CompactTask, [id, name, status], [Debug, Serialize, Deserialize, Clone])]

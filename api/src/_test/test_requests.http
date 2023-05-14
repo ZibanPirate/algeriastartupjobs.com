@@ -181,3 +181,13 @@ SELECT math::sum(score) as score, model_id as id FROM (
 ) GROUP BY id ORDER BY score NUMERIC DESC LIMIT 100 START 0;
 
 ###
+
+POST {{dbBaseUrl}}/sql
+Accept: application/json
+Authorization: Basic root root
+NS: asj
+DB: search
+
+SELECT word from word WHERE appear_in IN ["post_title", "post_short_description"] GROUP BY word
+
+###

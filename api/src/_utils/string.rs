@@ -19,6 +19,16 @@ pub fn escape_double_quote(s: &String) -> String {
   s.replace("\"", "\\\"")
 }
 
+// @TODO-ZM: change this to get_searchable_words
 pub fn get_words<'a>(paragraph: &'a str) -> impl Iterator<Item = &'a str> {
   paragraph.split(|c: char| !c.is_alphanumeric())
+}
+
+// @TODO-ZM: filter out common words
+pub fn get_searchable_words(paragraph: &String) -> Vec<String> {
+  paragraph
+    .split(|c: char| !c.is_alphanumeric())
+    .into_iter()
+    .map(|s| s.to_string())
+    .collect()
 }
