@@ -197,10 +197,6 @@ resource "ssh_resource" "upload_dot_env_to_vps" {
     source      = "${path.module}/../../api/${local.stage}.env"
     destination = "${local.upload_tmp_name}.env"
   }
-
-  commands = [
-    "sudo rm ${local.app_folder}/.env || true",
-  ]
 }
 
 
@@ -228,6 +224,7 @@ resource "ssh_resource" "upload_app_to_vps" {
     "sudo mkdir -p ${local.app_folder} || true",
     "sudo rm ${local.app_folder}/${local.app_name} || true",
     "sudo mv ${local.upload_tmp_name} ${local.app_folder}/${local.app_name} || true",
+    "sudo rm ${local.app_folder}/.env || true",
     "sudo mv ${local.upload_tmp_name}.env ${local.app_folder}/.env || true",
     "sudo chmod +x ${local.app_folder}/${local.app_name} || true",
     "sudo systemctl start ${local.db_service_name} || true",
