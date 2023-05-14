@@ -47,11 +47,6 @@ impl PostRepository {
           return Err(DataAccessError::InternalError);
         }
         if posts.as_ref().unwrap().len() == 0 {
-          tracing::info!(
-            "No posts found with filter: {} : {:?}",
-            filter,
-            query_result_string
-          );
           return Ok(vec![]);
         }
 

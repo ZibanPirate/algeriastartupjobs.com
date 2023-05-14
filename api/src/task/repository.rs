@@ -47,11 +47,6 @@ impl TaskRepository {
           return Err(DataAccessError::InternalError);
         }
         if tasks.as_ref().unwrap().len() == 0 {
-          tracing::info!(
-            "No tasks found with filter: {} : {:?}",
-            filter,
-            query_result_string
-          );
           return Ok(vec![]);
         }
 

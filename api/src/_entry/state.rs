@@ -29,8 +29,9 @@ pub async fn create_app_state() -> Result<AppState, BootError> {
       "search".to_string(),
       Some(
         r#"
-        DEFINE INDEX word_appearance_in_model ON TABLE word FIELDS in[*].model_id;
-        DEFINE INDEX word ON TABLE word FIELDS id.word;
+        DEFINE INDEX word ON TABLE word FIELDS word;
+        DEFINE INDEX model_id ON TABLE word FIELDS model_id;
+        DEFINE INDEX appear_in ON TABLE word FIELDS appear_in;
       "#
         .to_string(),
       ),
@@ -39,10 +40,7 @@ pub async fn create_app_state() -> Result<AppState, BootError> {
   );
 
   let config_service = Arc::new(ConfigService::new());
-  let search_service = Arc::new(SearchService::new(
-    Arc::clone(&config_service),
-    Arc::clone(&search_db),
-  ));
+  let search_service = Arc::new(SearchService::new(Arc::clone(&search_db)));
   let post_repository = Arc::new(PostRepository::new(Arc::clone(&main_db)));
   let category_repository = Arc::new(CategoryRepository::new(Arc::clone(&main_db)));
   let tag_repository = Arc::new(TagRepository::new(Arc::clone(&main_db)));

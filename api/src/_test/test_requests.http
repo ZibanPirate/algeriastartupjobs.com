@@ -108,7 +108,7 @@ Authorization: Basic root root
 NS: asj
 DB: search
 
-SELECT * from word
+SELECT * from word WHERE word="and"
 
 ###
 
@@ -118,8 +118,21 @@ Authorization: Basic root root
 NS: asj
 DB: search
 
-INSERT INTO word [ { id: { word: "to" }, in: [{"model_id":108,"appear_in":"post_short_description"},{"model_id":111,"appear_in":"post_short_description"},{"model_id":111,"appear_in":"post_short_description"},{"model_id":112,"appear_in":"post_short_description"},{"model_id":113,"appear_in":"post_short_description"}] } ]
-ON DUPLICATE KEY UPDATE in+=[{"model_id":108,"appear_in":"post_short_description"},{"model_id":111,"appear_in":"post_short_description"},{"model_id":111,"appear_in":"post_short_description"},{"model_id":112,"appear_in":"post_short_description"},{"model_id":113,"appear_in":"post_short_description"}]
+DELETE word;
+
+###
+
+POST {{dbBaseUrl}}/sql
+Accept: application/json
+Authorization: Basic root root
+NS: asj
+DB: search
+
+CREATE word CONTENT {
+  word: "software",
+  appear_in: "post_title",
+  model_id: 5
+}
 
 ###
 
@@ -150,21 +163,20 @@ Authorization: Basic root root
 NS: asj
 DB: search
 
-SELECT math::sum(score) as score, in.model_id as id FROM (
-  SELECT in, word, (
-      IF in.appear_in="post_title" THEN
+
+SELECT math::sum(score) as score, model_id as id FROM (
+  SELECT word, model_id, ((
+      IF appear_in="post_title" THEN
         100
-      ELSE IF in.appear_in="post_short_description" THEN
+      ELSE IF appear_in="post_short_description" THEN
         25
-      ELSE IF in.appear_in="post_tags" THEN
+      ELSE IF appear_in="post_tags" THEN
         5
       ELSE
         1
       END
-    ) as score FROM (
-    SELECT count() as count, in.model_id, in.appear_in, word FROM (
-      SELECT in, id.word as word FROM word WHERE id.word IN ["designer" ,"software"] SPLIT in
-    ) GROUP BY in.model_id, in.appear_in, word
+    ) * count) as score FROM (
+    SELECT count() as count, word, model_id, appear_in FROM word WHERE word IN ["software", "designer", "inspire", "inform"] GROUP BY word, model_id, appear_in
   )
 ) GROUP BY id ORDER BY score NUMERIC DESC LIMIT 100 START 0;
 

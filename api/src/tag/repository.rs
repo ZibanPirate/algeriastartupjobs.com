@@ -47,11 +47,6 @@ impl TagRepository {
           return Err(DataAccessError::InternalError);
         }
         if tags.as_ref().unwrap().len() == 0 {
-          tracing::info!(
-            "No tags found with filter: {} : {:?}",
-            filter,
-            query_result_string
-          );
           return Ok(vec![]);
         }
 

@@ -18,3 +18,7 @@ pub fn escape_single_quote(s: &String) -> String {
 pub fn escape_double_quote(s: &String) -> String {
   s.replace("\"", "\\\"")
 }
+
+pub fn get_words<'a>(paragraph: &'a str) -> impl Iterator<Item = &'a str> {
+  paragraph.split(|c: char| !c.is_alphanumeric())
+}

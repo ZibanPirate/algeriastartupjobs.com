@@ -44,11 +44,6 @@ impl AccountRepository {
           return Err(DataAccessError::InternalError);
         }
         if accounts.as_ref().unwrap().len() == 0 {
-          tracing::info!(
-            "No accounts found with filter: {} : {:?}",
-            filter,
-            query_result_string
-          );
           return Ok(vec![]);
         }
 
