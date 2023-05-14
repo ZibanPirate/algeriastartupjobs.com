@@ -46,19 +46,18 @@ variable "do_droplet_password" {
 }
 
 locals {
-  app_port            = "9090"
-  app_folder_name     = "asj"
-  app_folder          = "~/${local.app_folder_name}"
-  certificate_folder  = "/etc/ssl/certs"
-  upload_tmp_name     = "~/upload_tmp"
-  app_name            = "algeriastartupjobs-api"
-  service_name        = "algeriastartupjobs-api"
-  db_service_name     = "algeriastartupjobs-db"
-  search_service_name = "algeriastartupjobs-search"
-  stage               = terraform.workspace
-  root_domain_name    = "api.algeriastartupjobs.com"
-  sub_domain_name     = local.stage
-  domain_name         = "${local.sub_domain_name}.${local.root_domain_name}"
+  app_port           = "9090"
+  app_folder_name    = "asj"
+  app_folder         = "~/${local.app_folder_name}"
+  certificate_folder = "/etc/ssl/certs"
+  upload_tmp_name    = "~/upload_tmp"
+  app_name           = "algeriastartupjobs-api"
+  service_name       = "algeriastartupjobs-api"
+  db_service_name    = "algeriastartupjobs-db"
+  stage              = terraform.workspace
+  root_domain_name   = "api.algeriastartupjobs.com"
+  sub_domain_name    = local.stage
+  domain_name        = "${local.sub_domain_name}.${local.root_domain_name}"
 }
 
 provider "digitalocean" {
@@ -114,28 +113,11 @@ resource "digitalocean_droplet" "api" {
         [Install]
         WantedBy=multi-user.target
       path: /etc/systemd/system/${local.db_service_name}.service
-    - content: |
-        [Unit]
-        Description=Algeria Startup Jobs Search Engine
-        After=network.target
-
-        [Service]
-        ExecStart=sudo /home/${var.do_droplet_user}/quickwit/quickwit run
-        WorkingDirectory=/home/${var.do_droplet_user}/quickwit
-        Restart=always
-        RestartSec=5
-        User=${var.do_droplet_user}
-
-        [Install]
-        WantedBy=multi-user.target
-      path: /etc/systemd/system/${local.search_service_name}.service
     runcmd:
       - sudo apt update
       - sudo apt install nginx -y
       - sudo ufw allow 'Nginx HTTP'
       - curl -sSf https://install.surrealdb.com | sh
-      - curl -L https://install.quickwit.io | sudo sh
-      - sudo mv $(ls | egrep 'quickwit') /home/${var.do_droplet_user}/quickwit
       - sudo sh -c "echo '
           server {
               listen 80;
@@ -162,7 +144,6 @@ resource "digitalocean_droplet" "api" {
       - sudo systemctl start nginx
       - sudo systemctl daemon-reload
       - sudo systemctl start ${local.db_service_name}
-      - sudo systemctl start ${local.search_service_name}
       - sudo systemctl start ${local.service_name}
     EOT
 }

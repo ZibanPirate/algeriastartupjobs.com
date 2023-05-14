@@ -1,3 +1,4 @@
+use super::model::SearchRecord;
 use crate::{
   _utils::{error::SearchError, string::escape_double_quote},
   config::service::ConfigService,
@@ -6,12 +7,6 @@ use crate::{
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 use surrealdb::{engine::remote::ws::Client, Surreal};
-
-#[derive(Debug, Deserialize)]
-struct SearchRecord {
-  id: u32,
-  score: u32,
-}
 
 #[derive(Debug, Serialize, Deserialize)]
 struct WordIn {

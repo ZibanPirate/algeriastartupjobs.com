@@ -86,24 +86,6 @@
       "options": { "cwd": "${workspaceFolder}/api" }
     },
     {
-      "label": "dev search",
-      "type": "shell",
-      "command": [
-        "docker rm -f $(docker ps -aqf \"name=ajs-search-quickwit\") || true",
-        "&& DOCKER_DEFAULT_PLATFORM=linux/amd64 docker build -t ajs-search-quickwit -f quickwit.Dockerfile .",
-        "&& docker run -d --name=ajs-search-quickwit -p 7280:7280 -v ./quickwit_data:/quickwit/qwdata ajs-search-quickwit"
-      ],
-      "problemMatcher": [],
-      "options": { "cwd": "${workspaceFolder}/api" }
-    },
-    {
-      "label": "logs search",
-      "type": "shell",
-      "command": ["docker logs --follow $(docker ps -aqf \"name=ajs-search-quickwit\")"],
-      "problemMatcher": [],
-      "options": { "cwd": "${workspaceFolder}/api" }
-    },
-    {
       "label": "dev api",
       "type": "shell",
       "command": "cargo watch -x run",
@@ -111,7 +93,7 @@
       "options": { "cwd": "${workspaceFolder}/api" },
       "isBackground": true,
       "presentation": { "group": "dev" },
-      "dependsOn": ["dev db", "dev search"]
+      "dependsOn": ["dev db"]
     },
     {
       "label": "dev web",
