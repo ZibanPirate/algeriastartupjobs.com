@@ -5,13 +5,13 @@ import { AnimationProps } from "src/utils/props/animation";
 import FlipMove from "react-flip-move";
 import { shouldAnimate } from "src/utils/animation/should-animate";
 
-interface StackProps
+export interface StackProps
   extends PropsWithChildren,
     StyleProps,
     AnimationProps,
     Pick<CSSProperties, "minWidth" | "maxWidth" | "flex"> {
   orientation: "horizontal" | "vertical";
-  align?: "start" | "center" | "end" | "baseline" | "stretch";
+  align?: "start" | "center" | "end" | "baseline" | "stretch" | "space-between";
   gap?: CSSNumber;
   stretch?: boolean;
   wrap?: boolean;

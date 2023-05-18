@@ -11,6 +11,7 @@ import { PostCard } from "src/components/card/post";
 import { Button } from "src/components/button";
 import { Skeleton } from "src/components/skeleton";
 import { getStateActions } from "src/state";
+import { Icon } from "src/components/icon";
 
 export const Page: FC = () => {
   usePageTitle("Join a startup in Algeria");
@@ -36,12 +37,28 @@ export const Page: FC = () => {
         </Text>
       </Stack>
       {/* Global Search */}
-      <Stack orientation="vertical" margin="1 0 2" stretch={true} align="center">
-        <GlobalSearch
-          margin="0 1"
-          value={query}
-          setValue={(value) => getStateActions().landingPage.set({ query: value })}
-        />
+      <Stack orientation="vertical" stretch={true} align="stretch">
+        <Stack orientation="horizontal" margin="1 1 2" gap="1" align="space-between">
+          <Stack orientation="vertical" flex={1} />
+          <Stack orientation="vertical" align="center" flex={4}>
+            <GlobalSearch
+              margin="0 1"
+              value={query}
+              setValue={(value) => getStateActions().landingPage.set({ query: value })}
+            />
+          </Stack>
+          <Stack orientation="vertical" flex={1} align="end">
+            <Button
+              variant="v3"
+              padding="rectangle-end"
+              onClick={() => alert("Stay updated at github.com/algeriastartupjobs")}
+              vtName="new-post"
+            >
+              <Icon variant="v3" name="newPost" />
+              Free Post
+            </Button>
+          </Stack>
+        </Stack>
       </Stack>
       {/* Posts */}
       <Stack orientation="vertical" margin="0 0 3" stretch={true} align="center">

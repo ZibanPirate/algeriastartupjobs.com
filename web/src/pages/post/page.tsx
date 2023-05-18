@@ -18,6 +18,8 @@ import { PostCard } from "src/components/card/post";
 import { getStateActions } from "src/state";
 import { viewTransition } from "src/utils/animation/view-transition";
 import { useComponentDidMount } from "src/utils/hooks/component-did-mount";
+import { GlobalSearch } from "src/components/search/global";
+import { Icon } from "src/components/icon";
 
 export const Page: FC = () => {
   const postSlug = useMatch(POST_PAGE_URL)?.params.postSlug;
@@ -43,6 +45,31 @@ export const Page: FC = () => {
 
   return (
     <Stack orientation="vertical" stretch align="center" maxWidth={1600} margin="auto">
+      {/* Header */}
+      <Stack orientation="vertical" stretch={true} align="stretch">
+        <Stack orientation="horizontal" margin="1" gap="1" align="space-between">
+          <Stack orientation="vertical" flex={1} align="start">
+            <Link variant="v4" back={true} to={"/"}>
+              <Icon variant="v4" name="back" /> Back
+            </Link>
+          </Stack>
+          <Stack orientation="vertical" align="center" flex={4}>
+            <GlobalSearch value={""} setValue={() => null} />
+          </Stack>
+          <Stack orientation="vertical" flex={1} align="end">
+            <Button
+              variant="v3"
+              padding="rectangle-end"
+              onClick={() => alert("Stay updated at github.com/algeriastartupjobs")}
+              vtName="new-post"
+            >
+              <Icon variant="v3" name="newPost" />
+              Free Post
+            </Button>
+          </Stack>
+        </Stack>
+      </Stack>
+      {/* Post */}
       <Stack orientation="horizontal" align="start" stretch={true} gap="3">
         {post === "ERROR" ? (
           <Stack orientation="vertical" margin="3 0 0" flex={3} minWidth="60%">
@@ -58,7 +85,7 @@ export const Page: FC = () => {
         ) : (
           <Stack orientation="vertical" margin="1 1 0" flex={3} minWidth="60%">
             {loadedPost ? (
-              <Text variant="v3" margin="1 0" vtName={`post-title-${loadedPost?.id}`}>
+              <Text variant="v3" margin="0 0 1" vtName={`post-title-${loadedPost?.id}`}>
                 {loadedPost?.title}
               </Text>
             ) : (
@@ -123,8 +150,12 @@ export const Page: FC = () => {
                 Apply
               </Button>
               <Text variant="v4">or</Text>
-              <Link back={true} to="/" variant="v4">
-                go Back
+              <Link
+                to="#"
+                variant="v4"
+                onClick={() => alert("Stay updated at github.com/algeriastartupjobs")}
+              >
+                share this post
               </Link>
             </Stack>
           </Stack>
