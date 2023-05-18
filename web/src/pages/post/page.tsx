@@ -16,8 +16,6 @@ import { getAccountName } from "src/utils/models/acount-name";
 import { Skeleton } from "src/components/skeleton";
 import { PostCard } from "src/components/card/post";
 import { getStateActions } from "src/state";
-import { viewTransition } from "src/utils/animation/view-transition";
-import { useComponentDidMount } from "src/utils/hooks/component-did-mount";
 import { GlobalSearch } from "src/components/search/global";
 import { Icon } from "src/components/icon";
 
@@ -25,18 +23,11 @@ export const Page: FC = () => {
   const postSlug = useMatch(POST_PAGE_URL)?.params.postSlug;
   const postId = useMemo(() => (/(.*)_(\d+)$/.exec(postSlug || "") || [])[2], [postSlug]);
 
-  const componentDidMount = useComponentDidMount();
-
   useEffect(() => {
     getStateActions().postPage.set({ postId });
     if (!postId) return;
-    viewTransition(
-      () => {
-        fetchPostForPostPage(postId);
-        fetchSimilarPostsForPostPage(postId);
-      },
-      { skip: !componentDidMount }
-    );
+    fetchPostForPostPage(postId);
+    fetchSimilarPostsForPostPage(postId);
   }, [postId]);
 
   const { post, similarPosts } = useSliceSelector("postPage");
