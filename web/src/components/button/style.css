@@ -17,3 +17,7 @@
 .button-rectangle {
   padding: 0.25em 0.5em; /* 0.5em because we have line-height: 1.5;*/
 }
+
+.button-rectangle-end {
+  padding: 0.25em 0.5em 0.25em 0.25em; /* 0.5em because we have line-height: 1.5;*/
+}

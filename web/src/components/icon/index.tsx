@@ -1,10 +1,6 @@
 import { FC, memo } from "react";
 import "./style.css";
-import {
-  FontVariantProps,
-  StyleProps,
-  marginToClasses,
-} from "src/utils/props/style";
+import { FontVariantProps, StyleProps, marginToClasses } from "src/utils/props/style";
 import * as icons from "./svg";
 
 interface IconProps extends StyleProps, FontVariantProps {
@@ -13,19 +9,10 @@ interface IconProps extends StyleProps, FontVariantProps {
 
 // @TODO-ZM: Add ColorVariantProps
 const _Icon: FC<IconProps> = ({ variant, margin, name }) => {
-  const classes = [
-    "icon",
-    `font-variant-${variant}`,
-    ...marginToClasses(margin),
-  ];
+  const classes = ["icon", `font-variant-${variant}`, ...marginToClasses(margin)];
 
   const maskImage = `url(${icons[name].default})`;
 
-  return (
-    <span
-      className={classes.join(" ")}
-      style={{ maskImage, WebkitMaskImage: maskImage }}
-    />
-  );
+  return <span className={classes.join(" ")} style={{ maskImage, WebkitMaskImage: maskImage }} />;
 };
 export const Icon = memo(_Icon);

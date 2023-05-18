@@ -4,7 +4,7 @@
 
 .flex-horizontal {
   flex-direction: row;
-  align-items: baseline;
+  align-items: center;
 }
 
 .flex-vertical {
@@ -33,6 +33,10 @@
 
 .flex-align-stretch > * {
   flex: auto;
+}
+
+.flex-align-space-between {
+  justify-content: space-between;
 }
 
 .flex-gap-0 {

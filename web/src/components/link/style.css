@@ -1,5 +1,6 @@
 .link {
   text-decoration: none;
+  display: inline-flex;
 }
 
 .link:link {

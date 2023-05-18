@@ -1,13 +1,10 @@
-import { FC, PropsWithChildren } from "react";
+import { CSSProperties, FC, PropsWithChildren } from "react";
 import "./style.css";
-import {
-  FontVariantProps,
-  StyleProps,
-  marginToClasses,
-} from "src/utils/props/style";
+import { FontVariantProps, StyleProps, marginToClasses } from "src/utils/props/style";
+import { AnimationProps } from "src/utils/props/animation";
 
-interface ButtonProps extends PropsWithChildren, StyleProps, FontVariantProps {
-  padding?: "square" | "rectangle";
+interface ButtonProps extends PropsWithChildren, StyleProps, FontVariantProps, AnimationProps {
+  padding?: "square" | "rectangle" | "rectangle-end";
   onClick?: () => void;
 }
 
@@ -17,6 +14,7 @@ export const Button: FC<ButtonProps> = ({
   margin,
   padding = "rectangle",
   onClick,
+  vtName,
 }) => {
   const classes = [
     "button",
@@ -25,8 +23,11 @@ export const Button: FC<ButtonProps> = ({
     ...marginToClasses(margin),
   ];
 
+  const style: CSSProperties = {};
+  if (vtName) style["viewTransitionName"] = vtName;
+
   return (
-    <button className={classes.join(" ")} onClick={onClick}>
+    <button className={classes.join(" ")} style={style} onClick={onClick}>
       {children}
     </button>
   );
