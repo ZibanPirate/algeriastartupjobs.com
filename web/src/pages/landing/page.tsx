@@ -54,6 +54,7 @@ export const Page: FC = () => {
           margin="0 1"
           value={query}
           setValue={(value) => getStateActions().landingPage.set({ query: value })}
+          onClick={fetchPostsForLandingPage}
         />
       </Stack>
       {/* Posts */}

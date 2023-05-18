@@ -9,7 +9,7 @@ import { CompactTag } from "src/models/tag";
 import { AccountType, CompactAccount } from "src/models/account";
 import "./style.css";
 import { Link } from "src/components/link";
-import { getAccountName } from "src/utils/models/acount-name";
+import { getAccountName } from "src/utils/models/account-name";
 import { Divider } from "src/components/divider";
 import { Tag } from "src/components/tag";
 import { getPostUrl } from "src/utils/urls/post-url";

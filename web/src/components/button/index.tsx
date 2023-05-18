@@ -3,7 +3,11 @@ import "./style.css";
 import { FontVariantProps, StyleProps, marginToClasses } from "src/utils/props/style";
 import { AnimationProps } from "src/utils/props/animation";
 
-interface ButtonProps extends PropsWithChildren, StyleProps, FontVariantProps, AnimationProps {
+export interface ButtonProps
+  extends PropsWithChildren,
+    StyleProps,
+    FontVariantProps,
+    AnimationProps {
   padding?: "square" | "rectangle" | "rectangle-end";
   onClick?: () => void;
 }

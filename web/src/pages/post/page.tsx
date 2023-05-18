@@ -7,21 +7,28 @@ import { fetchPostForPostPage, fetchSimilarPostsForPostPage } from "./actions";
 import { usePageTitle } from "src/utils/hooks/page-title";
 
 import { isLoaded } from "src/utils/loadable";
-import { useMatch } from "react-router-dom";
+import { useMatch, useNavigate } from "react-router-dom";
 import { POST_PAGE_URL } from "src/utils/urls/common";
 import { getPostLongTitle } from "src/utils/urls/post-long-title";
 import { Button } from "src/components/button";
 import { Tag } from "src/components/tag";
-import { getAccountName } from "src/utils/models/acount-name";
+import { getAccountName } from "src/utils/models/account-name";
 import { Skeleton } from "src/components/skeleton";
 import { PostCard } from "src/components/card/post";
 import { getStateActions } from "src/state";
 import { GlobalSearch } from "src/components/search/global";
 import { Icon } from "src/components/icon";
+import { fetchPostsForLandingPage } from "../landing/actions";
 
 export const Page: FC = () => {
   const postSlug = useMatch(POST_PAGE_URL)?.params.postSlug;
   const postId = useMemo(() => (/(.*)_(\d+)$/.exec(postSlug || "") || [])[2], [postSlug]);
+  const { query } = useSliceSelector("landingPage");
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    fetchPostsForLandingPage();
+  }, [query]);
 
   useEffect(() => {
     getStateActions().postPage.set({ postId });
@@ -45,7 +52,11 @@ export const Page: FC = () => {
             </Link>
           </Stack>
           <Stack orientation="vertical" align="center">
-            <GlobalSearch value={""} setValue={() => null} />
+            <GlobalSearch
+              value={query}
+              setValue={(value) => getStateActions().landingPage.set({ query: value })}
+              onClick={() => navigate("/")}
+            />
           </Stack>
           <Stack orientation="vertical" align="end">
             <Button
