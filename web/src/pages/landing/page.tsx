@@ -25,7 +25,19 @@ export const Page: FC = () => {
   return (
     <Stack orientation="vertical" maxWidth={1600} margin="auto">
       {/* Header */}
-      <Stack orientation="vertical" margin="3 0 0" stretch={true} align="center">
+      <Stack orientation="vertical" margin="1 0 0" stretch={true} align="center">
+        <Stack orientation="vertical" stretch={true} align="end">
+          <Button
+            variant="v3"
+            padding="rectangle-end"
+            margin="0 1"
+            onClick={() => alert("Stay updated at github.com/algeriastartupjobs")}
+            vtName="new-post"
+          >
+            <Icon variant="v3" name="newPost" />
+            Free Post
+          </Button>
+        </Stack>
         <Text variant="v1" margin="0 1">
           Join a startup in Algeria
         </Text>
@@ -37,28 +49,12 @@ export const Page: FC = () => {
         </Text>
       </Stack>
       {/* Global Search */}
-      <Stack orientation="vertical" stretch={true} align="stretch">
-        <Stack orientation="horizontal" margin="1 1 2" gap="1" align="space-between">
-          <Stack orientation="vertical" flex={1} />
-          <Stack orientation="vertical" align="center" flex={4}>
-            <GlobalSearch
-              margin="0 1"
-              value={query}
-              setValue={(value) => getStateActions().landingPage.set({ query: value })}
-            />
-          </Stack>
-          <Stack orientation="vertical" flex={1} align="end">
-            <Button
-              variant="v3"
-              padding="rectangle-end"
-              onClick={() => alert("Stay updated at github.com/algeriastartupjobs")}
-              vtName="new-post"
-            >
-              <Icon variant="v3" name="newPost" />
-              Free Post
-            </Button>
-          </Stack>
-        </Stack>
+      <Stack orientation="vertical" margin="1 0 2" stretch={true} align="center">
+        <GlobalSearch
+          margin="0 1"
+          value={query}
+          setValue={(value) => getStateActions().landingPage.set({ query: value })}
+        />
       </Stack>
       {/* Posts */}
       <Stack orientation="vertical" margin="0 0 3" stretch={true} align="center">

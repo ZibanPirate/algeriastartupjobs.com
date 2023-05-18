@@ -47,16 +47,16 @@ export const Page: FC = () => {
     <Stack orientation="vertical" stretch align="center" maxWidth={1600} margin="auto">
       {/* Header */}
       <Stack orientation="vertical" stretch={true} align="stretch">
-        <Stack orientation="horizontal" margin="1" gap="1" align="space-between">
-          <Stack orientation="vertical" flex={1} align="start">
+        <Stack orientation="horizontal" margin="1 1 0" gap="1" align="space-between">
+          <Stack orientation="vertical" align="start">
             <Link variant="v4" back={true} to={"/"}>
               <Icon variant="v4" name="back" /> Back
             </Link>
           </Stack>
-          <Stack orientation="vertical" align="center" flex={4}>
+          <Stack orientation="vertical" align="center">
             <GlobalSearch value={""} setValue={() => null} />
           </Stack>
-          <Stack orientation="vertical" flex={1} align="end">
+          <Stack orientation="vertical" align="end">
             <Button
               variant="v3"
               padding="rectangle-end"
