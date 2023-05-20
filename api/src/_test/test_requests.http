@@ -29,6 +29,15 @@ Authorization: Basic root root
 NS: asj
 DB: main
 
+SELECT count() FROM account GROUP BY count
+
+###
+POST {{dbBaseUrl}}/sql
+Accept: application/json
+Authorization: Basic root root
+NS: asj
+DB: main
+
 BEGIN TRANSACTION;
 
 LET $count = (SELECT count() FROM account GROUP BY count)[0].count || 0;

@@ -3,7 +3,7 @@ use std::sync::Arc;
 use surrealdb::{engine::remote::ws::Client, Surreal};
 
 use crate::_utils::{
-  database::{db_thing_to_id, DBRecord},
+  database::{db_thing_to_id, DBCount, DBRecord},
   error::DataAccessError,
   string::escape_single_quote,
 };
@@ -217,6 +217,40 @@ impl PostRepository {
       }
       Err(e) => {
         tracing::error!("failed to create post {:?}, query {:?}", e, &query);
+        return Err(DataAccessError::CreationError);
+      }
+    }
+  }
+
+  pub async fn get_post_count(&self) -> Result<u32, DataAccessError> {
+    let query = r#"
+      SELECT count() FROM post GROUP BY count
+      "#;
+
+    let query_result = self.main_db.query(query).await;
+    match query_result {
+      Ok(mut query_result) => {
+        let db_count: Result<Option<DBCount>, _> = query_result.take(0);
+
+        match db_count {
+          Ok(db_count) => match db_count {
+            Some(db_count) => {
+              let count = db_count.count;
+              return Ok(count);
+            }
+            None => {
+              tracing::error!("failed to get post count {:?}", db_count);
+              return Err(DataAccessError::InternalError);
+            }
+          },
+          Err(e) => {
+            tracing::error!("failed to get post count {:?}", e);
+            return Err(DataAccessError::InternalError);
+          }
+        }
+      }
+      Err(e) => {
+        tracing::error!("failed to count posts {:?}, query {:?}", e, &query);
         return Err(DataAccessError::CreationError);
       }
     }

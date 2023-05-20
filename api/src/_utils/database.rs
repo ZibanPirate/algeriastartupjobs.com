@@ -7,6 +7,11 @@ pub struct DBRecord {
   pub id: Thing,
 }
 
+#[derive(Debug, Deserialize)]
+pub struct DBCount {
+  pub count: u32,
+}
+
 pub fn db_thing_to_id(thing: &Thing) -> Option<u32> {
   let raw_thing = thing.to_raw(); // table_name:{ id : 123}
   let re = Regex::new(r":\s(\d+)");

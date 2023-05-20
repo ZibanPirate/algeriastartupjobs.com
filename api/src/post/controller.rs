@@ -218,6 +218,21 @@ pub async fn get_many_similar_posts_by_id(
   .into_response()
 }
 
+pub async fn get_post_count(State(app_state): State<AppState>) -> impl IntoResponse {
+  let post_count = app_state.post_repository.get_post_count().await;
+
+  if !post_count.is_ok() {
+    // @TODO-ZM: log error reason
+    return StatusCode::INTERNAL_SERVER_ERROR.into_response();
+  }
+  let post_count = post_count.unwrap();
+
+  Json(json!({
+      "count": post_count,
+  }))
+  .into_response()
+}
+
 pub fn create_post_router() -> Router<AppState> {
   Router::new()
     .route("/feed", axum::routing::get(get_all_posts_for_feed))
@@ -226,4 +241,5 @@ pub fn create_post_router() -> Router<AppState> {
       "/:post_id/similar",
       axum::routing::get(get_many_similar_posts_by_id),
     )
+    .route("/count", axum::routing::get(get_post_count))
 }
