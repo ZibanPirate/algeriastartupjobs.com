@@ -1,4 +1,4 @@
-import { CSSProperties, FC, PropsWithChildren } from "react";
+import { CSSProperties, DOMAttributes, FC, PropsWithChildren } from "react";
 import "./style.css";
 import { FontVariantProps, StyleProps, marginToClasses } from "src/utils/props/style";
 import { AnimationProps } from "src/utils/props/animation";
@@ -7,9 +7,9 @@ export interface ButtonProps
   extends PropsWithChildren,
     StyleProps,
     FontVariantProps,
-    AnimationProps {
+    AnimationProps,
+    Pick<DOMAttributes<HTMLButtonElement>, "onClick"> {
   padding?: "square" | "rectangle" | "rectangle-end";
-  onClick?: () => void;
 }
 
 export const Button: FC<ButtonProps> = ({

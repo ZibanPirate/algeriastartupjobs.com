@@ -1,14 +1,24 @@
-import { FC } from "react";
+import { FC, HTMLAttributes } from "react";
 import "./style.css";
 import { FontVariantProps, StyleProps, marginToClasses } from "src/utils/props/style";
 
-export interface InputProps extends StyleProps, FontVariantProps {
+export interface InputProps
+  extends StyleProps,
+    FontVariantProps,
+    Pick<HTMLAttributes<HTMLInputElement>, "onKeyDown"> {
   placeholder?: string;
   value: string;
   setValue: (value: string) => void;
 }
 
-export const Input: FC<InputProps> = ({ variant, margin, placeholder, value, setValue }) => {
+export const Input: FC<InputProps> = ({
+  variant,
+  margin,
+  placeholder,
+  value,
+  setValue,
+  ...props
+}) => {
   const classes = ["input", `font-variant-${variant}`, ...marginToClasses(margin)];
 
   return (
@@ -17,6 +27,7 @@ export const Input: FC<InputProps> = ({ variant, margin, placeholder, value, set
       placeholder={placeholder}
       value={value}
       onChange={(e) => setValue(e.target.value)}
+      {...props}
     />
   );
 };
