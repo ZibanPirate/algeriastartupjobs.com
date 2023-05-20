@@ -18,17 +18,21 @@ import { PostCard } from "src/components/card/post";
 import { getStateActions } from "src/state";
 import { GlobalSearch } from "src/components/search/global";
 import { Icon } from "src/components/icon";
-import { fetchPostsForLandingPage } from "../landing/actions";
+import { fetchPostCountForLandingPage, fetchPostsForLandingPage } from "../landing/actions";
 
 export const Page: FC = () => {
   const postSlug = useMatch(POST_PAGE_URL)?.params.postSlug;
   const postId = useMemo(() => (/(.*)_(\d+)$/.exec(postSlug || "") || [])[2], [postSlug]);
-  const { query } = useSliceSelector("landingPage");
+  const { query, total_post_count } = useSliceSelector("landingPage");
   const navigate = useNavigate();
 
   useEffect(() => {
     fetchPostsForLandingPage();
   }, [query]);
+
+  useEffect(() => {
+    fetchPostCountForLandingPage();
+  }, []);
 
   useEffect(() => {
     getStateActions().postPage.set({ postId });
@@ -53,6 +57,7 @@ export const Page: FC = () => {
           </Stack>
           <Stack orientation="vertical" align="center">
             <GlobalSearch
+              total_post_count={total_post_count}
               value={query}
               setValue={(value) => getStateActions().landingPage.set({ query: value })}
               onClick={() => navigate("/")}

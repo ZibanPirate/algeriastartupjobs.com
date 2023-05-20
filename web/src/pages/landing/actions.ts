@@ -63,3 +63,15 @@ export const fetchPostsForLandingPage = async (): Promise<void> => {
     // Sentry.captureException(error, { tags: { type: "WEB_FETCH" } });
   }
 };
+
+export const fetchPostCountForLandingPage = async (): Promise<void> => {
+  const { landingPage } = getStateActions();
+  try {
+    const { data } = await Axios.get<{ count: number }>(getConfig().api.base_url + "/posts/count");
+    landingPage.set({ total_post_count: data.count });
+  } catch (error) {
+    // @TODO-ZM: use Logger abstraction instead of console.log
+    console.log("Error fetching post count for landing page", error);
+    // Sentry.captureException(error, { tags: { type: "WEB_FETCH" } });
+  }
+};

@@ -1,8 +1,16 @@
 import { FC } from "react";
 import { Search, SearchProps } from "src/components/search";
 
-interface GlobalSearchProps extends SearchProps {}
+interface GlobalSearchProps extends SearchProps {
+  total_post_count: number;
+}
 
-export const GlobalSearch: FC<GlobalSearchProps> = ({ ...props }) => {
-  return <Search {...props} placeholder="Search 1354 jobs" vtName="global-search" />;
+export const GlobalSearch: FC<GlobalSearchProps> = ({ total_post_count, ...props }) => {
+  return (
+    <Search
+      {...props}
+      placeholder={`Search${total_post_count > 0 ? ` ${total_post_count} ` : " "}jobs`}
+      vtName="global-search"
+    />
+  );
 };

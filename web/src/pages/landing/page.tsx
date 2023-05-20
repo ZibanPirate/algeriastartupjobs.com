@@ -3,7 +3,7 @@ import { Link } from "src/components/link";
 import { Stack } from "src/components/stack";
 import { Text } from "src/components/text";
 import { useSliceSelector } from "src/utils/state/selector";
-import { fetchPostsForLandingPage } from "./actions";
+import { fetchPostCountForLandingPage, fetchPostsForLandingPage } from "./actions";
 import { usePageTitle } from "src/utils/hooks/page-title";
 import { GlobalSearch } from "src/components/search/global";
 
@@ -16,11 +16,15 @@ import { Icon } from "src/components/icon";
 export const Page: FC = () => {
   usePageTitle("Join a startup in Algeria");
 
-  const { posts, query } = useSliceSelector("landingPage");
+  const { posts, query, total_post_count } = useSliceSelector("landingPage");
 
   useEffect(() => {
     fetchPostsForLandingPage();
   }, [query]);
+
+  useEffect(() => {
+    fetchPostCountForLandingPage();
+  }, []);
 
   return (
     <Stack orientation="vertical" maxWidth={1600} margin="auto">
@@ -52,6 +56,7 @@ export const Page: FC = () => {
       <Stack orientation="vertical" margin="1 0 2" stretch={true} align="center">
         <GlobalSearch
           margin="0 1"
+          total_post_count={total_post_count}
           value={query}
           setValue={(value) => getStateActions().landingPage.set({ query: value })}
           onClick={fetchPostsForLandingPage}
