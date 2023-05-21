@@ -7,9 +7,16 @@ import { usePageTitle } from "src/utils/hooks/page-title";
 import { Icon } from "src/components/icon";
 import { Input } from "src/components/input";
 import { Button } from "src/components/button";
+import { Select } from "src/components/select";
+import { Account } from "src/models/account";
+import { useSliceSelector } from "src/utils/state/selector";
+import { getStateActions } from "src/state";
 
 export const Page: FC = () => {
   usePageTitle("Post a job add for free!");
+
+  const { title, poster_type, poster_name, poster_contact } = useSliceSelector("createPostPage");
+  const { set } = getStateActions().createPostPage;
 
   return (
     <Stack orientation="vertical" stretch align="center" maxWidth={1600} margin="auto">
@@ -27,25 +34,34 @@ export const Page: FC = () => {
           <Input
             placeholder="Job title"
             stretch={false}
-            value=""
-            setValue={() => null}
+            value={title}
+            setValue={(value) => set({ title: value })}
             variant="v4"
           />
         </Stack>
         <Stack orientation="horizontal" gap="1" align="baseline">
-          <Text variant="v4">At (Company)</Text>
+          <Select<Account["type"]>
+            variant="v4"
+            padding="0"
+            value={poster_type}
+            setValue={(value) => set({ poster_type: value })}
+            options={[
+              { value: "Company", label: "At (Company)" },
+              { value: "Individual", label: "By (Individual)" },
+            ]}
+          />
           <Input
-            placeholder="Company name"
+            placeholder={`${poster_type} name`}
             stretch={false}
-            value=""
-            setValue={() => null}
+            value={poster_name}
+            setValue={(value) => set({ poster_name: value })}
             variant="v4"
           />
         </Stack>
         <Stack orientation="horizontal" gap="1" align="baseline">
-          <Text variant="v4">Apply by sending email to</Text>
+          <Text variant="v4">Candidate apply by sending email to</Text>
           <Input
-            placeholder="Your contact email"
+            placeholder={`${poster_type} contact email`}
             stretch={false}
             value=""
             setValue={() => null}
