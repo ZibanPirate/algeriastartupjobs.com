@@ -17,6 +17,11 @@ locals {
   count                 = local.is_shared_workspace ? 1 : 0
   contact_email_address = "contact@algeriastartupjobs.com"
   api_root_domain_name  = "api.algeriastartupjobs.com"
+  email_dns_records = [
+    { type : "MX", name : "", value : ["10 mx.zoho.com", "20 mx2.zoho.com", "50 mx3.zoho.com"] },
+    { type : "TXT", name : "", value : ["v=spf1 mx include:zoho.com ~all"] },
+    { type : "TXT", name : "dkim._domainkey", value : ["v=DKIM1; k=rsa; p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDCm72cEJ58s0O+DDFEuYbfofjbNxav37gs4avX784W6s7IOYTdUJcodUCfSUVmb3rPxocVhu5yU3X81BuETG54kg9hgSePx8FANURvkEKbLyyYZZes1g5zhJ1KK7mLkKn5wKnD54WDlrokf6u2TBw9oNU5vlYU1ZHgtxYQ2xmSaQIDAQAB"] }
+  ]
 }
 
 provider "aws" {
@@ -79,6 +84,34 @@ resource "aws_route53_record" "website" {
   type            = each.value.type
   zone_id         = aws_route53_zone.website[0].id
 }
+
+
+resource "aws_route53_record" "email" {
+  for_each = {
+    for record in local.email_dns_records : index(local.email_dns_records, record) => {
+      name    = record.name
+      records = record.value
+      type    = record.type
+    }
+  }
+
+  allow_overwrite = true
+  ttl             = 60
+  name            = each.value.name
+  type            = each.value.type
+  zone_id         = aws_route53_zone.website[0].id
+  records         = each.value.records
+}
+
+resource "aws_route53_record" "github" {
+  allow_overwrite = true
+  ttl             = 60
+  name            = "_github-challenge-algeriastartupjobs-org.algeriastartupjobs.com"
+  type            = "TXT"
+  zone_id         = aws_route53_zone.website[0].id
+  records         = ["029060ef0f"]
+}
+
 
 resource "aws_acm_certificate_validation" "website" {
   certificate_arn         = aws_acm_certificate.website[0].arn
