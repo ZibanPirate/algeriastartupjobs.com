@@ -25,6 +25,7 @@ export const Page: FC = () => {
   const postId = useMemo(() => (/(.*)_(\d+)$/.exec(postSlug || "") || [])[2], [postSlug]);
   const { query, total_post_count } = useSliceSelector("landingPage");
   const navigate = useNavigate();
+  const { set } = getStateActions().landingPage;
 
   useEffect(() => {
     fetchPostsForLandingPage();
@@ -59,14 +60,14 @@ export const Page: FC = () => {
             <GlobalSearch
               total_post_count={total_post_count}
               value={query}
-              setValue={(value) => getStateActions().landingPage.set({ query: value })}
+              setValue={(value) => set({ query: value })}
               onClick={() => navigate("/")}
             />
           </Stack>
           <Stack orientation="vertical" align="end">
             <Button
               variant="v3"
-              padding="rectangle-end"
+              paddingPreset="rectangle-end"
               onClick={() => navigate(CREATE_POST_PAGE_URL)}
               vtName="new-post"
             >

@@ -9,20 +9,20 @@ export interface ButtonProps
     FontVariantProps,
     AnimationProps,
     Pick<DOMAttributes<HTMLButtonElement>, "onClick"> {
-  padding?: "square" | "rectangle" | "rectangle-end";
+  paddingPreset?: "square" | "rectangle" | "rectangle-end";
 }
 
 export const Button: FC<ButtonProps> = ({
   children,
   variant,
   margin,
-  padding = "rectangle",
+  paddingPreset = "rectangle",
   onClick,
   vtName,
 }) => {
   const classes = [
     "button",
-    `button-${padding}`,
+    `button-${paddingPreset}`,
     `font-variant-${variant}`,
     ...marginToClasses(margin),
   ];

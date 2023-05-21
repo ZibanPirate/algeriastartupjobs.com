@@ -20,6 +20,7 @@ export const Page: FC = () => {
   const navigate = useNavigate();
 
   const { posts, query, total_post_count } = useSliceSelector("landingPage");
+  const { set } = getStateActions().landingPage;
 
   useEffect(() => {
     fetchPostsForLandingPage();
@@ -36,7 +37,7 @@ export const Page: FC = () => {
         <Stack orientation="vertical" stretch={true} align="end">
           <Button
             variant="v3"
-            padding="rectangle-end"
+            paddingPreset="rectangle-end"
             margin="0 1"
             onClick={() => navigate(CREATE_POST_PAGE_URL)}
             vtName="new-post"
@@ -61,7 +62,7 @@ export const Page: FC = () => {
           margin="0 1"
           total_post_count={total_post_count}
           value={query}
-          setValue={(value) => getStateActions().landingPage.set({ query: value })}
+          setValue={(value) => set({ query: value })}
           onClick={fetchPostsForLandingPage}
         />
       </Stack>

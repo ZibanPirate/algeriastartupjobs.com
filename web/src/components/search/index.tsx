@@ -49,7 +49,7 @@ export const Search: FC<SearchProps> = ({
           }
         }}
       />
-      <Button variant="v3" padding="square" onClick={onClick}>
+      <Button variant="v3" paddingPreset="square" onClick={onClick}>
         <Icon variant="v3" name="search" />
       </Button>
     </Stack>
