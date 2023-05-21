@@ -8,7 +8,7 @@ import { usePageTitle } from "src/utils/hooks/page-title";
 
 import { isLoaded } from "src/utils/loadable";
 import { useMatch, useNavigate } from "react-router-dom";
-import { POST_PAGE_URL } from "src/utils/urls/common";
+import { CREATE_POST_PAGE_URL, POST_PAGE_URL } from "src/utils/urls/common";
 import { getPostLongTitle } from "src/utils/urls/post-long-title";
 import { Button } from "src/components/button";
 import { Tag } from "src/components/tag";
@@ -18,7 +18,7 @@ import { PostCard } from "src/components/card/post";
 import { getStateActions } from "src/state";
 import { GlobalSearch } from "src/components/search/global";
 import { Icon } from "src/components/icon";
-import { fetchPostCountForLandingPage, fetchPostsForLandingPage } from "../landing/actions";
+import { fetchPostCountForLandingPage, fetchPostsForLandingPage } from "src/pages/landing/actions";
 
 export const Page: FC = () => {
   const postSlug = useMatch(POST_PAGE_URL)?.params.postSlug;
@@ -67,7 +67,7 @@ export const Page: FC = () => {
             <Button
               variant="v3"
               padding="rectangle-end"
-              onClick={() => alert("Stay updated at github.com/algeriastartupjobs")}
+              onClick={() => navigate(CREATE_POST_PAGE_URL)}
               vtName="new-post"
             >
               <Icon variant="v3" name="newPost" />

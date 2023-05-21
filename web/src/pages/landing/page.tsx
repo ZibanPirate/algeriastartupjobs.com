@@ -12,9 +12,12 @@ import { Button } from "src/components/button";
 import { Skeleton } from "src/components/skeleton";
 import { getStateActions } from "src/state";
 import { Icon } from "src/components/icon";
+import { CREATE_POST_PAGE_URL } from "src/utils/urls/common";
+import { useNavigate } from "react-router-dom";
 
 export const Page: FC = () => {
   usePageTitle("Join a startup in Algeria");
+  const navigate = useNavigate();
 
   const { posts, query, total_post_count } = useSliceSelector("landingPage");
 
@@ -35,7 +38,7 @@ export const Page: FC = () => {
             variant="v3"
             padding="rectangle-end"
             margin="0 1"
-            onClick={() => alert("Stay updated at github.com/algeriastartupjobs")}
+            onClick={() => navigate(CREATE_POST_PAGE_URL)}
             vtName="new-post"
           >
             <Icon variant="v3" name="newPost" />
