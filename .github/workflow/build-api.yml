@@ -1,0 +1,23 @@
+name: Build `./api`
+
+on: workflow_dispatch
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Build
+        run: cargo build --verbose
+
+      - name: Upload Build Artifact
+        uses: actions/upload-artifact@v3.1.2
+        with:
+          name: algeriastartupjobs-api
+          path: ./api/target/release/algeriastartupjobs-api
+          if-no-files-found: error
+          retention-days: 1
