@@ -1,6 +1,6 @@
 import { CSSProperties, FC, PropsWithChildren } from "react";
 import "./style.css";
-import { CSSNumber, StyleProps, marginToClasses } from "src/utils/props/style";
+import { CSSNumber, StyleProps, marginToClasses, paddingToClasses } from "src/utils/props/style";
 import { AnimationProps } from "src/utils/props/animation";
 import FlipMove from "react-flip-move";
 import { shouldAnimate } from "src/utils/animation/should-animate";
@@ -23,6 +23,7 @@ export const Stack: FC<StackProps> = ({
   orientation,
   align = "start",
   margin,
+  padding,
   gap,
   stretch = false,
   wrap = true,
@@ -42,6 +43,7 @@ export const Stack: FC<StackProps> = ({
     `flex-gap-${gap}`,
     wrap ? "flex-wrap" : "",
     ...marginToClasses(margin),
+    ...paddingToClasses(padding),
   ];
 
   const style: CSSProperties = {};

@@ -4,7 +4,6 @@
   border: 1px solid #aaaa;
   border-radius: 0;
   outline: none;
-  width: 100%; /* @TODO-ZM: what is going on here? */
 }
 
 .input:focus,

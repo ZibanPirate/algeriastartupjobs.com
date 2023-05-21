@@ -2,6 +2,7 @@
 @import url(./theme.css);
 @import url(./rules/flex.css);
 @import url(./rules/margin.css);
+@import url(./rules/padding.css);
 @import url(./rules/font.css);
 @import url(./rules/position.css);
 @import url(./rules/size.css);

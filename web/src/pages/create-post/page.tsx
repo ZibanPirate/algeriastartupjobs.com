@@ -1,55 +1,76 @@
-import { FC, useEffect } from "react";
+import { FC } from "react";
 import { Link } from "src/components/link";
 import { Stack } from "src/components/stack";
 import { Text } from "src/components/text";
-import { useSliceSelector } from "src/utils/state/selector";
 import { usePageTitle } from "src/utils/hooks/page-title";
 
-import { useNavigate } from "react-router-dom";
-import { getStateActions } from "src/state";
-import { GlobalSearch } from "src/components/search/global";
 import { Icon } from "src/components/icon";
-import { fetchPostCountForLandingPage, fetchPostsForLandingPage } from "src/pages/landing/actions";
+import { Input } from "src/components/input";
+import { Button } from "src/components/button";
 
 export const Page: FC = () => {
-  const { query, total_post_count } = useSliceSelector("landingPage");
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    fetchPostsForLandingPage();
-  }, [query]);
-
-  useEffect(() => {
-    fetchPostCountForLandingPage();
-  }, []);
-
   usePageTitle("Post a job add for free!");
 
   return (
     <Stack orientation="vertical" stretch align="center" maxWidth={1600} margin="auto">
       {/* Header */}
-      <Stack orientation="vertical" stretch={true} align="stretch">
-        <Stack orientation="horizontal" margin="1 1 0" gap="1" align="space-between">
-          <Stack orientation="vertical" align="start">
-            <Link variant="v4" back={true} to={"/"}>
-              <Icon variant="v4" name="back" /> Back
-            </Link>
-          </Stack>
-          <Stack orientation="vertical" align="center">
-            <GlobalSearch
-              total_post_count={total_post_count}
-              value={query}
-              setValue={(value) => getStateActions().landingPage.set({ query: value })}
-              onClick={() => navigate("/")}
-            />
-          </Stack>
+      <Stack orientation="vertical" margin="1 0 0" stretch={true} align="start">
+        <Link variant="v4" back={true} to={"/"}>
+          <Icon variant="v4" name="back" /> Back
+        </Link>
+      </Stack>
+      {/* Create Post */}
+      {/* @TODO-ZM: apply padding to other places where we did workaround it */}
+      <Stack orientation="vertical" stretch gap="1" margin="3 0" padding="0 1">
+        <Stack orientation="horizontal" gap="1" align="baseline">
+          <Text variant="v4">Looking for</Text>
+          <Input
+            placeholder="Job title"
+            stretch={false}
+            value=""
+            setValue={() => null}
+            variant="v4"
+          />
+        </Stack>
+        <Stack orientation="horizontal" gap="1" align="baseline">
+          <Text variant="v4">At (Company)</Text>
+          <Input
+            placeholder="Company name"
+            stretch={false}
+            value=""
+            setValue={() => null}
+            variant="v4"
+          />
+        </Stack>
+        <Stack orientation="horizontal" gap="1" align="baseline">
+          <Text variant="v4">Apply by sending email to</Text>
+          <Input
+            placeholder="Your contact email"
+            stretch={false}
+            value=""
+            setValue={() => null}
+            variant="v4"
+          />
+        </Stack>
+        <Stack orientation="horizontal" margin="2 0 0" align="center" gap="1">
+          <Button
+            variant="v3"
+            onClick={() => alert("Stay updated at github.com/algeriastartupjobs")}
+            vtName="new-post"
+          >
+            Post now
+          </Button>
+          <Text variant="v4">or</Text>
+          <Link
+            to="#"
+            variant="v4"
+            onClick={() => alert("Stay updated at github.com/algeriastartupjobs")}
+          >
+            Add more details
+          </Link>
         </Stack>
       </Stack>
-      {/* Post */}
-      <Stack orientation="horizontal" align="start" stretch={true} gap="3">
-        Post form goes here
-      </Stack>
-      <Text variant="v4" margin="2 1">
+      <Text variant="v4" margin="0 1 1">
         Source code is publicly available at&nbsp;
         <Link to="https://github.com/algeriastartupjobs/algeriastartupjobs.com" variant="v4">
           Github

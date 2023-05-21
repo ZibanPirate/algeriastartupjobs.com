@@ -2,7 +2,7 @@ import memoize from "lodash/memoize";
 
 export type CSSNumber = `${0 | 1 | 2 | 3}`;
 
-type Margin =
+type MarginOrPadding =
   | "auto"
   | CSSNumber
   | `${CSSNumber} ${CSSNumber}`
@@ -10,45 +10,54 @@ type Margin =
   | `${CSSNumber} ${CSSNumber} ${CSSNumber} ${CSSNumber}`;
 
 export interface StyleProps {
-  margin?: Margin;
+  margin?: MarginOrPadding;
+  padding?: MarginOrPadding;
 }
 
-const _marginToClasses = (
-  margin: Margin | "" = ""
-): Array<`margin-${"top" | "right" | "bottom" | "left"}-${CSSNumber}` | "margin-auto"> => {
-  if (margin === "auto") return ["margin-auto"];
-  const [top, right, bottom, left] = margin.split(" ") as CSSNumber[];
+const _marginOrPaddingToClasses = <T extends "margin" | "padding">(
+  value: MarginOrPadding | "" = "",
+  type: T
+): Array<`${T}-${"top" | "right" | "bottom" | "left"}-${CSSNumber}` | `${T}-auto`> => {
+  if (value === "auto") return [`${type}-auto`];
+  const [top, right, bottom, left] = value.split(" ") as CSSNumber[];
   if (left)
     return [
-      `margin-top-${top}`,
-      `margin-left-${left}`,
-      `margin-right-${right}`,
-      `margin-bottom-${bottom}`,
+      `${type}-top-${top}`,
+      `${type}-left-${left}`,
+      `${type}-right-${right}`,
+      `${type}-bottom-${bottom}`,
     ];
   else if (bottom)
     return [
-      `margin-top-${top}`,
-      `margin-left-${right}`,
-      `margin-bottom-${bottom}`,
-      `margin-right-${right}`,
+      `${type}-top-${top}`,
+      `${type}-left-${right}`,
+      `${type}-bottom-${bottom}`,
+      `${type}-right-${right}`,
     ];
   else if (right)
     return [
-      `margin-top-${top}`,
-      `margin-right-${right}`,
-      `margin-bottom-${top}`,
-      `margin-left-${right}`,
+      `${type}-top-${top}`,
+      `${type}-right-${right}`,
+      `${type}-bottom-${top}`,
+      `${type}-left-${right}`,
     ];
   else if (top)
     return [
-      `margin-top-${top}`,
-      `margin-right-${top}`,
-      `margin-bottom-${top}`,
-      `margin-left-${top}`,
+      `${type}-top-${top}`,
+      `${type}-right-${top}`,
+      `${type}-bottom-${top}`,
+      `${type}-left-${top}`,
     ];
   else return [];
 };
+
+const _marginToClasses = (margin: MarginOrPadding | "" = "") =>
+  _marginOrPaddingToClasses(margin, "margin");
 export const marginToClasses = memoize(_marginToClasses);
+
+const _paddingToClasses = (padding: MarginOrPadding | "" = "") =>
+  _marginOrPaddingToClasses(padding, "padding");
+export const paddingToClasses = memoize(_paddingToClasses);
 
 export interface FontVariantProps {
   variant: "v1" | "v2" | "v3" | "v4" | "v5";

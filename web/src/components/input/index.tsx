@@ -9,6 +9,7 @@ export interface InputProps
   placeholder?: string;
   value: string;
   setValue: (value: string) => void;
+  stretch?: boolean;
 }
 
 export const Input: FC<InputProps> = ({
@@ -17,9 +18,15 @@ export const Input: FC<InputProps> = ({
   placeholder,
   value,
   setValue,
+  stretch = true,
   ...props
 }) => {
-  const classes = ["input", `font-variant-${variant}`, ...marginToClasses(margin)];
+  const classes = [
+    "input",
+    `font-variant-${variant}`,
+    stretch ? "width100" : "",
+    ...marginToClasses(margin),
+  ];
 
   return (
     <input
