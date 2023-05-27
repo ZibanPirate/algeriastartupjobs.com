@@ -3,8 +3,8 @@ import Axios from "axios";
 import { getConfig } from "src/utils/config/get-config";
 import { CompactPost, Post } from "src/models/post";
 import { CompactCategory } from "src/models/category";
-import { CompactTag, Tag } from "src/models/tag";
-import { CompactAccount } from "src/models/account";
+import { CompactTag } from "src/models/tag";
+import { Account, CompactAccount } from "src/models/account";
 import { PostPageState } from "./state";
 import { isLoaded } from "src/utils/loadable";
 import { TagEntity } from "src/state/entities/tag";
@@ -38,7 +38,7 @@ export const fetchPostForPostPage = async (postId: string): Promise<void> => {
       post: Post;
       category: CompactCategory;
       tags: CompactTag[];
-      poster: CompactAccount;
+      poster: Account;
     }>(getConfig().api.base_url + "/posts/" + postId);
 
     const { category_id, tag_ids, poster_id, ...lonePost } = data.post;

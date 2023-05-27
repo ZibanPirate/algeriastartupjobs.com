@@ -140,12 +140,22 @@ export const Page: FC = () => {
                   <Text variant="v3" vtName={`post-poster-${loadedPost?.id}`}>
                     {getAccountName(loadedPost.poster)}
                   </Text>
-                  <Text variant="v4" vtName={`post-category-${loadedPost?.id}`}>
-                    {loadedPost.poster?.email}
-                  </Text>
+                  {loadedPost.poster?.email ? (
+                    <Text variant="v4" vtName={`post-category-${loadedPost?.id}`}>
+                      {loadedPost.poster?.email}
+                    </Text>
+                  ) : (
+                    <Skeleton
+                      variant="v4"
+                      width="10rem"
+                      vtName={`post-category-${loadedPost?.id}`}
+                    />
+                  )}
                 </>
               ) : (
-                <Skeleton variant="v3" width="10rem" vtName={`post-poster-${loadedPost?.id}`} />
+                <>
+                  <Skeleton variant="v3" width="10rem" vtName={`post-poster-${loadedPost?.id}`} />
+                </>
               )}
               {loadedPost?.category ? (
                 <Text variant="v4" vtName={`post-category-${loadedPost?.id}`}>

@@ -1,12 +1,14 @@
 import { createSlice } from "@reduxjs/toolkit";
+import { UnionToIntersection } from "@reduxjs/toolkit/dist/tsHelpers";
 import { PostCardProps } from "src/components/card/post";
-import { Account, AccountType } from "src/models/account";
+import { Account, AccountType, CompactAccount } from "src/models/account";
 import { CompactCategory } from "src/models/category";
 import { CompactPost, Post } from "src/models/post";
 import { CompactTag } from "src/models/tag";
 import { LOADABLE } from "src/utils/loadable";
 import { LoneModel } from "src/utils/models/lone-model";
 import { setterReducerFactory } from "src/utils/state/reducer";
+import { UnionWithOptionalDiscriminatedProps } from "src/utils/types/union";
 
 export interface PostPageState {
   postId: string | null;
@@ -18,7 +20,8 @@ export interface PostPageState {
           Post & {
             category: LoneModel<CompactCategory>;
             tags: Array<LoneModel<CompactTag>>;
-            poster: LoneModel<Account> & AccountType;
+            poster: LoneModel<UnionWithOptionalDiscriminatedProps<Account, CompactAccount>> &
+              AccountType;
           }
         >
     >
