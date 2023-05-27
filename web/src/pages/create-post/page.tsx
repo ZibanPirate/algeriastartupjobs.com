@@ -1,4 +1,4 @@
-import { FC } from "react";
+import { FC, useEffect, useState } from "react";
 import { Link } from "src/components/link";
 import { Stack } from "src/components/stack";
 import { Text } from "src/components/text";
@@ -11,12 +11,54 @@ import { Select } from "src/components/select";
 import { Account } from "src/models/account";
 import { useSliceSelector } from "src/utils/state/selector";
 import { getStateActions } from "src/state";
+import { DebouncedValueInput } from "src/components/input/debounced-value";
+import { fetchAccountForCreatePostPage } from "./actions";
+import { isLoaded } from "src/utils/loadable";
 
 export const Page: FC = () => {
   usePageTitle("Post a job add for free!");
 
-  const { title, poster_type, poster_name, poster_contact } = useSliceSelector("createPostPage");
+  const {
+    title,
+    poster_type,
+    poster_name,
+    poster_first_name,
+    poster_last_name,
+    poster_contact,
+    poster,
+  } = useSliceSelector("createPostPage");
   const { set } = getStateActions().createPostPage;
+
+  useEffect(() => {
+    fetchAccountForCreatePostPage();
+  }, [poster_contact]);
+
+  const [isPosterLocked, setIsPosterLocked] = useState(false);
+  const [posterName, setPosterName] = useState("");
+
+  useEffect(() => {
+    const loadedPoster = isLoaded(poster);
+    if (loadedPoster && loadedPoster.email === poster_contact) {
+      set({
+        poster_type: loadedPoster.type,
+        ...(loadedPoster.type === "Company"
+          ? { poster_name: loadedPoster.company_name }
+          : {
+              poster_first_name: loadedPoster.first_name,
+              poster_last_name: loadedPoster.last_name,
+            }),
+      });
+      setIsPosterLocked(true);
+      setPosterName(
+        loadedPoster.type === "Company"
+          ? "At " + loadedPoster.company_name
+          : "By " + loadedPoster.first_name + " " + loadedPoster.last_name
+      );
+    } else {
+      setIsPosterLocked(false);
+      setPosterName("");
+    }
+  }, [poster]);
 
   return (
     <Stack orientation="vertical" stretch align="center" maxWidth={1600} margin="auto">
@@ -32,41 +74,67 @@ export const Page: FC = () => {
         <Stack orientation="horizontal" gap="1" align="baseline">
           <Text variant="v4">Looking for</Text>
           <Input
-            placeholder="Job title"
+            placeholder="Job title, eg: Sales Manager"
             stretch={false}
             value={title}
             setValue={(value) => set({ title: value })}
             variant="v4"
           />
-        </Stack>
-        <Stack orientation="horizontal" gap="1" align="baseline">
-          <Select<Account["type"]>
-            variant="v4"
-            padding="0"
-            value={poster_type}
-            setValue={(value) => set({ poster_type: value })}
-            options={[
-              { value: "Company", label: "At (Company)" },
-              { value: "Individual", label: "By (Individual)" },
-            ]}
-          />
-          <Input
-            placeholder={`${poster_type} name`}
-            stretch={false}
-            value={poster_name}
-            setValue={(value) => set({ poster_name: value })}
-            variant="v4"
-          />
+          {posterName && <Text variant="v4">{posterName}</Text>}
         </Stack>
         <Stack orientation="horizontal" gap="1" align="baseline">
           <Text variant="v4">Candidate apply by sending email to</Text>
-          <Input
+          <DebouncedValueInput
             placeholder={`${poster_type} contact email`}
             stretch={false}
-            value=""
-            setValue={() => null}
+            value={poster_contact}
+            setValue={(value) => set({ poster_contact: value })}
             variant="v4"
           />
+        </Stack>
+        <Stack orientation="horizontal" gap="1" align="baseline">
+          {!isPosterLocked && (
+            <>
+              <Select<Account["type"]>
+                variant="v4"
+                padding="0"
+                value={poster_type}
+                setValue={(value) => set({ poster_type: value })}
+                options={[
+                  { value: "Company", label: "At (Company)" },
+                  { value: "Individual", label: "By (Individual)" },
+                ]}
+              />
+              {poster_type === "Company" ? (
+                <Input
+                  placeholder="Company name"
+                  stretch={false}
+                  value={poster_name}
+                  setValue={(value) => set({ poster_name: value })}
+                  variant="v4"
+                />
+              ) : (
+                <>
+                  <Text variant="v4">First name</Text>
+                  <Input
+                    placeholder="First name"
+                    stretch={false}
+                    value={poster_first_name}
+                    setValue={(value) => set({ poster_first_name: value })}
+                    variant="v4"
+                  />
+                  <Text variant="v4">Last name</Text>
+                  <Input
+                    placeholder="Last name"
+                    stretch={false}
+                    value={poster_last_name}
+                    setValue={(value) => set({ poster_last_name: value })}
+                    variant="v4"
+                  />
+                </>
+              )}
+            </>
+          )}
         </Stack>
         <Stack orientation="horizontal" margin="2 0 0" align="center" gap="1">
           <Button

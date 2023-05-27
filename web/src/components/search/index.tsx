@@ -1,10 +1,10 @@
-import { FC, useCallback, useEffect, useState } from "react";
-import { Input, InputProps } from "src/components/input";
+import { FC } from "react";
+import { InputProps } from "src/components/input";
 import { Stack, StackProps } from "src/components/stack";
 import { Icon } from "src/components/icon";
 import { Button } from "src/components/button";
 import { StyleProps } from "src/utils/props/style";
-import debounce from "lodash/debounce";
+import { DebouncedValueInput } from "../input/debounced-value";
 
 export interface SearchProps
   extends StyleProps,
@@ -24,27 +24,16 @@ export const Search: FC<SearchProps> = ({
   onClick,
   ...stackProps
 }) => {
-  const [localValue, setLocalValue] = useState(value);
-
-  const debouncedSetValue = useCallback(
-    debounce((newLocalValue: string) => setValue(newLocalValue), debounceValue),
-    []
-  );
-
-  useEffect(() => {
-    debouncedSetValue(localValue), [localValue];
-  });
-
   return (
     <Stack orientation="horizontal" margin={margin} wrap={false} {...stackProps}>
-      <Input
+      <DebouncedValueInput
         variant="v3"
         placeholder={placeholder}
-        value={localValue}
-        setValue={setLocalValue}
+        value={value}
+        setValue={setValue}
         onKeyDown={(event) => {
           if (event.key === "Enter") {
-            setValue(localValue);
+            setValue(event.currentTarget.value);
             onClick?.();
           }
         }}
