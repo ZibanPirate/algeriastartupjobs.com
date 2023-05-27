@@ -200,3 +200,13 @@ DB: search
 SELECT word from word WHERE appear_in IN ["post_title", "post_short_description"] GROUP BY word
 
 ###
+
+POST {{dbBaseUrl}}/sql
+Accept: application/json
+Authorization: Basic root root
+NS: asj
+DB: main
+
+SELECT *, id.id as id FROM account WHERE email = 'test+deckow-inc.0@algeriastartupjobs.com'
+
+###

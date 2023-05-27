@@ -13,9 +13,12 @@ use crate::{
 
 pub async fn search_posts(
   State(app_state): State<AppState>,
-  search: Query<SearchQuery>,
+  url_query: Query<SearchQuery>,
 ) -> impl IntoResponse {
-  let post_ids = app_state.search_service.search_posts(&search.query).await;
+  let post_ids = app_state
+    .search_service
+    .search_posts(&url_query.query)
+    .await;
   if !post_ids.is_ok() {
     return StatusCode::INTERNAL_SERVER_ERROR.into_response();
   }

@@ -106,6 +106,45 @@ impl AccountRepository {
     }
   }
 
+  pub async fn get_one_account_by_email(&self, email: &String) -> Result<Account, DataAccessError> {
+    let query = format!(
+      r#"
+      SELECT *, id.id as id FROM account WHERE email = '{}'
+      "#,
+      escape_single_quote(&email)
+    );
+
+    let query_result = self.main_db.query(&query).await;
+
+    tracing::info!("query_result: {:?}", query);
+
+    match query_result {
+      Ok(mut query_result) => {
+        let account: Result<Option<Account>, _> = query_result.take(0);
+        if account.as_ref().is_err() {
+          tracing::error!(
+            "Error while getting one account by email: {:?}",
+            query_result
+          );
+          return Err(DataAccessError::InternalError);
+        }
+        if account.as_ref().unwrap().is_none() {
+          tracing::info!(
+            "No account found with email: {} : {:?}",
+            email,
+            query_result
+          );
+          return Err(DataAccessError::NotFound);
+        }
+
+        let account = account.unwrap().unwrap();
+
+        Ok(account)
+      }
+      Err(_) => Err(DataAccessError::InternalError),
+    }
+  }
+
   pub async fn create_one_account(&self, account: DBAccount) -> Result<u32, DataAccessError> {
     let query = format!(
       r#"

@@ -3,6 +3,7 @@ use std::sync::Arc;
 use crate::{
   _test::controller::create_test_router,
   _utils::error::BootError,
+  account::controller::create_account_router,
   post::controller::create_post_router,
   search::{controller::create_search_router, cron_job::SearchCronJob},
 };
@@ -61,6 +62,7 @@ async fn create_app(app_state: AppState) -> Result<Router, BootError> {
   let app = app
     .nest("/posts", create_post_router())
     .nest("/search", create_search_router())
+    .nest("/account", create_account_router())
     // @TODO-ZM: route this only on development
     .nest("/test", create_test_router())
     .route(
