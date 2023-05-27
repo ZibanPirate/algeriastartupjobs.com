@@ -14,6 +14,7 @@ import { getStateActions } from "src/state";
 import { DebouncedValueInput } from "src/components/input/debounced-value";
 import { fetchAccountForCreatePostPage } from "./actions";
 import { isLoaded } from "src/utils/loadable";
+import { getAccountName } from "src/utils/models/account-name";
 
 export const Page: FC = () => {
   usePageTitle("Post a job add for free!");
@@ -50,9 +51,7 @@ export const Page: FC = () => {
       });
       setIsPosterLocked(true);
       setPosterName(
-        loadedPoster.type === "Company"
-          ? "At " + loadedPoster.company_name
-          : "By " + loadedPoster.first_name + " " + loadedPoster.last_name
+        (loadedPoster.type === "Company" ? "At " : "By ") + getAccountName(loadedPoster)
       );
     } else {
       setIsPosterLocked(false);

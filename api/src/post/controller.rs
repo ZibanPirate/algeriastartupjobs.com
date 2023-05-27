@@ -130,13 +130,12 @@ pub async fn get_one_post_by_id(
   let poster = poster.unwrap();
 
   let compact_category = category.to_compact_category();
-  let compact_poster = poster.to_compact_account();
 
   Json(json!({
       "post": post,
       "category": compact_category,
       "tags": compact_tags,
-      "poster": compact_poster,
+      "poster": poster,
   }))
   .into_response()
 }

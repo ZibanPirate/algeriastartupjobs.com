@@ -136,9 +136,14 @@ export const Page: FC = () => {
             )}
             <Stack orientation="vertical" margin="1 0 0" gap="1" stretch={true}>
               {loadedPost?.poster ? (
-                <Text variant="v3" vtName={`post-poster-${loadedPost?.id}`}>
-                  {getAccountName(loadedPost.poster)}
-                </Text>
+                <>
+                  <Text variant="v3" vtName={`post-poster-${loadedPost?.id}`}>
+                    {getAccountName(loadedPost.poster)}
+                  </Text>
+                  <Text variant="v4" vtName={`post-category-${loadedPost?.id}`}>
+                    {loadedPost.poster?.email}
+                  </Text>
+                </>
               ) : (
                 <Skeleton variant="v3" width="10rem" vtName={`post-poster-${loadedPost?.id}`} />
               )}
