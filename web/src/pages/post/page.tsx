@@ -52,7 +52,7 @@ export const Page: FC = () => {
       <Stack orientation="vertical" stretch={true} align="stretch">
         <Stack orientation="horizontal" margin="1 1 0" gap="1" align="space-between">
           <Stack orientation="vertical" align="start">
-            <Link variant="v4" back={true} to={"/"}>
+            <Link variant="v4" back={true} to={"/"} vtName="back">
               <Icon variant="v4" name="back" /> Back
             </Link>
           </Stack>
@@ -141,15 +141,9 @@ export const Page: FC = () => {
                     {getAccountName(loadedPost.poster)}
                   </Text>
                   {loadedPost.poster?.email ? (
-                    <Text variant="v4" vtName={`post-category-${loadedPost?.id}`}>
-                      {loadedPost.poster?.email}
-                    </Text>
+                    <Text variant="v4">{loadedPost.poster?.email}</Text>
                   ) : (
-                    <Skeleton
-                      variant="v4"
-                      width="10rem"
-                      vtName={`post-category-${loadedPost?.id}`}
-                    />
+                    <Skeleton variant="v4" width="10rem" />
                   )}
                 </>
               ) : (
@@ -217,6 +211,7 @@ export const Page: FC = () => {
           </Stack>
         </Stack>
       </Stack>
+      {/* Footer */}
       <Text variant="v4" margin="2 1">
         Source code is publicly available at&nbsp;
         <Link to="https://github.com/algeriastartupjobs/algeriastartupjobs.com" variant="v4">

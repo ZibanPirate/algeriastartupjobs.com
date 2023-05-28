@@ -18,13 +18,13 @@ export const Input: FC<InputProps> = ({
   placeholder,
   value,
   setValue,
-  stretch = true,
+  stretch = false,
   ...props
 }) => {
   const classes = [
     "input",
     `font-variant-${variant}`,
-    stretch ? "width100" : "",
+    stretch ? "stretch" : "width100",
     ...marginToClasses(margin),
   ];
 

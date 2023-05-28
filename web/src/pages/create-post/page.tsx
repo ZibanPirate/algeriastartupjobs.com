@@ -17,7 +17,7 @@ import { isLoaded } from "src/utils/loadable";
 import { getAccountName } from "src/utils/models/account-name";
 
 export const Page: FC = () => {
-  usePageTitle("Post a job add for free!");
+  usePageTitle("Post a job ad for free!");
 
   const {
     title,
@@ -34,7 +34,6 @@ export const Page: FC = () => {
     fetchAccountForCreatePostPage();
   }, [poster_contact]);
 
-  const [isPosterLocked, setIsPosterLocked] = useState(false);
   const [posterName, setPosterName] = useState("");
 
   useEffect(() => {
@@ -49,92 +48,87 @@ export const Page: FC = () => {
               poster_last_name: loadedPoster.last_name,
             }),
       });
-      setIsPosterLocked(true);
       setPosterName(
         (loadedPoster.type === "Company" ? "At " : "By ") + getAccountName(loadedPoster)
       );
     } else {
-      setIsPosterLocked(false);
       setPosterName("");
     }
   }, [poster]);
 
   return (
-    <Stack orientation="vertical" stretch align="center" maxWidth={1600} margin="auto">
+    <Stack orientation="vertical" stretch align="start" maxWidth={600} margin="auto">
       {/* Header */}
       <Stack orientation="vertical" margin="1 0 0" stretch={true} align="start">
-        <Link variant="v4" back={true} to={"/"}>
+        <Link variant="v4" back={true} to={"/"} vtName="back">
           <Icon variant="v4" name="back" /> Back
         </Link>
       </Stack>
       {/* Create Post */}
       {/* @TODO-ZM: apply padding to other places where we did workaround it */}
-      <Stack orientation="vertical" stretch gap="1" margin="3 0" padding="0 1">
-        <Stack orientation="horizontal" gap="1" align="baseline">
-          <Text variant="v4">Looking for</Text>
-          <Input
-            placeholder="Job title, eg: Sales Manager"
-            stretch={false}
-            value={title}
-            setValue={(value) => set({ title: value })}
-            variant="v4"
-          />
-          {posterName && <Text variant="v4">{posterName}</Text>}
-        </Stack>
-        <Stack orientation="horizontal" gap="1" align="baseline">
-          <Text variant="v4">Candidate apply by sending email to</Text>
-          <DebouncedValueInput
-            placeholder={`${poster_type} contact email`}
-            stretch={false}
-            value={poster_contact}
-            setValue={(value) => set({ poster_contact: value })}
-            variant="v4"
-          />
-        </Stack>
-        <Stack orientation="horizontal" gap="1" align="baseline">
-          {!isPosterLocked && (
-            <>
-              <Select<Account["type"]>
+      <Stack orientation="vertical" align="start" stretch gap="1" margin="3 0">
+        <Text variant="v4">Looking for</Text>
+        <Input
+          placeholder="Job title, eg: Sales Manager"
+          stretch={true}
+          value={title}
+          setValue={(value) => set({ title: value })}
+          variant="v4"
+        />
+
+        <Text variant="v4">Candidate apply by sending email to</Text>
+        <DebouncedValueInput
+          placeholder={`${poster_type} contact email`}
+          stretch={true}
+          value={poster_contact}
+          setValue={(value) => set({ poster_contact: value })}
+          variant="v4"
+        />
+
+        {posterName ? (
+          <Text variant="v4">{posterName}</Text>
+        ) : (
+          <>
+            <Select<Account["type"]>
+              variant="v4"
+              padding="0"
+              value={poster_type}
+              setValue={(value) => set({ poster_type: value })}
+              options={[
+                { value: "Company", label: "At (Company)" },
+                { value: "Individual", label: "By (Individual)" },
+              ]}
+            />
+            {poster_type === "Company" ? (
+              <Input
+                placeholder="Company name"
+                stretch={true}
+                value={poster_name}
+                setValue={(value) => set({ poster_name: value })}
                 variant="v4"
-                padding="0"
-                value={poster_type}
-                setValue={(value) => set({ poster_type: value })}
-                options={[
-                  { value: "Company", label: "At (Company)" },
-                  { value: "Individual", label: "By (Individual)" },
-                ]}
               />
-              {poster_type === "Company" ? (
+            ) : (
+              <>
+                <Text variant="v4">First name</Text>
                 <Input
-                  placeholder="Company name"
-                  stretch={false}
-                  value={poster_name}
-                  setValue={(value) => set({ poster_name: value })}
+                  placeholder="First name"
+                  stretch={true}
+                  value={poster_first_name}
+                  setValue={(value) => set({ poster_first_name: value })}
                   variant="v4"
                 />
-              ) : (
-                <>
-                  <Text variant="v4">First name</Text>
-                  <Input
-                    placeholder="First name"
-                    stretch={false}
-                    value={poster_first_name}
-                    setValue={(value) => set({ poster_first_name: value })}
-                    variant="v4"
-                  />
-                  <Text variant="v4">Last name</Text>
-                  <Input
-                    placeholder="Last name"
-                    stretch={false}
-                    value={poster_last_name}
-                    setValue={(value) => set({ poster_last_name: value })}
-                    variant="v4"
-                  />
-                </>
-              )}
-            </>
-          )}
-        </Stack>
+                <Text variant="v4">Last name</Text>
+                <Input
+                  placeholder="Last name"
+                  stretch={true}
+                  value={poster_last_name}
+                  setValue={(value) => set({ poster_last_name: value })}
+                  variant="v4"
+                />
+              </>
+            )}
+          </>
+        )}
         <Stack orientation="horizontal" margin="2 0 0" align="center" gap="1">
           <Button
             variant="v3"

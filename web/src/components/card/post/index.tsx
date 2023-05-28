@@ -27,7 +27,7 @@ export const PostCard = forwardRef<HTMLAnchorElement, PostCardProps>(
   ({ margin, post, stretch }, ref) => {
     return (
       <Link
-        className={`post-card${stretch ? " width100" : ""}`}
+        className={`post-card${stretch ? "stretch" : ""}`}
         variant="v4"
         to={getPostUrl(post, post.category, post.poster)}
         margin={margin}
@@ -38,7 +38,7 @@ export const PostCard = forwardRef<HTMLAnchorElement, PostCardProps>(
             {post.title}
           </Text>
         </div>
-        <div style={{ viewTransitionName: `post-description-${post.id}` }}>
+        <div style={{ viewTransitionName: `post-description-${post.id}`, flex: 1 }}>
           <Text variant="v5">{post.short_description}</Text>
         </div>
         {post.tags.length > 0 && (
@@ -57,7 +57,7 @@ export const PostCard = forwardRef<HTMLAnchorElement, PostCardProps>(
             </Stack>
           </div>
         )}
-        <Stack orientation="horizontal" margin="1 0 0">
+        <Stack orientation="horizontal" margin="1 0 0" flex="0">
           <div style={{ viewTransitionName: `post-poster-${post.id}` }}>
             <Text variant="v5">{getAccountName(post.poster)}</Text>
           </div>

@@ -5,7 +5,9 @@ import { getConfig } from "src/utils/config/get-config";
 
 export const fetchAccountForCreatePostPage = async (): Promise<void> => {
   const { accountEntities, createPostPage } = getStateActions();
-  const { poster_contact, poster } = getState().createPostPage;
+  const { poster_contact } = getState().createPostPage;
+
+  if (!poster_contact) return;
 
   try {
     // @TODO-ZM: auto-generate types for API endpoints
