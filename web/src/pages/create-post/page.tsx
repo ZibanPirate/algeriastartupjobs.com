@@ -78,11 +78,13 @@ export const Page: FC = () => {
 
         <Text variant="v4">Candidate apply by sending email to</Text>
         <DebouncedValueInput
-          placeholder={`${poster_type} contact email`}
+          placeholder="Contact email"
           stretch={true}
           value={poster_contact}
           setValue={(value) => set({ poster_contact: value })}
           variant="v4"
+          id="email"
+          inputMode="email"
         />
 
         {posterName ? (
@@ -116,6 +118,7 @@ export const Page: FC = () => {
                   value={poster_first_name}
                   setValue={(value) => set({ poster_first_name: value })}
                   variant="v4"
+                  id="first-name"
                 />
                 <Text variant="v4">Last name</Text>
                 <Input
@@ -124,6 +127,7 @@ export const Page: FC = () => {
                   value={poster_last_name}
                   setValue={(value) => set({ poster_last_name: value })}
                   variant="v4"
+                  id="last-name"
                 />
               </>
             )}

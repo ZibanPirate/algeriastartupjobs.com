@@ -5,7 +5,7 @@ import { FontVariantProps, StyleProps, marginToClasses } from "src/utils/props/s
 export interface InputProps
   extends StyleProps,
     FontVariantProps,
-    Pick<HTMLAttributes<HTMLInputElement>, "onKeyDown"> {
+    Pick<HTMLAttributes<HTMLInputElement>, "onKeyDown" | "id" | "inputMode"> {
   placeholder?: string;
   value: string;
   setValue: (value: string) => void;
