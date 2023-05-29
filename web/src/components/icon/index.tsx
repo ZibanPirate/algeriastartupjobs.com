@@ -8,11 +8,17 @@ interface IconProps
     FontVariantProps,
     Pick<HTMLAttributes<HTMLSpanElement>, "onClick"> {
   name: keyof typeof icons;
+  animation?: "rotate" | "none";
 }
 
 // @TODO-ZM: Add ColorVariantProps
-const _Icon: FC<IconProps> = ({ variant, margin, name, ...props }) => {
-  const classes = ["icon", `font-variant-${variant}`, ...marginToClasses(margin)];
+const _Icon: FC<IconProps> = ({ variant, margin, name, animation = "none", ...props }) => {
+  const classes = [
+    "icon",
+    animation === "none" ? "" : `animate-${animation}`,
+    `font-variant-${variant}`,
+    ...marginToClasses(margin),
+  ];
 
   const maskImage = `url(${icons[name].default})`;
 

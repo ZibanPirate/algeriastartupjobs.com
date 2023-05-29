@@ -15,6 +15,7 @@ export interface SelectProps<O> extends StyleProps, FontVariantProps, AnimationP
   options: Array<{ value: O; label: string }>;
   value: O;
   setValue: (value: O) => void;
+  disabled?: boolean;
 }
 
 export const Select = <O extends string>({
@@ -26,6 +27,7 @@ export const Select = <O extends string>({
   options,
   value,
   setValue,
+  disabled,
 }: SelectProps<O>): ReturnType<FunctionComponent<SelectProps<O>>> => {
   const selectRef = useRef<HTMLSelectElement>(null);
 
@@ -49,6 +51,7 @@ export const Select = <O extends string>({
         ref={selectRef}
         value={value}
         onChange={(event) => setValue(event.target.value as O)}
+        disabled={disabled}
       >
         {options.map(({ value, label }) => (
           <option value={value}>{label}</option>

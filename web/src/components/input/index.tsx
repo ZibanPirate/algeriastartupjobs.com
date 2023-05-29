@@ -10,6 +10,7 @@ export interface InputProps
   value: string;
   setValue: (value: string) => void;
   stretch?: boolean;
+  disabled?: boolean;
 }
 
 export const Input: FC<InputProps> = ({

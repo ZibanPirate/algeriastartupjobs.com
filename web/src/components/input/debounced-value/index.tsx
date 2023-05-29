@@ -14,6 +14,10 @@ export const DebouncedValueInput: FC<DebouncedValueInputProps> = ({
 }) => {
   const [localValue, setLocalValue] = useState(value);
 
+  useEffect(() => {
+    setLocalValue(value);
+  }, [value]);
+
   const debouncedSetValue = useCallback(
     debounce((newLocalValue: string) => setValue(newLocalValue), debounceValue),
     []

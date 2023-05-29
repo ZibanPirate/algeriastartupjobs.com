@@ -12,7 +12,7 @@ import { Account } from "src/models/account";
 import { useSliceSelector } from "src/utils/state/selector";
 import { getStateActions } from "src/state";
 import { DebouncedValueInput } from "src/components/input/debounced-value";
-import { fetchAccountForCreatePostPage } from "./actions";
+import { createPost, fetchAccountForCreatePostPage } from "./actions";
 import { isLoaded } from "src/utils/loadable";
 import { getAccountName } from "src/utils/models/account-name";
 
@@ -27,6 +27,7 @@ export const Page: FC = () => {
     poster_last_name,
     poster_contact,
     poster,
+    creation_status,
   } = useSliceSelector("createPostPage");
   const { set } = getStateActions().createPostPage;
 
@@ -69,6 +70,7 @@ export const Page: FC = () => {
       <Stack orientation="vertical" align="start" stretch gap="1" margin="3 0">
         <Text variant="v4">Looking for</Text>
         <Input
+          disabled={creation_status === "CREATING"}
           placeholder="Job title, eg: Sales Manager"
           stretch={true}
           value={title}
@@ -78,6 +80,7 @@ export const Page: FC = () => {
 
         <Text variant="v4">Candidate apply by sending email to</Text>
         <DebouncedValueInput
+          disabled={creation_status === "CREATING"}
           placeholder="Contact email"
           stretch={true}
           value={poster_contact}
@@ -92,6 +95,7 @@ export const Page: FC = () => {
         ) : (
           <>
             <Select<Account["type"]>
+              disabled={creation_status === "CREATING"}
               variant="v4"
               padding="0"
               value={poster_type}
@@ -103,6 +107,7 @@ export const Page: FC = () => {
             />
             {poster_type === "Company" ? (
               <Input
+                disabled={creation_status === "CREATING"}
                 placeholder="Company name"
                 stretch={true}
                 value={poster_name}
@@ -113,6 +118,7 @@ export const Page: FC = () => {
               <>
                 <Text variant="v4">First name</Text>
                 <Input
+                  disabled={creation_status === "CREATING"}
                   placeholder="First name"
                   stretch={true}
                   value={poster_first_name}
@@ -122,6 +128,7 @@ export const Page: FC = () => {
                 />
                 <Text variant="v4">Last name</Text>
                 <Input
+                  disabled={creation_status === "CREATING"}
                   placeholder="Last name"
                   stretch={true}
                   value={poster_last_name}
@@ -133,22 +140,24 @@ export const Page: FC = () => {
             )}
           </>
         )}
-        <Stack orientation="horizontal" margin="2 0 0" align="center" gap="1">
-          <Button
-            variant="v3"
-            onClick={() => alert("Stay updated at github.com/algeriastartupjobs")}
-            vtName="new-post"
-          >
-            Post now
-          </Button>
-          <Text variant="v4">or</Text>
-          <Link
-            to="#"
-            variant="v4"
-            onClick={() => alert("Stay updated at github.com/algeriastartupjobs")}
-          >
-            Add more details
-          </Link>
+        <Stack orientation="vertical" align="center" padding="2 0 0" stretch>
+          {creation_status === "CREATING" ? (
+            <Icon variant="v3" name="loadingSpinner" animation="rotate" />
+          ) : (
+            <Stack orientation="horizontal" align="center" gap="1">
+              <Button variant="v3" onClick={() => createPost()} vtName="new-post">
+                Post now
+              </Button>
+              <Text variant="v4">or</Text>
+              <Link
+                to="#"
+                variant="v4"
+                onClick={() => alert("Stay updated at github.com/algeriastartupjobs")}
+              >
+                Add more details
+              </Link>
+            </Stack>
+          )}
         </Stack>
       </Stack>
       <Text variant="v4" margin="0 1 1">

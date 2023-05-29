@@ -2,6 +2,7 @@ import Axios from "axios";
 import { Account } from "src/models/account";
 import { getState, getStateActions } from "src/state";
 import { getConfig } from "src/utils/config/get-config";
+import { initialStateForCreatePostPage } from "./state";
 
 export const fetchAccountForCreatePostPage = async (): Promise<void> => {
   const { accountEntities, createPostPage } = getStateActions();
@@ -26,4 +27,15 @@ export const fetchAccountForCreatePostPage = async (): Promise<void> => {
     console.log("Error fetching posts for landing page", error);
     // Sentry.captureException(error, { tags: { type: "WEB_FETCH" } });
   }
+};
+
+export const createPost = async (): Promise<void> => {
+  // @TODO-ZM: update post cache
+  const { createPostPage } = getStateActions();
+  createPostPage.set({ creation_status: "CREATING" });
+
+  // @TODO-ZM: Call backend, get post id, and render a link to the post
+  await new Promise((resolve) => setTimeout(resolve, 1000));
+
+  createPostPage.set({ ...initialStateForCreatePostPage, creation_status: "CREATED" });
 };
