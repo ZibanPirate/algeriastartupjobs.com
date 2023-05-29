@@ -19,8 +19,10 @@ locals {
   api_root_domain_name  = "api.algeriastartupjobs.com"
   email_dns_records = [
     { type : "MX", name : "", value : ["10 mx.zoho.com", "20 mx2.zoho.com", "50 mx3.zoho.com"] },
-    { type : "TXT", name : "", value : ["v=spf1 mx include:zoho.com ~all"] },
-    { type : "TXT", name : "dkim._domainkey", value : ["v=DKIM1; k=rsa; p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDCm72cEJ58s0O+DDFEuYbfofjbNxav37gs4avX784W6s7IOYTdUJcodUCfSUVmb3rPxocVhu5yU3X81BuETG54kg9hgSePx8FANURvkEKbLyyYZZes1g5zhJ1KK7mLkKn5wKnD54WDlrokf6u2TBw9oNU5vlYU1ZHgtxYQ2xmSaQIDAQAB"] }
+    { type : "TXT", name : "", value : ["v=spf1 include:zeptomail.net mx include:zoho.com ~all"] },
+    { type : "TXT", name : "dkim._domainkey", value : ["v=DKIM1; k=rsa; p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDCm72cEJ58s0O+DDFEuYbfofjbNxav37gs4avX784W6s7IOYTdUJcodUCfSUVmb3rPxocVhu5yU3X81BuETG54kg9hgSePx8FANURvkEKbLyyYZZes1g5zhJ1KK7mLkKn5wKnD54WDlrokf6u2TBw9oNU5vlYU1ZHgtxYQ2xmSaQIDAQAB"] },
+    { type : "TXT", name : "29611._domainkey", value : ["k=rsa; p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCaK3ZkrLUeTAss2WebIPPDR1hGuDhczxcD0NqGXgSY7ecYO9PRSQaOQh20+rSEIJGhfhDNfYitFcZYolzp64hanJfiBP3JK7yVRrgT1WDa95E6rwZ7syciGRVyWj4wqFK+ys3JHfNguqXyyylktKKhGzMVILrN2xi3OPRc0UDZ7wIDAQAB"] },
+    { type : "CNAME", name : "mail", value : ["cluster89.zeptomail.com"] },
   ]
 }
 
