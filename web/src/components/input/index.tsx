@@ -1,4 +1,4 @@
-import { FC, HTMLAttributes } from "react";
+import { CSSProperties, FC, HTMLAttributes } from "react";
 import "./style.css";
 import { FontVariantProps, StyleProps, marginToClasses } from "src/utils/props/style";
 
@@ -11,6 +11,7 @@ export interface InputProps
   setValue: (value: string) => void;
   stretch?: boolean;
   disabled?: boolean;
+  width?: CSSProperties["width"];
 }
 
 export const Input: FC<InputProps> = ({
@@ -20,6 +21,7 @@ export const Input: FC<InputProps> = ({
   value,
   setValue,
   stretch = false,
+  width,
   ...props
 }) => {
   const classes = [
@@ -29,11 +31,15 @@ export const Input: FC<InputProps> = ({
     ...marginToClasses(margin),
   ];
 
+  const style: CSSProperties = {};
+  if (width) style.width = width;
+
   return (
     <input
       className={classes.join(" ")}
       placeholder={placeholder}
       value={value}
+      style={style}
       onChange={(e) => setValue(e.target.value)}
       {...props}
     />

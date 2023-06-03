@@ -3,6 +3,9 @@ import { Account } from "src/models/account";
 import { getState, getStateActions } from "src/state";
 import { getConfig } from "src/utils/config/get-config";
 import { initialStateForCreatePostPage } from "./state";
+import { getBrowserRouter } from "src/components/router-provider";
+import { CONFIRM_EMAIL_PAGE_URL } from "src/utils/urls/common";
+import { initialStateForConfirmEmailPage } from "../confirm-email/state";
 
 export const fetchAccountForCreatePostPage = async (): Promise<void> => {
   const { accountEntities, createPostPage } = getStateActions();
@@ -31,11 +34,15 @@ export const fetchAccountForCreatePostPage = async (): Promise<void> => {
 
 export const createPost = async (): Promise<void> => {
   // @TODO-ZM: update post cache
-  const { createPostPage } = getStateActions();
+  const { createPostPage, confirmEmailPage } = getStateActions();
   createPostPage.set({ creation_status: "CREATING" });
 
   // @TODO-ZM: Call backend, get post id, and render a link to the post
   await new Promise((resolve) => setTimeout(resolve, 1000));
 
+  // createPostPage.set({ ...initialStateForCreatePostPage, creation_status: "ERROR" });
   createPostPage.set({ ...initialStateForCreatePostPage, creation_status: "CREATED" });
+  confirmEmailPage.set(initialStateForConfirmEmailPage);
+
+  getBrowserRouter().navigate(CONFIRM_EMAIL_PAGE_URL);
 };

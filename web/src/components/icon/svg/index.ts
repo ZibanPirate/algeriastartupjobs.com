@@ -3,3 +3,4 @@ export * as newPost from "./new-post.svg";
 export * as back from "./back.svg";
 export * as dropdown from "./dropdown.svg";
 export * as loadingSpinner from "./loading-spinner.svg";
+export * as success from "./success.svg";

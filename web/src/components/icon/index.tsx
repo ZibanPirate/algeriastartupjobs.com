@@ -2,17 +2,19 @@ import { FC, HTMLAttributes, memo } from "react";
 import "./style.css";
 import { FontVariantProps, StyleProps, marginToClasses } from "src/utils/props/style";
 import * as icons from "./svg";
+import { AnimationProps } from "src/utils/props/animation";
 
 interface IconProps
   extends StyleProps,
     FontVariantProps,
+    AnimationProps,
     Pick<HTMLAttributes<HTMLSpanElement>, "onClick"> {
   name: keyof typeof icons;
   animation?: "rotate" | "none";
 }
 
 // @TODO-ZM: Add ColorVariantProps
-const _Icon: FC<IconProps> = ({ variant, margin, name, animation = "none", ...props }) => {
+const _Icon: FC<IconProps> = ({ variant, margin, name, animation = "none", vtName, ...props }) => {
   const classes = [
     "icon",
     animation === "none" ? "" : `animate-${animation}`,
@@ -22,12 +24,13 @@ const _Icon: FC<IconProps> = ({ variant, margin, name, animation = "none", ...pr
 
   const maskImage = `url(${icons[name].default})`;
 
-  return (
-    <span
-      className={classes.join(" ")}
-      style={{ maskImage, WebkitMaskImage: maskImage }}
-      {...props}
-    />
-  );
+  const style: React.CSSProperties = {
+    maskImage,
+    WebkitMaskImage: maskImage,
+  };
+
+  if (vtName) style["viewTransitionName"] = vtName;
+
+  return <span className={classes.join(" ")} style={style} {...props} />;
 };
 export const Icon = memo(_Icon);

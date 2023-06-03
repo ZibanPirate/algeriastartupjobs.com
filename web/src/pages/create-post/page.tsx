@@ -57,6 +57,8 @@ export const Page: FC = () => {
     }
   }, [poster]);
 
+  const disabledInputs = ["CREATING", "CREATED"].includes(creation_status);
+
   return (
     <Stack orientation="vertical" stretch align="start" maxWidth={600} margin="auto">
       {/* Header */}
@@ -70,7 +72,7 @@ export const Page: FC = () => {
       <Stack orientation="vertical" align="start" stretch gap="1" margin="3 0">
         <Text variant="v4">Looking for</Text>
         <Input
-          disabled={creation_status === "CREATING"}
+          disabled={disabledInputs}
           placeholder="Job title, eg: Sales Manager"
           stretch={true}
           value={title}
@@ -80,7 +82,7 @@ export const Page: FC = () => {
 
         <Text variant="v4">Candidate apply by sending email to</Text>
         <DebouncedValueInput
-          disabled={creation_status === "CREATING"}
+          disabled={disabledInputs}
           placeholder="Contact email"
           stretch={true}
           value={poster_contact}
@@ -95,7 +97,7 @@ export const Page: FC = () => {
         ) : (
           <>
             <Select<Account["type"]>
-              disabled={creation_status === "CREATING"}
+              disabled={disabledInputs}
               variant="v4"
               padding="0"
               value={poster_type}
@@ -107,7 +109,7 @@ export const Page: FC = () => {
             />
             {poster_type === "Company" ? (
               <Input
-                disabled={creation_status === "CREATING"}
+                disabled={disabledInputs}
                 placeholder="Company name"
                 stretch={true}
                 value={poster_name}
@@ -118,7 +120,7 @@ export const Page: FC = () => {
               <>
                 <Text variant="v4">First name</Text>
                 <Input
-                  disabled={creation_status === "CREATING"}
+                  disabled={disabledInputs}
                   placeholder="First name"
                   stretch={true}
                   value={poster_first_name}
@@ -128,7 +130,7 @@ export const Page: FC = () => {
                 />
                 <Text variant="v4">Last name</Text>
                 <Input
-                  disabled={creation_status === "CREATING"}
+                  disabled={disabledInputs}
                   placeholder="Last name"
                   stretch={true}
                   value={poster_last_name}
@@ -140,23 +142,34 @@ export const Page: FC = () => {
             )}
           </>
         )}
-        <Stack orientation="vertical" align="center" padding="2 0 0" stretch>
-          {creation_status === "CREATING" ? (
-            <Icon variant="v3" name="loadingSpinner" animation="rotate" />
+        <Stack orientation="vertical" align="center" stretch>
+          {["CREATING", "CREATED"].includes(creation_status) ? (
+            <Icon
+              variant="v3"
+              name={creation_status === "CREATING" ? "loadingSpinner" : "success"}
+              animation={creation_status === "CREATING" ? "rotate" : undefined}
+              margin="3 0"
+              vtName="create-post-icon"
+            />
           ) : (
-            <Stack orientation="horizontal" align="center" gap="1">
-              <Button variant="v3" onClick={() => createPost()} vtName="new-post">
-                Post now
-              </Button>
-              <Text variant="v4">or</Text>
-              <Link
-                to="#"
-                variant="v4"
-                onClick={() => alert("Stay updated at github.com/algeriastartupjobs")}
-              >
-                Add more details
-              </Link>
-            </Stack>
+            <>
+              <Text variant="v4" margin="1 0 2">
+                {creation_status === "ERROR" ? "Something went wrong, please try again" : <br />}
+              </Text>
+              <Stack orientation="horizontal" align="center" gap="1">
+                <Button variant="v3" onClick={() => createPost()} vtName="new-post">
+                  Post now
+                </Button>
+                <Text variant="v4">or</Text>
+                <Link
+                  to="#"
+                  variant="v4"
+                  onClick={() => alert("Stay updated at github.com/algeriastartupjobs")}
+                >
+                  Add more details
+                </Link>
+              </Stack>
+            </>
           )}
         </Stack>
       </Stack>

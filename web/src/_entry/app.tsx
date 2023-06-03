@@ -4,7 +4,7 @@ import "src/utils/css/index.css";
 import { Route, Routes } from "react-router-dom";
 import { LazyPages, pageLoaders } from "src/pages";
 import { useHtmlThemeColor } from "src/utils/hooks/html-theme-color";
-import { CREATE_POST_PAGE_URL, POST_PAGE_URL } from "src/utils/urls/common";
+import { CONFIRM_EMAIL_PAGE_URL, CREATE_POST_PAGE_URL, POST_PAGE_URL } from "src/utils/urls/common";
 import LoadingBar, { LoadingBarRef } from "react-top-loading-bar";
 import { viewTransition } from "src/utils/animation/view-transition";
 
@@ -54,6 +54,7 @@ export const App: FC = () => {
         <Route path="/" Component={pageToRenderSetter("landing")} />
         <Route path={POST_PAGE_URL} Component={pageToRenderSetter("post")} />
         <Route path={CREATE_POST_PAGE_URL} Component={pageToRenderSetter("create-post")} />
+        <Route path={CONFIRM_EMAIL_PAGE_URL} Component={pageToRenderSetter("confirm-email")} />
         <Route path="*" Component={pageToRenderSetter("404")} />
       </Routes>
       {LazyPages[currentPage]}
