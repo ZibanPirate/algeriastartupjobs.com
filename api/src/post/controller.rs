@@ -298,10 +298,9 @@ pub async fn create_one_post_with_poster(
     .email_service
     .send_one_email(
       &body.poster.email,
-      &"contact@algeriastartupjobs.com".to_string(),
-      &"Confirm you email".to_string(),
+      &"Confirm your email".to_string(),
       &format!(
-        r#"Your email is used to created a FREE job post at algeriastartupjobs.com with title:
+        r#"Your email is used to create a FREE job post at algeriastartupjobs.com with title:
 
 {}
 

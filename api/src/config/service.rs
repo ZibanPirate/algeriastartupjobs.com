@@ -18,6 +18,7 @@ pub struct Config {
   pub stage: Stage,
   pub admin_auth_code: String,
   pub search_url: String,
+  pub email_service_auth_token: String,
 }
 
 pub struct ConfigService {}
@@ -45,6 +46,8 @@ impl ConfigService {
       admin_auth_code: std::env::var("ADMIN_AUTH_CODE")
         .expect("ADMIN_AUTH_CODE env variable is missing!"),
       search_url: "http://127.0.0.1:7280".to_string(),
+      email_service_auth_token: std::env::var("EMAIL_SERVICE_AUTH_TOKEN")
+        .expect("EMAIL_SERVICE_AUTH_TOKEN env variable is missing!"),
     }
   }
 }
