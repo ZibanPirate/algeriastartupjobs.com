@@ -16,6 +16,13 @@
       "options": { "cwd": "${workspaceFolder}/web" }
     },
     {
+      "label": ".env api",
+      "type": "shell",
+      "command": "test -f .env || cp development.env .env",
+      "problemMatcher": [],
+      "options": { "cwd": "${workspaceFolder}/api" }
+    },
+    {
       "label": "build api",
       "type": "shell",
       "command": [
@@ -26,7 +33,8 @@
         "&& docker cp $(docker run --name=ajs-api-ubuntu -d -it ajs-api-ubuntu):/usr/asj/api/target ./ubuntu-target"
       ],
       "problemMatcher": [],
-      "options": { "cwd": "${workspaceFolder}/api" }
+      "options": { "cwd": "${workspaceFolder}/api" },
+      "dependsOn": [".env api"]
     },
     {
       "label": "terraform shared",
