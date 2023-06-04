@@ -263,7 +263,7 @@ pub async fn create_one_post_with_poster(
     if let Err(DataAccessError::NotFound) = existing_poster {
       let poster_id_result = app_state
         .account_repository
-        .create_one_account(body.poster)
+        .create_one_account(&body.poster)
         .await;
 
       if !poster_id_result.is_ok() {
@@ -282,9 +282,9 @@ pub async fn create_one_post_with_poster(
 
   let post_id = app_state
     .post_repository
-    .create_one_post(DBPost {
+    .create_one_post(&DBPost {
       poster_id,
-      ..body.post
+      ..body.post.clone()
     })
     .await;
 
@@ -293,6 +293,37 @@ pub async fn create_one_post_with_poster(
     return StatusCode::INTERNAL_SERVER_ERROR.into_response();
   }
   let post_id = post_id.unwrap();
+
+  let email_result = app_state
+    .email_service
+    .send_one_email(
+      &body.poster.email,
+      &"contact@algeriastartupjobs.com".to_string(),
+      &"Confirm you email".to_string(),
+      &format!(
+        r#"Your email is used to created a FREE job post at algeriastartupjobs.com with title:
+
+{}
+
+Please confirm your email by copying the code below into the confirmation page:
+
+{}
+
+Thank you for using our service!
+
+ASJ Team
+contact@algeriastartupjobs.com
+https://www.algeriastartupjobs.com
+      "#,
+        &body.post.title, "abc123",
+      ),
+    )
+    .await;
+
+  if !email_result.is_ok() {
+    // @TODO-ZM: log error reason
+    return StatusCode::INTERNAL_SERVER_ERROR.into_response();
+  }
 
   Json(json!({
       "post_id": post_id,

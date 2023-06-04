@@ -2,8 +2,8 @@ use super::database::create_db_client;
 use crate::{
   _utils::error::BootError, account::repository::AccountRepository,
   category::repository::CategoryRepository, config::service::ConfigService,
-  post::repository::PostRepository, search::service::SearchService, tag::repository::TagRepository,
-  task::repository::TaskRepository,
+  email::service::EmailService, post::repository::PostRepository, search::service::SearchService,
+  tag::repository::TagRepository, task::repository::TaskRepository,
 };
 use std::sync::Arc;
 use surrealdb::{engine::remote::ws::Client, Surreal};
@@ -19,6 +19,7 @@ pub struct AppState {
   pub config_service: Arc<ConfigService>,
   pub task_repository: Arc<TaskRepository>,
   pub search_service: Arc<SearchService>,
+  pub email_service: Arc<EmailService>,
 }
 
 pub async fn create_app_state() -> Result<AppState, BootError> {
@@ -46,6 +47,7 @@ pub async fn create_app_state() -> Result<AppState, BootError> {
   let tag_repository = Arc::new(TagRepository::new(Arc::clone(&main_db)));
   let account_repository = Arc::new(AccountRepository::new(Arc::clone(&main_db)));
   let task_repository = Arc::new(TaskRepository::new(Arc::clone(&main_db)));
+  let email_service = Arc::new(EmailService::new(Arc::clone(&config_service)));
 
   Ok(AppState {
     main_db: Arc::clone(&main_db),
@@ -57,5 +59,6 @@ pub async fn create_app_state() -> Result<AppState, BootError> {
     config_service: Arc::clone(&config_service),
     task_repository: Arc::clone(&task_repository),
     search_service: Arc::clone(&search_service),
+    email_service: Arc::clone(&email_service),
   })
 }

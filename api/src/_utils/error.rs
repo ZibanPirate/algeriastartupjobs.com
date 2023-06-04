@@ -18,3 +18,8 @@ pub enum BootError {
 pub enum SearchError {
   InternalError,
 }
+
+#[derive(Debug)]
+pub enum EmailError {
+  InternalError,
+}

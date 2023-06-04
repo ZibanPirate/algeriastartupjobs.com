@@ -4,6 +4,7 @@ mod _utils;
 mod account;
 mod category;
 mod config;
+mod email;
 mod post;
 mod search;
 mod tag;

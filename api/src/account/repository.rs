@@ -145,7 +145,7 @@ impl AccountRepository {
     }
   }
 
-  pub async fn create_one_account(&self, account: DBAccount) -> Result<u32, DataAccessError> {
+  pub async fn create_one_account(&self, account: &DBAccount) -> Result<u32, DataAccessError> {
     let query = format!(
       r#"
       BEGIN TRANSACTION;
@@ -164,7 +164,7 @@ impl AccountRepository {
       escape_single_quote(&account.email),
       escape_single_quote(&account.slug),
       escape_single_quote(&account.r#type.to_string()),
-      match account.r#type {
+      match &account.r#type {
         AccountType::Company { company_name } => format!("company_name: '{}'", company_name),
         AccountType::Admin {
           first_name,

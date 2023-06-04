@@ -27,7 +27,7 @@ pub async fn seed_the_database_with_mocks(
     let slug = slugify(&company_name);
     let account_id = app_state
       .account_repository
-      .create_one_account(DBAccount {
+      .create_one_account(&DBAccount {
         email: format!("test+{}.{}@algeriastartupjobs.com", slug, index),
         slug,
         r#type: AccountType::Company { company_name },
@@ -50,7 +50,7 @@ pub async fn seed_the_database_with_mocks(
     let slug = slugify(&format!("{}_{}", first_name, last_name));
     let account_id = app_state
       .account_repository
-      .create_one_account(DBAccount {
+      .create_one_account(&DBAccount {
         email: format!("test+{}.{}@algeriastartupjobs.com", slug, index),
         slug,
         r#type: AccountType::Individual {
@@ -211,7 +211,7 @@ pub async fn seed_the_database_with_mocks(
     let slug = slugify(&title);
     let post_id = app_state
       .post_repository
-      .create_one_post(DBPost {
+      .create_one_post(&DBPost {
         slug,
         title,
         category_id: category_ids[index % category_ids.len()],

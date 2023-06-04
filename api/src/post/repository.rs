@@ -154,7 +154,7 @@ impl PostRepository {
     Ok(similar_posts)
   }
 
-  pub async fn create_one_post(&self, post: DBPost) -> Result<u32, DataAccessError> {
+  pub async fn create_one_post(&self, post: &DBPost) -> Result<u32, DataAccessError> {
     let query = format!(
       r#"
       BEGIN TRANSACTION;
