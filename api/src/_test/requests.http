@@ -34,3 +34,71 @@ GET {{baseUrl}}/account/by_email?email=test%2Bdeckow-inc.0@algeriastartupjobs.co
 
 ### Non-existing account
 GET {{baseUrl}}/account/by_email?email=test@0@algeriastartupjobs.com
+
+###
+POST {{baseUrl}}/posts
+Content-Type: application/json
+
+{
+  "poster": {
+    "email": "zakman.dev+admin@gmail.com",
+    "type": "Admin",
+    "first_name": "Admino",
+    "last_name": "Admini",
+    "slug": ""
+  },
+  "post": {
+    "title": "Admin trolling",
+    "short_description": "",
+    "description": "",
+    "slug": "",
+    "poster_id": 0,
+    "category_id": 0,
+    "tag_ids": []
+  }
+}
+
+###
+POST {{baseUrl}}/posts
+Content-Type: application/json
+
+{
+  "poster": {
+    "email": "zakman.dev+strawhats@gmail.com",
+    "type": "Company",
+    "company_name": "Strawhats LLC",
+    "slug": ""
+  },
+  "post": {
+    "title": "Experienced Shipwright",
+    "short_description": "",
+    "description": "",
+    "slug": "",
+    "poster_id": 0,
+    "category_id": 0,
+    "tag_ids": []
+  }
+}
+
+###
+POST {{baseUrl}}/posts
+Content-Type: application/json
+
+{
+  "poster": {
+    "email": "zakman.dev+luffy@gmail.com",
+    "type": "Individual",
+    "first_name": "Monkey",
+    "last_name": "De Luffy",
+    "slug": ""
+  },
+  "post": {
+    "title": "Master Chef",
+    "short_description": "",
+    "description": "",
+    "slug": "",
+    "poster_id": 0,
+    "category_id": 0,
+    "tag_ids": []
+  }
+}

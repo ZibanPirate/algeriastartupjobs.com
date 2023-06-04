@@ -4,6 +4,7 @@ use axum::{
   Json, Router,
 };
 use hyper::StatusCode;
+use serde::Deserialize;
 use serde_json::json;
 
 use crate::{
@@ -13,9 +14,11 @@ use crate::{
     query::{PaginationQuery, PaginationQueryTrait},
     vec::sort_and_dedup_vec,
   },
-  account::model::AccountTrait,
+  account::model::DBAccount,
   category::model::CategoryTrait,
 };
+
+use super::model::DBPost;
 
 pub async fn get_all_posts_for_feed(State(app_state): State<AppState>) -> impl IntoResponse {
   let compact_posts = app_state
@@ -232,6 +235,72 @@ pub async fn get_post_count(State(app_state): State<AppState>) -> impl IntoRespo
   .into_response()
 }
 
+#[derive(Deserialize)]
+pub struct CreateOnePostBody {
+  poster: DBAccount,
+  post: DBPost,
+}
+
+pub async fn create_one_post_with_poster(
+  State(app_state): State<AppState>,
+  Json(body): Json<CreateOnePostBody>,
+) -> impl IntoResponse {
+  match body.poster.r#type.to_string().as_str() {
+    "Individual" | "Company" => {}
+    _ => {
+      return StatusCode::BAD_REQUEST.into_response();
+    }
+  }
+
+  let mut poster_id;
+
+  let existing_poster = app_state
+    .account_repository
+    .get_one_account_by_email(&body.poster.email)
+    .await;
+
+  if !existing_poster.is_ok() {
+    if let Err(DataAccessError::NotFound) = existing_poster {
+      let poster_id_result = app_state
+        .account_repository
+        .create_one_account(body.poster)
+        .await;
+
+      if !poster_id_result.is_ok() {
+        // @TODO-ZM: log error reason
+        return StatusCode::INTERNAL_SERVER_ERROR.into_response();
+      }
+
+      poster_id = poster_id_result.unwrap();
+    } else {
+      // @TODO-ZM: log error reason
+      return StatusCode::INTERNAL_SERVER_ERROR.into_response();
+    }
+  }
+
+  poster_id = existing_poster.unwrap().id;
+
+  let post_id = app_state
+    .post_repository
+    .create_one_post(DBPost {
+      poster_id,
+      ..body.post
+    })
+    .await;
+
+  if !post_id.is_ok() {
+    // @TODO-ZM: log error reason
+    return StatusCode::INTERNAL_SERVER_ERROR.into_response();
+  }
+  let post_id = post_id.unwrap();
+
+  Json(json!({
+      "post_id": post_id,
+      "poster_id": poster_id,
+  }))
+  .into_response()
+}
+
 pub fn create_post_router() -> Router<AppState> {
   Router::new()
     .route("/feed", axum::routing::get(get_all_posts_for_feed))
@@ -241,4 +310,5 @@ pub fn create_post_router() -> Router<AppState> {
       axum::routing::get(get_many_similar_posts_by_id),
     )
     .route("/count", axum::routing::get(get_post_count))
+    .route("/", axum::routing::post(create_one_post_with_poster))
 }
