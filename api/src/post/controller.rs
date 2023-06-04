@@ -327,6 +327,8 @@ https://www.algeriastartupjobs.com
   Json(json!({
       "post_id": post_id,
       "poster_id": poster_id,
+      // @TODO-ZM: implement email confirmation logic
+      "confirmation_id": "abc123",
   }))
   .into_response()
 }
