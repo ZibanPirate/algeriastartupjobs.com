@@ -17,6 +17,7 @@ impl EmailService {
     Self { config_service }
   }
 
+  // @TODO-ZM: gmail groups emails by subject, so we need to add a random string to the subject or something
   pub async fn send_one_email(
     &self,
     email: &String,

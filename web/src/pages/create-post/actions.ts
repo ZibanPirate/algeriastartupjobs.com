@@ -34,7 +34,6 @@ export const fetchAccountForCreatePostPage = async (): Promise<void> => {
 };
 
 export const createPost = async (): Promise<void> => {
-  // @TODO-ZM: update post cache
   const { createPostPage, confirmEmailPage } = getStateActions();
   createPostPage.set({ creation_status: "CREATING" });
 
@@ -43,7 +42,7 @@ export const createPost = async (): Promise<void> => {
       getState().createPostPage;
 
     const {
-      data: { confirmation_id },
+      data: { confirmation_id, post_id },
     } = await Axios.post<{
       post_id: number;
       poster_id: number;
@@ -70,11 +69,12 @@ export const createPost = async (): Promise<void> => {
         poster_id: 0,
         category_id: 0,
         tag_ids: [],
+        is_confirmed: false,
       } as Omit<Post, "id">,
     });
 
     createPostPage.set({ ...initialStateForCreatePostPage, creation_status: "CREATED" });
-    confirmEmailPage.set({ ...initialStateForConfirmEmailPage, confirmation_id });
+    confirmEmailPage.set({ ...initialStateForConfirmEmailPage, confirmation_id, post_id });
     getBrowserRouter().navigate(CONFIRM_EMAIL_PAGE_URL);
   } catch (error) {
     createPostPage.set({ creation_status: "ERROR" });
