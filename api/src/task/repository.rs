@@ -159,7 +159,7 @@ impl TaskRepository {
         {}
         {}
         {}
-     }} WHERE {} RETURN NONE;
+      }} WHERE {} RETURN NONE;
       "#,
       match task.name {
         Some(name) => match name.clone() {

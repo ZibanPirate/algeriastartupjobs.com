@@ -54,7 +54,8 @@ Content-Type: application/json
     "slug": "",
     "poster_id": 0,
     "category_id": 0,
-    "tag_ids": []
+    "tag_ids": [],
+    "is_confirmed": false
   }
 }
 
@@ -76,7 +77,8 @@ Content-Type: application/json
     "slug": "",
     "poster_id": 0,
     "category_id": 0,
-    "tag_ids": []
+    "tag_ids": [],
+    "is_confirmed": false
   }
 }
 
@@ -86,7 +88,7 @@ Content-Type: application/json
 
 {
   "poster": {
-    "email": "zakman.dev+luffy@gmail.com",
+    "email": "zakman.dev+luffys@gmail.com",
     "type": "Individual",
     "first_name": "Monkey",
     "last_name": "De Luffy",
@@ -99,6 +101,17 @@ Content-Type: application/json
     "slug": "",
     "poster_id": 0,
     "category_id": 0,
-    "tag_ids": []
+    "tag_ids": [],
+    "is_confirmed": false
   }
+}
+
+###
+POST {{baseUrl}}/posts/confirm
+Content-Type: application/json
+
+{
+  "post_id": 203,
+  "confirmation_id": "VII6BHSQVLCF",
+  "confirmation_code": "BQJO"
 }

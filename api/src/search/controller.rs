@@ -61,7 +61,7 @@ pub async fn search_posts(
 
   let compact_tags = app_state
     .tag_repository
-    .get_many_compact_tags_by_ids(unique_tag_ids.clone())
+    .get_many_compact_tags_by_ids(&unique_tag_ids)
     .await;
   if !compact_tags.is_ok() {
     // @TODO-ZM: log error reason

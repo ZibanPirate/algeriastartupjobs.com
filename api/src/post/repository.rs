@@ -8,7 +8,7 @@ use crate::_utils::{
   string::escape_single_quote,
 };
 
-use super::model::{CompactPost, DBPost, Post};
+use super::model::{CompactPost, DBPost, PartialPost, Post};
 
 pub struct PostRepository {
   main_db: Arc<Surreal<Client>>,
@@ -169,6 +169,7 @@ impl PostRepository {
         description:'{}',
         category_id: {},
         tag_ids:[{}],
+        is_confirmed: {},
       }};
 
       COMMIT TRANSACTION;
@@ -184,7 +185,8 @@ impl PostRepository {
         .iter()
         .map(|tag_id| escape_single_quote(&tag_id.to_string()))
         .collect::<Vec<String>>()
-        .join(", ")
+        .join(", "),
+      post.is_confirmed.to_string(),
     );
 
     let query_result = self.main_db.query(&query).await;
@@ -254,5 +256,54 @@ impl PostRepository {
         return Err(DataAccessError::CreationError);
       }
     }
+  }
+
+  pub async fn update_many_posts_by_filter(
+    &self,
+    filter: &str,
+    post: PartialPost,
+  ) -> Result<(), DataAccessError> {
+    // @TODO-ZM: implement updating the rest of the fields
+    let query = format!(
+      r#"
+      UPDATE task MERGE {{
+        {}
+      }} WHERE {} RETURN NONE;
+     "#,
+      match post.is_confirmed {
+        Some(is_confirmed) => format!("is_confirmed: {},", is_confirmed),
+        None => "".to_string(),
+      },
+      filter,
+    );
+
+    let query_result = self.main_db.query(&query).await;
+    match query_result {
+      Ok(_) => Ok(()),
+      Err(e) => {
+        tracing::error!("failed to update posts {:?}, query {:?}", e, &query);
+        return Err(DataAccessError::UpdateError);
+      }
+    }
+  }
+
+  pub async fn update_many_posts_by_ids(
+    &self,
+    ids: Vec<u32>,
+    partial_post: PartialPost,
+  ) -> Result<(), DataAccessError> {
+    self
+      .update_many_posts_by_filter(
+        &format!(
+          "array::any([{}])",
+          ids
+            .iter()
+            .map(|id| format!("id.id={}", id))
+            .collect::<Vec<String>>()
+            .join(", "),
+        ),
+        partial_post,
+      )
+      .await
   }
 }

@@ -14,6 +14,7 @@ pub struct Post {
   pub description: String,
   pub category_id: u32,
   pub tag_ids: Vec<u32>,
+  pub is_confirmed: bool,
 }
 
 pub trait PostTrait {
@@ -55,6 +56,7 @@ impl PartialPostTrait for PartialPost {
         .unwrap_or(fallback_post.description),
       category_id: self.category_id.unwrap_or(fallback_post.category_id),
       tag_ids: self.tag_ids.clone().unwrap_or(fallback_post.tag_ids),
+      is_confirmed: self.is_confirmed.unwrap_or(fallback_post.is_confirmed),
     }
   }
 }

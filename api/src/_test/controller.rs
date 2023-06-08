@@ -224,6 +224,7 @@ pub async fn seed_the_database_with_mocks(
           .take(3)
           .map(|tag_id| *tag_id)
           .collect::<Vec<u32>>(),
+        is_confirmed: true,
       })
       .await;
     match post_id {

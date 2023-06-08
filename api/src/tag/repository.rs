@@ -60,7 +60,7 @@ impl TagRepository {
 
   pub async fn get_many_compact_tags_by_ids(
     &self,
-    ids: Vec<u32>,
+    ids: &Vec<u32>,
   ) -> Result<Vec<CompactTag>, DataAccessError> {
     self
       .get_many_compact_tags_by_filter(
