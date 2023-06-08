@@ -90,7 +90,7 @@ resource "digitalocean_droplet" "api" {
         After=network.target
 
         [Service]
-        ExecStart=/home/${var.do_droplet_user}/${local.app_folder_name}/${local.app_name}
+        ExecStart=sudo /home/${var.do_droplet_user}/${local.app_folder_name}/${local.app_name}
         WorkingDirectory=/home/${var.do_droplet_user}/${local.app_folder_name}
         Restart=always
         RestartSec=5
