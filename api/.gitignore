@@ -1,7 +1,7 @@
 target
 ubuntu-target
 surrealdb_data
-quickwit_data
+kv_db_data
 
 .env
 production.env

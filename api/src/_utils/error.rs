@@ -9,6 +9,7 @@ pub enum DataAccessError {
 #[derive(Debug)]
 pub enum BootError {
   DBSetupError,
+  KVDBSetupError,
   DBLoginError,
   DBNamespaceError,
   CronJobSetupError,

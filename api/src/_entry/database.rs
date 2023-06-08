@@ -1,3 +1,4 @@
+use sled::Db;
 use surrealdb::{
   engine::remote::ws::{Client, Ws},
   opt::auth::Root,
@@ -57,6 +58,27 @@ pub async fn create_db_client(
       return Err(BootError::DBSetupError);
     }
   }
+
+  Ok(db)
+}
+
+pub async fn create_kv_db(path: String) -> Result<Db, BootError> {
+  tracing::info!(
+    "Setting up the key-value database client for the database: {}",
+    path
+  );
+
+  let db = sled::open(path);
+
+  if db.is_err() {
+    tracing::error!(
+      "Failed to setup the key-value database: {}",
+      db.err().unwrap()
+    );
+    return Err(BootError::KVDBSetupError);
+  }
+
+  let db = db.unwrap();
 
   Ok(db)
 }

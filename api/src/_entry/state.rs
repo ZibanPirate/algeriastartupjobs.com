@@ -1,4 +1,4 @@
-use super::database::create_db_client;
+use super::database::{create_db_client, create_kv_db};
 use crate::{
   _utils::error::BootError, account::repository::AccountRepository,
   category::repository::CategoryRepository, config::service::ConfigService,
@@ -12,6 +12,7 @@ use surrealdb::{engine::remote::ws::Client, Surreal};
 pub struct AppState {
   pub main_db: Arc<Surreal<Client>>,
   pub search_db: Arc<Surreal<Client>>,
+  pub main_kv_db: Arc<sled::Db>,
   pub post_repository: Arc<PostRepository>,
   pub category_repository: Arc<CategoryRepository>,
   pub tag_repository: Arc<TagRepository>,
@@ -23,6 +24,8 @@ pub struct AppState {
 }
 
 pub async fn create_app_state() -> Result<AppState, BootError> {
+  let config_service = Arc::new(ConfigService::new());
+
   let main_db = Arc::new(create_db_client("asj".to_string(), "main".to_string(), None).await?);
   let search_db = Arc::new(
     create_db_client(
@@ -39,8 +42,9 @@ pub async fn create_app_state() -> Result<AppState, BootError> {
     )
     .await?,
   );
+  let main_kv_db =
+    Arc::new(create_kv_db(format!("{}/main", config_service.get_config().kv_db_dir)).await?);
 
-  let config_service = Arc::new(ConfigService::new());
   let search_service = Arc::new(SearchService::new(Arc::clone(&search_db)));
   let post_repository = Arc::new(PostRepository::new(Arc::clone(&main_db)));
   let category_repository = Arc::new(CategoryRepository::new(Arc::clone(&main_db)));
@@ -52,6 +56,7 @@ pub async fn create_app_state() -> Result<AppState, BootError> {
   Ok(AppState {
     main_db: Arc::clone(&main_db),
     search_db: Arc::clone(&search_db),
+    main_kv_db: Arc::clone(&main_kv_db),
     post_repository: Arc::clone(&post_repository),
     category_repository: Arc::clone(&category_repository),
     tag_repository: Arc::clone(&tag_repository),
