@@ -60,7 +60,7 @@ export const Page: FC = () => {
   const disabledInputs = ["CREATING", "CREATED"].includes(creation_status);
 
   return (
-    <Stack orientation="vertical" stretch align="start" maxWidth={600} margin="auto">
+    <Stack orientation="vertical" fullWidth align="start" maxWidth={600} margin="auto">
       {/* Header */}
       <Stack orientation="vertical" margin="1 0 0" stretch={true} align="start">
         <Link variant="v4" back={true} to={"/"} vtName="back">
@@ -68,8 +68,7 @@ export const Page: FC = () => {
         </Link>
       </Stack>
       {/* Create Post */}
-      {/* @TODO-ZM: apply padding to other places where we did workaround it */}
-      <Stack orientation="vertical" align="start" stretch gap="1" margin="3 0">
+      <Stack orientation="vertical" align="start" stretch gap="1" padding="3 1">
         <Text variant="v4">Looking for</Text>
         <Input
           disabled={disabledInputs}

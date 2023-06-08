@@ -31,7 +31,7 @@ export const Page: FC = () => {
   }, []);
 
   return (
-    <Stack orientation="vertical" maxWidth={1600} margin="auto">
+    <Stack orientation="vertical" fullWidth maxWidth={1600} margin="auto">
       {/* Header */}
       <Stack orientation="vertical" margin="1 0 0" stretch={true} align="center">
         <Stack orientation="vertical" stretch={true} align="end">
