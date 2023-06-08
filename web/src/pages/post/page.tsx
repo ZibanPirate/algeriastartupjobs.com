@@ -19,6 +19,7 @@ import { getStateActions } from "src/state";
 import { GlobalSearch } from "src/components/search/global";
 import { Icon } from "src/components/icon";
 import { fetchPostCountForLandingPage, fetchPostsForLandingPage } from "src/pages/landing/actions";
+import { useMediaQuery } from "src/utils/hooks/use-media-query";
 
 export const Page: FC = () => {
   const postSlug = useMatch(POST_PAGE_URL)?.params.postSlug;
@@ -45,6 +46,7 @@ export const Page: FC = () => {
   const { post, similarPosts } = useSliceSelector("postPage");
   const loadedPost = isLoaded(post);
   usePageTitle(loadedPost ? getPostLongTitle(loadedPost, loadedPost.poster) : "Loading Job...");
+  const isSmallScreen = useMediaQuery("(max-width: 700px)");
 
   return (
     <Stack orientation="vertical" fullWidth align="center" maxWidth={1600} margin="auto">
@@ -56,7 +58,7 @@ export const Page: FC = () => {
               <Icon variant="v4" name="back" /> Back
             </Link>
           </Stack>
-          <Stack orientation="vertical" align="center">
+          <Stack orientation="vertical" align="center" flex={1}>
             <GlobalSearch
               total_post_count={total_post_count}
               value={query}
@@ -64,17 +66,19 @@ export const Page: FC = () => {
               onClick={() => navigate("/")}
             />
           </Stack>
-          <Stack orientation="vertical" align="end">
-            <Button
-              variant="v3"
-              paddingPreset="rectangle-end"
-              onClick={() => navigate(CREATE_POST_PAGE_URL)}
-              vtName="new-post"
-            >
-              <Icon variant="v3" name="newPost" />
-              Free Post
-            </Button>
-          </Stack>
+          {!isSmallScreen && (
+            <Stack orientation="vertical" align="end">
+              <Button
+                variant="v3"
+                paddingPreset="rectangle-end"
+                onClick={() => navigate(CREATE_POST_PAGE_URL)}
+                vtName="new-post"
+              >
+                <Icon variant="v3" name="newPost" />
+                Free Post
+              </Button>
+            </Stack>
+          )}
         </Stack>
       </Stack>
       {/* Post */}
