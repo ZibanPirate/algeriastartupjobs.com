@@ -35,7 +35,7 @@ export const Stack: FC<StackProps> = ({
 }) => {
   const classes = [
     "stack",
-    stretch ? "stretch" : "",
+    stretch ? "stretch width100" : "",
     "height100",
     "flex",
     `flex-${orientation}`,

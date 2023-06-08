@@ -100,10 +100,24 @@ export const Page: FC = () => {
               <Skeleton variant="v3" width="18rem" margin="0 0 1" />
             )}
             <Text variant="v4" vtName={`post-description-${loadedPost?.id}`}>
-              {loadedPost?.description ? (
-                <pre className="fade-in-up" style={{ whiteSpace: "pre-line", maxWidth: 600 }}>
-                  {loadedPost.description}
-                </pre>
+              {loadedPost?.description !== undefined ? (
+                loadedPost.description ? (
+                  <pre className="fade-in-up" style={{ whiteSpace: "pre-line", maxWidth: 600 }}>
+                    {loadedPost.description}
+                  </pre>
+                ) : (
+                  <>
+                    No description provided, you can&nbsp;
+                    <Link
+                      variant="v4"
+                      to="#"
+                      onClick={() => alert("Stay updated at github.com/algeriastartupjobs")}
+                    >
+                      ask
+                    </Link>
+                    &nbsp;for more information from the poster
+                  </>
+                )
               ) : (
                 <Stack orientation="vertical" gap="1">
                   <Skeleton variant="v4" width="20rem" />
