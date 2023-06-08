@@ -13,9 +13,10 @@ use crate::{
   _utils::{
     error::DataAccessError,
     query::{PaginationQuery, PaginationQueryTrait},
+    string::slugify,
     vec::sort_and_dedup_vec,
   },
-  account::model::DBAccount,
+  account::model::{AccountNameTrait, DBAccount},
   category::model::CategoryTrait,
   task::model::{DBTask, TaskName, TaskStatus, TaskType},
 };
@@ -266,7 +267,10 @@ pub async fn create_one_post_with_poster(
       Err(DataAccessError::NotFound) => {
         let poster_id_result = app_state
           .account_repository
-          .create_one_account(&body.poster)
+          .create_one_account(&DBAccount {
+            slug: slugify(&body.poster.get_display_name()),
+            ..body.poster.clone()
+          })
           .await;
 
         if !poster_id_result.is_ok() {
@@ -289,6 +293,7 @@ pub async fn create_one_post_with_poster(
     .post_repository
     .create_one_post(&DBPost {
       poster_id,
+      slug: slugify(&body.post.title),
       is_confirmed: false,
       ..body.post.clone()
     })

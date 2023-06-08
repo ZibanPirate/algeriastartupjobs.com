@@ -32,11 +32,24 @@ pub struct Account {
 }
 
 pub trait AccountTrait {
-  fn get_display_name(&self) -> String;
   fn to_compact_account(&self) -> CompactAccount;
 }
 
 impl AccountTrait for Account {
+  fn to_compact_account(&self) -> CompactAccount {
+    CompactAccount {
+      id: self.id,
+      slug: self.slug.clone(),
+      r#type: self.r#type.clone(),
+    }
+  }
+}
+
+pub trait AccountNameTrait {
+  fn get_display_name(&self) -> String;
+}
+
+impl AccountNameTrait for Account {
   fn get_display_name(&self) -> String {
     match &self.r#type {
       AccountType::Admin {
@@ -50,12 +63,20 @@ impl AccountTrait for Account {
       AccountType::Company { company_name } => company_name.to_string(),
     }
   }
+}
 
-  fn to_compact_account(&self) -> CompactAccount {
-    CompactAccount {
-      id: self.id,
-      slug: self.slug.clone(),
-      r#type: self.r#type.clone(),
+impl AccountNameTrait for DBAccount {
+  fn get_display_name(&self) -> String {
+    match &self.r#type {
+      AccountType::Admin {
+        first_name,
+        last_name,
+      } => format!("{} {}", first_name, last_name),
+      AccountType::Individual {
+        first_name,
+        last_name,
+      } => format!("{} {}", first_name, last_name),
+      AccountType::Company { company_name } => company_name.to_string(),
     }
   }
 }

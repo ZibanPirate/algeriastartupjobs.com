@@ -39,8 +39,8 @@ export const Page: FC = () => {
           disabled={disabledInputs}
           variant="v3"
           value={confirmation_code}
-          setValue={(value) => set({ confirmation_code: value })}
-          placeholder="123abc"
+          setValue={(value) => set({ confirmation_code: value.toUpperCase() })}
+          placeholder=""
         />
         <Stack orientation="vertical" align="center" stretch>
           {["CONFIRMING", "CONFIRMED"].includes(confirmation_status) ? (
