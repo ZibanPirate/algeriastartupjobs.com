@@ -24,3 +24,8 @@ pub enum SearchError {
 pub enum EmailError {
   InternalError,
 }
+
+#[derive(Debug)]
+pub enum SecurityError {
+  RateLimitError,
+}

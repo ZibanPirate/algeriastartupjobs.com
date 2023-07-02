@@ -9,6 +9,7 @@ mod post;
 mod search;
 mod tag;
 mod task;
+mod security;
 
 use _entry::app::actual_main;
 

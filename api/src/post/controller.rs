@@ -1,5 +1,7 @@
+use std::net::SocketAddr;
+
 use axum::{
-  extract::{Path, Query, State},
+  extract::{ConnectInfo, Path, Query, State},
   response::IntoResponse,
   Json, Router,
 };
@@ -18,6 +20,7 @@ use crate::{
   },
   account::model::{AccountNameTrait, DBAccount},
   category::model::CategoryTrait,
+  security::service::RateLimitConstraint,
   task::model::{DBTask, TaskName, TaskStatus, TaskType},
 };
 
@@ -245,6 +248,8 @@ pub struct CreateOnePostBody {
 }
 
 pub async fn create_one_post_with_poster(
+  // @TODO-ZM: make sure this is a secure ip
+  ConnectInfo(ip): ConnectInfo<SocketAddr>,
   State(app_state): State<AppState>,
   Json(body): Json<CreateOnePostBody>,
 ) -> impl IntoResponse {
@@ -252,6 +257,25 @@ pub async fn create_one_post_with_poster(
     "Individual" | "Company" => {}
     _ => {
       return StatusCode::BAD_REQUEST.into_response();
+    }
+  }
+
+  // @TODO-ZM: write a macro for this
+  match app_state.security_service.rate_limit(vec![
+    RateLimitConstraint {
+      id: format!("{}", ip.ip()),
+      max_requests: 60,
+      duration: 60000,
+    },
+    RateLimitConstraint {
+      id: format!("{}", body.poster.email),
+      max_requests: 1,
+      duration: 2000,
+    },
+  ]) {
+    Ok(_) => {}
+    Err(_) => {
+      return StatusCode::TOO_MANY_REQUESTS.into_response();
     }
   }
 

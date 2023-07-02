@@ -3,7 +3,8 @@ use crate::{
   _utils::error::BootError, account::repository::AccountRepository,
   category::repository::CategoryRepository, config::service::ConfigService,
   email::service::EmailService, post::repository::PostRepository, search::service::SearchService,
-  tag::repository::TagRepository, task::repository::TaskRepository,
+  security::service::SecurityService, tag::repository::TagRepository,
+  task::repository::TaskRepository,
 };
 use std::sync::Arc;
 use surrealdb::{engine::remote::ws::Client, Surreal};
@@ -21,6 +22,7 @@ pub struct AppState {
   pub task_repository: Arc<TaskRepository>,
   pub search_service: Arc<SearchService>,
   pub email_service: Arc<EmailService>,
+  pub security_service: Arc<SecurityService>,
 }
 
 pub async fn create_app_state() -> Result<AppState, BootError> {
@@ -52,6 +54,7 @@ pub async fn create_app_state() -> Result<AppState, BootError> {
   let account_repository = Arc::new(AccountRepository::new(Arc::clone(&main_db)));
   let task_repository = Arc::new(TaskRepository::new(Arc::clone(&main_db)));
   let email_service = Arc::new(EmailService::new(Arc::clone(&config_service)));
+  let security_service = Arc::new(SecurityService::new());
 
   Ok(AppState {
     main_db: Arc::clone(&main_db),
@@ -65,5 +68,6 @@ pub async fn create_app_state() -> Result<AppState, BootError> {
     task_repository: Arc::clone(&task_repository),
     search_service: Arc::clone(&search_service),
     email_service: Arc::clone(&email_service),
+    security_service: Arc::clone(&security_service),
   })
 }
