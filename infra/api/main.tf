@@ -186,6 +186,7 @@ resource "ssh_resource" "upload_dot_env_to_vps" {
     # always       = timestamp()
     vps_id       = digitalocean_droplet.api.id
     dot_env_hash = filesha256("${path.module}/../../api/${local.stage}.env")
+    app_hash     = filesha256("${path.module}/../../api/ubuntu-target/target/release/${local.app_name}")
   }
 
   host        = digitalocean_droplet.api.ipv4_address
