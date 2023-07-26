@@ -13,7 +13,7 @@ use serde_json::json;
 use crate::{
   _entry::state::AppState,
   _utils::{
-    error::DataAccessError,
+    error::{DataAccessError, SecurityError},
     query::{PaginationQuery, PaginationQueryTrait},
     string::slugify,
     vec::sort_and_dedup_vec,
@@ -265,16 +265,20 @@ pub async fn create_one_post_with_poster(
     RateLimitConstraint {
       id: format!("{}", ip.ip()),
       max_requests: 60,
-      duration: 60000,
+      duration_ms: 60000,
     },
     RateLimitConstraint {
       id: format!("{}", body.poster.email),
       max_requests: 1,
-      duration: 2000,
+      duration_ms: 2000,
     },
   ]) {
     Ok(_) => {}
-    Err(_) => {
+    Err(SecurityError::InternalError) => {
+      // @TODO-ZM: log error reason
+      return StatusCode::INTERNAL_SERVER_ERROR.into_response();
+    }
+    Err(SecurityError::RateLimitError) => {
       return StatusCode::TOO_MANY_REQUESTS.into_response();
     }
   }

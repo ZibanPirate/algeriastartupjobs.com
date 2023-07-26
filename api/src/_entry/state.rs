@@ -14,6 +14,7 @@ pub struct AppState {
   pub main_db: Arc<Surreal<Client>>,
   pub search_db: Arc<Surreal<Client>>,
   pub main_kv_db: Arc<sled::Db>,
+  pub rate_limit_kv_db: Arc<sled::Db>,
   pub post_repository: Arc<PostRepository>,
   pub category_repository: Arc<CategoryRepository>,
   pub tag_repository: Arc<TagRepository>,
@@ -47,6 +48,14 @@ pub async fn create_app_state() -> Result<AppState, BootError> {
   let main_kv_db =
     Arc::new(create_kv_db(format!("{}/main", config_service.get_config().kv_db_dir)).await?);
 
+  let rate_limit_kv_db = Arc::new(
+    create_kv_db(format!(
+      "{}/rate_limit",
+      config_service.get_config().kv_db_dir
+    ))
+    .await?,
+  );
+
   let search_service = Arc::new(SearchService::new(Arc::clone(&search_db)));
   let post_repository = Arc::new(PostRepository::new(Arc::clone(&main_db)));
   let category_repository = Arc::new(CategoryRepository::new(Arc::clone(&main_db)));
@@ -54,12 +63,13 @@ pub async fn create_app_state() -> Result<AppState, BootError> {
   let account_repository = Arc::new(AccountRepository::new(Arc::clone(&main_db)));
   let task_repository = Arc::new(TaskRepository::new(Arc::clone(&main_db)));
   let email_service = Arc::new(EmailService::new(Arc::clone(&config_service)));
-  let security_service = Arc::new(SecurityService::new());
+  let security_service = Arc::new(SecurityService::new(Arc::clone(&rate_limit_kv_db)));
 
   Ok(AppState {
     main_db: Arc::clone(&main_db),
     search_db: Arc::clone(&search_db),
     main_kv_db: Arc::clone(&main_kv_db),
+    rate_limit_kv_db: Arc::clone(&rate_limit_kv_db),
     post_repository: Arc::clone(&post_repository),
     category_repository: Arc::clone(&category_repository),
     tag_repository: Arc::clone(&tag_repository),

@@ -28,4 +28,5 @@ pub enum EmailError {
 #[derive(Debug)]
 pub enum SecurityError {
   RateLimitError,
+  InternalError,
 }
