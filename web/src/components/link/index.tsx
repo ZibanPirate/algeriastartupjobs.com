@@ -2,11 +2,12 @@ import { CSSProperties, PropsWithChildren, forwardRef } from "react";
 import "./style.css";
 import { FontVariantProps, StyleProps, marginToClasses } from "src/utils/props/style";
 import { NavLink as RL, LinkProps as RLP } from "react-router-dom";
-import { isNavigatingBackLeavesWebsite } from "../router-provider";
+import { getBeforeLastURLPathname, isNavigatingBackLeavesWebsite } from "../router-provider";
 import { AnimationProps } from "src/utils/props/animation";
+import { safeMatchPath } from "src/utils/urls/safe-match-path";
 
 interface LinkProps extends PropsWithChildren, StyleProps, FontVariantProps, RLP, AnimationProps {
-  back?: boolean;
+  back?: boolean | string;
   className?: string;
 }
 
@@ -22,7 +23,10 @@ export const Link = forwardRef<HTMLAnchorElement, LinkProps>(
     const style: CSSProperties = {};
     if (vtName) style["viewTransitionName"] = vtName;
 
-    const willGoBack = back && !isNavigatingBackLeavesWebsite();
+    const willGoBack =
+      typeof back === "string"
+        ? !!safeMatchPath(back, getBeforeLastURLPathname())
+        : back && !isNavigatingBackLeavesWebsite();
 
     const to = willGoBack ? (-1 as unknown as string) : props.to;
 

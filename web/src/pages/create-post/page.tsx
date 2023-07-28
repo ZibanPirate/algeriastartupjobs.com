@@ -15,6 +15,7 @@ import { DebouncedValueInput } from "src/components/input/debounced-value";
 import { createPost, fetchAccountForCreatePostPage } from "./actions";
 import { isLoaded } from "src/utils/loadable";
 import { getAccountName } from "src/utils/models/account-name";
+import { POST_PAGE_URL } from "src/utils/urls/common";
 
 export const Page: FC = () => {
   usePageTitle("Post a job ad for free!");
@@ -63,7 +64,7 @@ export const Page: FC = () => {
     <Stack orientation="vertical" fullWidth align="start" maxWidth={600} margin="auto">
       {/* Header */}
       <Stack orientation="vertical" margin="1 0 0" stretch={true} align="start">
-        <Link variant="v4" back={true} to={"/"} vtName="back">
+        <Link variant="v4" back={POST_PAGE_URL} to={"/"} vtName="back">
           <Icon variant="v4" name="back" /> Back
         </Link>
       </Stack>

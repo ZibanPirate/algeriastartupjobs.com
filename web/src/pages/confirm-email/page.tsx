@@ -10,6 +10,7 @@ import { Button } from "src/components/button";
 import { useSliceSelector } from "src/utils/state/selector";
 import { getStateActions } from "src/state";
 import { confirmEmail } from "./actions";
+import { POST_PAGE_URL } from "src/utils/urls/common";
 
 export const Page: FC = () => {
   usePageTitle("Please confirm your EMail");
@@ -23,7 +24,7 @@ export const Page: FC = () => {
     <Stack orientation="vertical" fullWidth align="center" maxWidth={600} margin="auto">
       {/* Header */}
       <Stack orientation="vertical" margin="1 0 0" stretch={true} align="start">
-        <Link variant="v4" back={true} to={"/"} vtName="back">
+        <Link variant="v4" back={POST_PAGE_URL} to={"/"} vtName="back">
           <Icon variant="v4" name="back" /> Back
         </Link>
       </Stack>

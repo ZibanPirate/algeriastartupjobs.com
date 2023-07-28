@@ -54,7 +54,7 @@ export const Page: FC = () => {
       <Stack orientation="vertical" stretch={true} align="stretch">
         <Stack orientation="horizontal" margin="1 1 0" gap="1" align="space-between">
           <Stack orientation="vertical" align="start">
-            <Link variant="v4" back={true} to={"/"} vtName="back">
+            <Link variant="v4" back={POST_PAGE_URL} to={"/"} vtName="back">
               <Icon variant="v4" name="back" /> Back
             </Link>
           </Stack>
