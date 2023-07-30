@@ -1,0 +1,13 @@
+.rich-input {
+  padding: 0.25em 0.5em; /* 0.5em because we have line-height: 1.5;*/
+  background-color: var(--color-background-back-1);
+  border: 1px solid #aaaa;
+  border-radius: 0;
+  outline: none;
+  font: inherit;
+}
+
+.rich-input:focus,
+.rich-input:active {
+  border: 1px solid var(--color-primary);
+}
