@@ -1,7 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { Account } from "src/models/account";
-import { LOADABLE } from "src/utils/loadable";
-import { setterReducerFactory } from "src/utils/state/reducer";
+import { overWriterReducerFactory, setterReducerFactory } from "src/utils/state/reducer";
 
 export interface ConfirmEmailPageState {
   confirmation_id: string;
@@ -22,5 +20,6 @@ export const confirmEmailPage = createSlice({
   initialState: initialStateForConfirmEmailPage,
   reducers: {
     set: setterReducerFactory(),
+    overwrite: overWriterReducerFactory(),
   },
 });

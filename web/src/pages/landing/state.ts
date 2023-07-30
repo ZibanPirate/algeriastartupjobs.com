@@ -1,7 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { PostCardProps } from "src/components/card/post";
 import { LOADABLE } from "src/utils/loadable";
-import { setterReducerFactory } from "src/utils/state/reducer";
+import { overWriterReducerFactory, setterReducerFactory } from "src/utils/state/reducer";
 
 export interface LandingPageState {
   total_post_count: number;
@@ -14,5 +14,6 @@ export const landingPage = createSlice({
   initialState: { posts: null, query: "", total_post_count: 0 } as LandingPageState,
   reducers: {
     set: setterReducerFactory(),
+    overwrite: overWriterReducerFactory(),
   },
 });
