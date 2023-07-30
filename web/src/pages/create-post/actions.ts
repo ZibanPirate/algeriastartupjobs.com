@@ -38,8 +38,15 @@ export const createPost = async (): Promise<void> => {
   createPostPage.set({ creation_status: "CREATING" });
 
   try {
-    const { title, poster_type, poster_name, poster_first_name, poster_last_name, poster_contact } =
-      getState().createPostPage;
+    const {
+      title,
+      poster_type,
+      poster_name,
+      poster_first_name,
+      poster_last_name,
+      poster_contact,
+      post_description = "",
+    } = getState().createPostPage;
 
     const {
       data: { confirmation_id, post_id },
@@ -65,7 +72,7 @@ export const createPost = async (): Promise<void> => {
         title,
         slug: "",
         short_description: "",
-        description: "",
+        description: post_description,
         poster_id: 0,
         category_id: 0,
         tag_ids: [],
@@ -73,7 +80,7 @@ export const createPost = async (): Promise<void> => {
       } as Omit<Post, "id">,
     });
 
-    createPostPage.set({ ...initialStateForCreatePostPage, creation_status: "CREATED" });
+    createPostPage.overwrite({ ...initialStateForCreatePostPage, creation_status: "CREATED" });
     confirmEmailPage.set({ ...initialStateForConfirmEmailPage, confirmation_id, post_id });
     getBrowserRouter().navigate(CONFIRM_EMAIL_PAGE_URL);
   } catch (error) {

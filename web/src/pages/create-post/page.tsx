@@ -16,6 +16,7 @@ import { createPost, fetchAccountForCreatePostPage } from "./actions";
 import { isLoaded } from "src/utils/loadable";
 import { getAccountName } from "src/utils/models/account-name";
 import { POST_PAGE_URL } from "src/utils/urls/common";
+import { RichInput } from "src/components/rich-input";
 
 export const Page: FC = () => {
   usePageTitle("Post a job ad for free!");
@@ -29,6 +30,8 @@ export const Page: FC = () => {
     poster_contact,
     poster,
     creation_status,
+    compact,
+    post_description,
   } = useSliceSelector("createPostPage");
   const { set } = getStateActions().createPostPage;
 
@@ -142,6 +145,21 @@ export const Page: FC = () => {
             )}
           </>
         )}
+        {compact ? null : (
+          <>
+            <Text variant="v4">More details about the job</Text>
+            <RichInput
+              disabled={disabledInputs}
+              placeholder="What is the job about?"
+              stretch={true}
+              value={post_description}
+              setValue={(value) => set({ post_description: value })}
+              autoRows={true}
+              variant="v4"
+              id="description"
+            />
+          </>
+        )}
         <Stack orientation="vertical" align="center" stretch>
           {["CREATING", "CREATED"].includes(creation_status) ? (
             <Icon
@@ -161,12 +179,8 @@ export const Page: FC = () => {
                   Post now
                 </Button>
                 <Text variant="v4">or</Text>
-                <Link
-                  to="#"
-                  variant="v4"
-                  onClick={() => alert("Stay updated at github.com/algeriastartupjobs")}
-                >
-                  Add more details
+                <Link to="#" variant="v4" onClick={() => set({ compact: !compact })}>
+                  {compact ? "Add more details" : "Hide details"}
                 </Link>
               </Stack>
             </>
