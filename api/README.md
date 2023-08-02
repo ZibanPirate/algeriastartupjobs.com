@@ -30,6 +30,14 @@ Or simply delete the whole file and restart Docker:
 rm ~/.docker/config.json
 ```
 
+### Fix Docker build issues
+
+if VSCode's Rust Analyzer extension doesn't work:
+
+```sh
+cargo clean
+```
+
 ### Generate Random password
 
 ```sh

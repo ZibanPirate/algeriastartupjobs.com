@@ -44,7 +44,7 @@ export const fetchTagsForCreatePostPage = async (): Promise<void> => {
     // @TODO-ZM: auto-generate types for API endpoints
     const { data } = await Axios.post<{
       tags: CompactTag[];
-    }>(getConfig().api.base_url + "/tags/description_suggestions", {
+    }>(getConfig().api.base_url + "/tags/suggestions_for_description", {
       description: post_description,
     });
 

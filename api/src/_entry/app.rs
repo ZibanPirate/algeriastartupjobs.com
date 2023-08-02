@@ -6,6 +6,7 @@ use crate::{
   account::controller::create_account_router,
   post::controller::create_post_router,
   search::{controller::create_search_router, cron_job::SearchCronJob},
+  tag::controller::create_tag_router,
 };
 use axum::{routing::get, Json, Router};
 use local_ip_address::local_ip;
@@ -64,6 +65,7 @@ async fn create_app(app_state: AppState) -> Result<Router, BootError> {
     .nest("/posts", create_post_router())
     .nest("/search", create_search_router())
     .nest("/account", create_account_router())
+    .nest("/tags", create_tag_router())
     // @TODO-ZM: route this only on development
     .nest("/test", create_test_router())
     .route(
