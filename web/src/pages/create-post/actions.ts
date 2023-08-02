@@ -7,12 +7,13 @@ import { getBrowserRouter } from "src/components/router-provider";
 import { CONFIRM_EMAIL_PAGE_URL } from "src/utils/urls/common";
 import { initialStateForConfirmEmailPage } from "../confirm-email/state";
 import { Post } from "src/models/post";
+import { CompactTag } from "src/models/tag";
 
 export const fetchAccountForCreatePostPage = async (): Promise<void> => {
-  const { accountEntities, createPostPage } = getStateActions();
   const { poster_contact } = getState().createPostPage;
-
   if (!poster_contact) return;
+
+  const { accountEntities, createPostPage } = getStateActions();
 
   try {
     // @TODO-ZM: auto-generate types for API endpoints
@@ -29,6 +30,33 @@ export const fetchAccountForCreatePostPage = async (): Promise<void> => {
     createPostPage.set({ poster: "ERROR" });
     // @TODO-ZM: use Logger abstraction instead of console.log
     console.log("Error fetching posts for landing page", error);
+    // Sentry.captureException(error, { tags: { type: "WEB_FETCH" } });
+  }
+};
+
+export const fetchTagsForCreatePostPage = async (): Promise<void> => {
+  const { compact, post_description } = getState().createPostPage;
+  if (compact || !post_description) return;
+
+  const { tagEntities, createPostPage } = getStateActions();
+
+  try {
+    // @TODO-ZM: auto-generate types for API endpoints
+    const { data } = await Axios.post<{
+      tags: CompactTag[];
+    }>(getConfig().api.base_url + "/tags/description_suggestions", {
+      description: post_description,
+    });
+
+    createPostPage.set({ suggested_tags: data.tags });
+
+    // update cache:
+    tagEntities.upsertMany(data.tags);
+  } catch (error) {
+    // @TODO-ZM: set it to null when status is 404
+    createPostPage.set({ suggested_tags: "ERROR" });
+    // @TODO-ZM: use Logger abstraction instead of console.log
+    console.log("Error fetching suggested tags for create post page", error);
     // Sentry.captureException(error, { tags: { type: "WEB_FETCH" } });
   }
 };

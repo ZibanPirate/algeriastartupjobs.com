@@ -12,11 +12,11 @@ import { Account } from "src/models/account";
 import { useSliceSelector } from "src/utils/state/selector";
 import { getStateActions } from "src/state";
 import { DebouncedValueInput } from "src/components/input/debounced-value";
-import { createPost, fetchAccountForCreatePostPage } from "./actions";
+import { createPost, fetchAccountForCreatePostPage, fetchTagsForCreatePostPage } from "./actions";
 import { isLoaded } from "src/utils/loadable";
 import { getAccountName } from "src/utils/models/account-name";
 import { POST_PAGE_URL } from "src/utils/urls/common";
-import { RichInput } from "src/components/rich-input";
+import { DebouncedValueRichInput } from "src/components/rich-input/debounced-value";
 
 export const Page: FC = () => {
   usePageTitle("Post a job ad for free!");
@@ -38,6 +38,10 @@ export const Page: FC = () => {
   useEffect(() => {
     fetchAccountForCreatePostPage();
   }, [poster_contact]);
+
+  useEffect(() => {
+    fetchTagsForCreatePostPage();
+  }, [post_description]);
 
   const [posterName, setPosterName] = useState("");
 
@@ -148,7 +152,7 @@ export const Page: FC = () => {
         {compact ? null : (
           <>
             <Text variant="v4">More details about the job</Text>
-            <RichInput
+            <DebouncedValueRichInput
               disabled={disabledInputs}
               placeholder="What is the job about?"
               stretch={true}
