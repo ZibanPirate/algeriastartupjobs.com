@@ -34,8 +34,16 @@ export const Page: FC = () => {
     compact,
     post_description,
     suggested_tags,
+    tags,
   } = useSliceSelector("createPostPage");
   const { set } = getStateActions().createPostPage;
+
+  const [uniqueSuggestedTags, setUniqueSuggestedTags] = useState(suggested_tags);
+  useEffect(() => {
+    if (suggested_tags === "ERROR" || !suggested_tags || !tags)
+      setUniqueSuggestedTags(uniqueSuggestedTags);
+    else setUniqueSuggestedTags(suggested_tags.filter((tag) => !tags.find((t) => t.id === tag.id)));
+  }, [suggested_tags, tags]);
 
   useEffect(() => {
     fetchAccountForCreatePostPage();
@@ -164,17 +172,38 @@ export const Page: FC = () => {
               variant="v4"
               id="description"
             />
-            {suggested_tags === "ERROR" ? (
+            {tags.length > 0 && (
+              <>
+                <Text variant="v4">Applied tags</Text>
+                <Stack orientation="horizontal" animation={true} gap="1">
+                  {tags.map((tag) => (
+                    <Tag variant="v4" key={tag.id}>
+                      {tag.name}
+                      <Button
+                        variant="v4"
+                        onClick={() => set({ tags: tags.filter((t) => t.id !== tag.id) })}
+                      >
+                        <Icon variant="v4" name="back" />
+                      </Button>
+                    </Tag>
+                  ))}
+                </Stack>
+              </>
+            )}
+            {uniqueSuggestedTags === "ERROR" ? (
               <Text variant="v4">Something went wrong while suggesting tags...</Text>
             ) : (
-              suggested_tags &&
-              suggested_tags.length > 0 && (
+              uniqueSuggestedTags &&
+              uniqueSuggestedTags.length > 0 && (
                 <>
                   <Text variant="v4">Suggested tags</Text>
                   <Stack orientation="horizontal" animation={true} gap="1">
-                    {suggested_tags?.map((tag) => (
+                    {uniqueSuggestedTags.map((tag) => (
                       <Tag variant="v4" key={tag.id}>
                         {tag.name}
+                        <Button variant="v4" onClick={() => set({ tags: [...tags, tag] })}>
+                          <Icon variant="v4" name="newPost" />
+                        </Button>
                       </Tag>
                     ))}
                   </Stack>
