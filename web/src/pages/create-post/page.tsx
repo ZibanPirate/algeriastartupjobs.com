@@ -17,6 +17,7 @@ import { isLoaded } from "src/utils/loadable";
 import { getAccountName } from "src/utils/models/account-name";
 import { POST_PAGE_URL } from "src/utils/urls/common";
 import { DebouncedValueRichInput } from "src/components/rich-input/debounced-value";
+import { Tag } from "src/components/tag";
 
 export const Page: FC = () => {
   usePageTitle("Post a job ad for free!");
@@ -32,6 +33,7 @@ export const Page: FC = () => {
     creation_status,
     compact,
     post_description,
+    suggested_tags,
   } = useSliceSelector("createPostPage");
   const { set } = getStateActions().createPostPage;
 
@@ -162,6 +164,23 @@ export const Page: FC = () => {
               variant="v4"
               id="description"
             />
+            {suggested_tags === "ERROR" ? (
+              <Text variant="v4">Something went wrong while suggesting tags...</Text>
+            ) : (
+              suggested_tags &&
+              suggested_tags.length > 0 && (
+                <>
+                  <Text variant="v4">Suggested tags</Text>
+                  <Stack orientation="horizontal" animation={true} gap="1">
+                    {suggested_tags?.map((tag) => (
+                      <Tag variant="v4" key={tag.id}>
+                        {tag.name}
+                      </Tag>
+                    ))}
+                  </Stack>
+                </>
+              )
+            )}
           </>
         )}
         <Stack orientation="vertical" align="center" stretch>

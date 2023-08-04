@@ -35,10 +35,14 @@ export const fetchAccountForCreatePostPage = async (): Promise<void> => {
 };
 
 export const fetchTagsForCreatePostPage = async (): Promise<void> => {
-  const { compact, post_description } = getState().createPostPage;
-  if (compact || !post_description) return;
-
+  const { compact, title, post_description } = getState().createPostPage;
   const { tagEntities, createPostPage } = getStateActions();
+
+  if (!post_description) {
+    createPostPage.set({ suggested_tags: [] });
+    if (!title) createPostPage.set({ suggested_categories: [] });
+  }
+  if (compact || !post_description) return;
 
   try {
     // @TODO-ZM: auto-generate types for API endpoints

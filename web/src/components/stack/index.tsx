@@ -59,9 +59,9 @@ export const Stack: FC<StackProps> = ({
       <div style={style}>
         <FlipMove
           className={classes.join(" ")}
-          appearAnimation="none"
+          appearAnimation="fade"
           leaveAnimation="none"
-          enterAnimation="none"
+          enterAnimation="fade"
           disableAllAnimations={!shouldAnimate}
         >
           {children}
