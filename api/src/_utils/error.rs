@@ -30,3 +30,8 @@ pub enum SecurityError {
   RateLimitError,
   InternalError,
 }
+
+#[derive(Debug)]
+pub enum AIError {
+  InternalError,
+}

@@ -2,14 +2,15 @@ mod _entry;
 mod _test;
 mod _utils;
 mod account;
+mod ai;
 mod category;
 mod config;
 mod email;
 mod post;
 mod search;
+mod security;
 mod tag;
 mod task;
-mod security;
 
 use _entry::app::actual_main;
 

@@ -1,6 +1,6 @@
 use super::database::{create_db_client, create_kv_db};
 use crate::{
-  _utils::error::BootError, account::repository::AccountRepository,
+  _utils::error::BootError, account::repository::AccountRepository, ai::service::AIService,
   category::repository::CategoryRepository, config::service::ConfigService,
   email::service::EmailService, post::repository::PostRepository, search::service::SearchService,
   security::service::SecurityService, tag::repository::TagRepository,
@@ -24,6 +24,7 @@ pub struct AppState {
   pub search_service: Arc<SearchService>,
   pub email_service: Arc<EmailService>,
   pub security_service: Arc<SecurityService>,
+  pub ai_service: Arc<AIService>,
 }
 
 pub async fn create_app_state() -> Result<AppState, BootError> {
@@ -64,6 +65,7 @@ pub async fn create_app_state() -> Result<AppState, BootError> {
   let task_repository = Arc::new(TaskRepository::new(Arc::clone(&main_db)));
   let email_service = Arc::new(EmailService::new(Arc::clone(&config_service)));
   let security_service = Arc::new(SecurityService::new(Arc::clone(&rate_limit_kv_db)));
+  let ai_service = Arc::new(AIService::new(Arc::clone(&config_service)));
 
   Ok(AppState {
     main_db: Arc::clone(&main_db),
@@ -79,5 +81,6 @@ pub async fn create_app_state() -> Result<AppState, BootError> {
     search_service: Arc::clone(&search_service),
     email_service: Arc::clone(&email_service),
     security_service: Arc::clone(&security_service),
+    ai_service: Arc::clone(&ai_service),
   })
 }
