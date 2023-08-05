@@ -177,14 +177,13 @@ export const Page: FC = () => {
                 <Text variant="v4">Applied tags</Text>
                 <Stack orientation="horizontal" animation={true} gap="1">
                   {tags.map((tag) => (
-                    <Tag variant="v4" key={tag.id}>
+                    <Tag
+                      variant="v4"
+                      key={tag.id}
+                      onClick={() => set({ tags: tags.filter((t) => t.id !== tag.id) })}
+                    >
                       {tag.name}
-                      <Button
-                        variant="v4"
-                        onClick={() => set({ tags: tags.filter((t) => t.id !== tag.id) })}
-                      >
-                        <Icon variant="v4" name="back" />
-                      </Button>
+                      <Icon variant="v4" name="removeTag" />
                     </Tag>
                   ))}
                 </Stack>
@@ -199,11 +198,9 @@ export const Page: FC = () => {
                   <Text variant="v4">Suggested tags</Text>
                   <Stack orientation="horizontal" animation={true} gap="1">
                     {uniqueSuggestedTags.map((tag) => (
-                      <Tag variant="v4" key={tag.id}>
+                      <Tag variant="v4" key={tag.id} onClick={() => set({ tags: [...tags, tag] })}>
                         {tag.name}
-                        <Button variant="v4" onClick={() => set({ tags: [...tags, tag] })}>
-                          <Icon variant="v4" name="newPost" />
-                        </Button>
+                        <Icon variant="v4" name="addTag" />
                       </Tag>
                     ))}
                   </Stack>

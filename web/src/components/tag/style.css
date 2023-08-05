@@ -4,3 +4,11 @@
   padding: 0 0.5em;
   display: flex;
 }
+
+.tag-clickable {
+  cursor: pointer;
+}
+
+.tag-clickable > *:hover {
+  background-color: var(--color-background-back-1);
+}
