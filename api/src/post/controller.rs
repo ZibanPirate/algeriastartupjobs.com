@@ -263,14 +263,14 @@ pub async fn create_one_post_with_poster(
   // @TODO-ZM: write a macro for this
   match app_state.security_service.rate_limit(vec![
     RateLimitConstraint {
-      id: format!("{}", ip.ip()),
-      max_requests: 60,
-      duration_ms: 60000,
-    },
-    RateLimitConstraint {
-      id: format!("{}", body.poster.email),
+      id: format!("create_one_post_with_poster-1-{}", body.poster.email),
       max_requests: 1,
       duration_ms: 2000,
+    },
+    RateLimitConstraint {
+      id: format!("create_one_post_with_poster-2-{}", ip.ip()),
+      max_requests: 60,
+      duration_ms: 60000,
     },
   ]) {
     Ok(_) => {}

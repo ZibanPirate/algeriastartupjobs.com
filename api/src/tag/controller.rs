@@ -1,16 +1,45 @@
+use std::net::SocketAddr;
+
 use crate::_entry::state::AppState;
+use crate::_utils::error::SecurityError;
 use crate::_utils::string::escape_single_quote;
 use crate::_utils::string::slugify;
 use crate::ai::service::PostToSuggestTagsFor;
+use crate::security::service::RateLimitConstraint;
 use crate::tag::model::{CompactTag, DBTag};
+use axum::extract::ConnectInfo;
 use axum::{extract::State, response::IntoResponse, Json, Router};
 use hyper::StatusCode;
 use serde_json::json;
 
 pub async fn get_many_suggested_tags_for_post(
+  ConnectInfo(ip): ConnectInfo<SocketAddr>,
   State(app_state): State<AppState>,
   Json(body): Json<PostToSuggestTagsFor>,
 ) -> impl IntoResponse {
+  // @TODO-ZM: write a macro for this
+  match app_state.security_service.rate_limit(vec![
+    RateLimitConstraint {
+      id: format!("get_many_suggested_tags_for_post-1{}", ip.ip()),
+      max_requests: 1,
+      duration_ms: 2000,
+    },
+    RateLimitConstraint {
+      id: format!("get_many_suggested_tags_for_post-2-{}", ip.ip()),
+      max_requests: 30,
+      duration_ms: 60000,
+    },
+  ]) {
+    Ok(_) => {}
+    Err(SecurityError::InternalError) => {
+      // @TODO-ZM: log error reason
+      return StatusCode::INTERNAL_SERVER_ERROR.into_response();
+    }
+    Err(SecurityError::RateLimitError) => {
+      return StatusCode::TOO_MANY_REQUESTS.into_response();
+    }
+  }
+
   let keywords = app_state.ai_service.suggest_tags_for_post(body).await;
   if keywords.is_err() {
     // @TODO-ZM: log error reason
