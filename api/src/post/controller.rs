@@ -270,7 +270,7 @@ pub async fn create_one_post_with_poster(
     RateLimitConstraint {
       id: format!("create_one_post_with_poster-2-{}", ip.ip()),
       max_requests: 60,
-      duration_ms: 60000,
+      duration_ms: 60_000,
     },
   ]) {
     Ok(_) => {}
@@ -323,6 +323,14 @@ pub async fn create_one_post_with_poster(
       poster_id,
       slug: slugify(&body.post.title),
       is_confirmed: false,
+      // @TODO-ZM: summarize description using AI
+      short_description: body
+        .post
+        .description
+        .split_whitespace()
+        .take(20)
+        .collect::<Vec<&str>>()
+        .join(" "),
       ..body.post.clone()
     })
     .await;

@@ -27,7 +27,7 @@ pub async fn get_many_suggested_tags_for_post(
     RateLimitConstraint {
       id: format!("get_many_suggested_tags_for_post-2-{}", ip.ip()),
       max_requests: 30,
-      duration_ms: 60000,
+      duration_ms: 60_000,
     },
   ]) {
     Ok(_) => {}
