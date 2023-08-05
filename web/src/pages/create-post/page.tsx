@@ -45,6 +45,11 @@ export const Page: FC = () => {
     else setUniqueSuggestedTags(suggested_tags.filter((tag) => !tags.find((t) => t.id === tag.id)));
   }, [suggested_tags, tags]);
 
+  const [canHideDetails, setCanHideDetails] = useState(false);
+  useEffect(() => {
+    setCanHideDetails(!(compact || post_description || tags?.length > 0));
+  }, [compact, post_description, tags]);
+
   useEffect(() => {
     fetchAccountForCreatePostPage();
   }, [poster_contact]);
@@ -227,10 +232,14 @@ export const Page: FC = () => {
                 <Button variant="v3" onClick={() => createPost()} vtName="new-post">
                   Post now
                 </Button>
-                <Text variant="v4">or</Text>
-                <Link to="#" variant="v4" onClick={() => set({ compact: !compact })}>
-                  {compact ? "Add more details" : "Hide details"}
-                </Link>
+                {(compact || canHideDetails) && (
+                  <>
+                    <Text variant="v4">or</Text>
+                    <Link to="#" variant="v4" onClick={() => set({ compact: !compact })}>
+                      {compact ? "Add more details" : "Hide details"}
+                    </Link>
+                  </>
+                )}
               </Stack>
             </>
           )}
