@@ -40,10 +40,14 @@ impl AIService {
   }
 
   pub async fn suggest_tags_for_post(
-    self,
+    &self,
     post: PostToSuggestTagsFor,
   ) -> Result<Vec<String>, AIError> {
     let client = reqwest::Client::new();
+
+    if post.title.len() < 3 || post.description.split(" ").count() < 2 {
+      return Ok(vec![]);
+    }
 
     let ai_response_string = client
       .post("https://api.openai.com/v1/chat/completions")
@@ -51,7 +55,10 @@ impl AIService {
       .header("accept", "application/json")
       .header(
         "Authorization",
-        self.config_service.get_config().ai_service_auth_token,
+        format!(
+          "Bearer {}",
+          self.config_service.get_config().ai_service_auth_token
+        ),
       )
       .body(format!(
         r#"{{
@@ -59,7 +66,7 @@ impl AIService {
           "messages": [
             {{
               "role": "system",
-              "content": "You will be provided with an Algerian job post description, and your task is to generate 10 relevant keywords in English about skills needed, in this format: [keyword1|keyword2|...|keyword10]"
+              "content": "You will be provided with an Algerian job post title and description, and your task is, if possible, generate 10 relevant keywords in English about skills needed, in this format: [keyword1|keyword2|...|keyword10]"
             }},
             {{
               "role": "user",
@@ -76,8 +83,8 @@ impl AIService {
           "frequency_penalty": 0.25,
           "presence_penalty": 0
         }}"#,
-        escape_new_line(&escape_double_quote(&post.title)),
-        escape_new_line(&escape_double_quote(&post.description)),
+        escape_new_line(&escape_double_quote(&post.title)).trim(),
+        escape_new_line(&escape_double_quote(&post.description)).trim(),
       ))
       .send()
       .await;
@@ -103,15 +110,23 @@ impl AIService {
     let string_result = &string_result.unwrap().message.content;
 
     // extract all keywords where string_result is: [keyword1|keyword2|keyword3|...]
-    let keywords = string_result
-      .split('[')
-      .nth(1)
-      .unwrap()
-      .split(']')
-      .nth(0)
-      .unwrap()
-      .split('|')
-      .map(|s| s.trim().to_string())
+    let keywords = match string_result.split('[').nth(1) {
+      Some(s) => match s.split(']').nth(0) {
+        Some(s) => match s.split('|').collect::<Vec<&str>>() {
+          keywords => keywords
+            .iter()
+            .map(|s| s.trim().to_string())
+            .collect::<Vec<String>>(),
+        },
+        None => vec![],
+      },
+      None => vec![],
+    };
+
+    let keywords = keywords
+      .iter()
+      .filter(|s| !s.is_empty() && !s.to_lowercase().contains("keyword"))
+      .map(|s| s.to_lowercase())
       .collect::<Vec<String>>();
 
     Ok(keywords)

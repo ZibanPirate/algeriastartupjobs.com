@@ -55,8 +55,9 @@ export const Page: FC = () => {
   }, [poster_contact]);
 
   useEffect(() => {
+    if (compact) return;
     fetchTagsForCreatePostPage();
-  }, [post_description]);
+  }, [title, post_description, compact]);
 
   const [posterName, setPosterName] = useState("");
 
@@ -93,7 +94,7 @@ export const Page: FC = () => {
       {/* Create Post */}
       <Stack orientation="vertical" align="start" stretch gap="1" padding="3 1">
         <Text variant="v4">Looking for</Text>
-        <Input
+        <DebouncedValueInput
           disabled={disabledInputs}
           placeholder="Job title, eg: Sales Manager"
           stretch={true}

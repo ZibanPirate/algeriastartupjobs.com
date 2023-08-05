@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 use utility_types::{omit, partial, pick};
 
-#[omit(DBTag, [id])]
+#[omit(DBTag, [id], [Debug, Serialize, Deserialize, Clone])]
 #[pick(CompactTag, [id, slug, name], [Debug, Serialize, Deserialize, Clone])]
 #[partial(PartialTag)]
 #[derive(Debug, Serialize, Deserialize, Clone)]

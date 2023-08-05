@@ -54,7 +54,14 @@ impl TagRepository {
 
         Ok(tag)
       }
-      Err(_) => Err(DataAccessError::InternalError),
+      Err(_) => {
+        tracing::error!(
+          "Error while getting many tags by filter, error: {:?} | query: {}",
+          query_result,
+          query
+        );
+        return Err(DataAccessError::InternalError);
+      }
     }
   }
 

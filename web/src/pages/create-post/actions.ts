@@ -8,6 +8,7 @@ import { CONFIRM_EMAIL_PAGE_URL } from "src/utils/urls/common";
 import { initialStateForConfirmEmailPage } from "../confirm-email/state";
 import { Post } from "src/models/post";
 import { CompactTag } from "src/models/tag";
+import { onceAtATime } from "src/utils/concurrency/once-at-a-time";
 
 export const fetchAccountForCreatePostPage = async (): Promise<void> => {
   const { poster_contact } = getState().createPostPage;
@@ -34,7 +35,7 @@ export const fetchAccountForCreatePostPage = async (): Promise<void> => {
   }
 };
 
-export const fetchTagsForCreatePostPage = async (): Promise<void> => {
+const concurrentFetchTagsForCreatePostPage = async (): Promise<void> => {
   const { compact, title, post_description } = getState().createPostPage;
   const { tagEntities, createPostPage } = getStateActions();
 
@@ -48,8 +49,9 @@ export const fetchTagsForCreatePostPage = async (): Promise<void> => {
     // @TODO-ZM: auto-generate types for API endpoints
     const { data } = await Axios.post<{
       tags: CompactTag[];
-    }>(getConfig().api.base_url + "/tags/suggestions_for_description", {
+    }>(getConfig().api.base_url + "/tags/suggestions_for_post", {
       description: post_description,
+      title,
     });
 
     createPostPage.set({ suggested_tags: data.tags });
@@ -64,6 +66,8 @@ export const fetchTagsForCreatePostPage = async (): Promise<void> => {
     // Sentry.captureException(error, { tags: { type: "WEB_FETCH" } });
   }
 };
+
+export const fetchTagsForCreatePostPage = onceAtATime(concurrentFetchTagsForCreatePostPage);
 
 export const createPost = async (): Promise<void> => {
   const { createPostPage, confirmEmailPage } = getStateActions();
