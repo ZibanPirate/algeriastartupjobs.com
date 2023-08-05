@@ -1,6 +1,6 @@
 import memoize from "lodash/memoize";
 
-export type CSSNumber = `${0 | 1 | 2 | 3}`;
+export type CSSNumber = `${".5" | 0 | 1 | 2 | 3}`;
 
 type MarginOrPadding =
   | "auto"

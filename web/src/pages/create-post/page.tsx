@@ -185,6 +185,7 @@ export const Page: FC = () => {
                   {tags.map((tag) => (
                     <Tag
                       variant="v4"
+                      padding="0 0 0 .5"
                       key={tag.id}
                       onClick={() => set({ tags: tags.filter((t) => t.id !== tag.id) })}
                     >
@@ -204,7 +205,12 @@ export const Page: FC = () => {
                   <Text variant="v4">Suggested tags</Text>
                   <Stack orientation="horizontal" animation={true} gap="1">
                     {uniqueSuggestedTags.map((tag) => (
-                      <Tag variant="v4" key={tag.id} onClick={() => set({ tags: [...tags, tag] })}>
+                      <Tag
+                        variant="v4"
+                        padding="0 0 0 .5"
+                        key={tag.id}
+                        onClick={() => set({ tags: [...tags, tag] })}
+                      >
                         {tag.name}
                         <Icon variant="v4" name="addTag" />
                       </Tag>

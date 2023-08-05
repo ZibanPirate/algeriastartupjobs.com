@@ -6,6 +6,10 @@
   padding-top: 0 !important;
 }
 
+.padding-top-p5 {
+  padding-top: 0.5 !important;
+}
+
 .padding-top-1 {
   padding-top: 1rem !important;
 }
@@ -20,6 +24,10 @@
 
 .padding-bottom-0 {
   padding-bottom: 0 !important;
+}
+
+.padding-bottom-p5 {
+  padding-bottom: 0.5 !important;
 }
 
 .padding-bottom-1 {
@@ -38,6 +46,10 @@
   padding-left: 0 !important;
 }
 
+.padding-left-p5 {
+  padding-left: 0.5 !important;
+}
+
 .padding-left-1 {
   padding-left: 1rem !important;
 }
@@ -52,6 +64,10 @@
 
 .padding-right-0 {
   padding-right: 0 !important;
+}
+
+.padding-right-p5 {
+  padding-right: 0.5 !important;
 }
 
 .padding-right-1 {
