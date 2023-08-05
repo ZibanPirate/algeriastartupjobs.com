@@ -78,6 +78,7 @@ export const createPost = async (): Promise<void> => {
       poster_last_name,
       poster_contact,
       post_description = "",
+      tags = [],
     } = getState().createPostPage;
 
     const {
@@ -107,7 +108,7 @@ export const createPost = async (): Promise<void> => {
         description: post_description,
         poster_id: 0,
         category_id: 0,
-        tag_ids: [],
+        tag_ids: tags.map((tag) => tag.id),
         is_confirmed: false,
       } as Omit<Post, "id">,
     });
