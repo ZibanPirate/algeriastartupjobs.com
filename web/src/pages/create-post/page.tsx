@@ -1,4 +1,4 @@
-import { FC, useEffect, useState } from "react";
+import { FC, useEffect, useMemo, useState } from "react";
 import { Link } from "src/components/link";
 import { Stack } from "src/components/stack";
 import { Text } from "src/components/text";
@@ -18,6 +18,7 @@ import { getAccountName } from "src/utils/models/account-name";
 import { POST_PAGE_URL } from "src/utils/urls/common";
 import { DebouncedValueRichInput } from "src/components/rich-input/debounced-value";
 import { Tag } from "src/components/tag";
+import { useMediaQuery } from "src/utils/hooks/use-media-query";
 
 export const Page: FC = () => {
   usePageTitle("Post a job ad for free!");
@@ -81,7 +82,58 @@ export const Page: FC = () => {
     }
   }, [poster]);
 
+  const isMediumScreen = useMediaQuery("(max-width: 1300px)");
+
   const disabledInputs = ["CREATING", "CREATED"].includes(creation_status);
+
+  const Tags = useMemo(
+    () => (
+      <>
+        {tags.length > 0 && (
+          <>
+            <Text variant="v4">Applied tags</Text>
+            <Stack orientation="horizontal" animation={true} gap="1">
+              {tags.map((tag) => (
+                <Tag
+                  variant="v4"
+                  padding="0 0 0 .5"
+                  key={tag.id}
+                  onClick={() => set({ tags: tags.filter((t) => t.id !== tag.id) })}
+                >
+                  {tag.name}
+                  <Icon variant="v4" name="removeTag" />
+                </Tag>
+              ))}
+            </Stack>
+          </>
+        )}
+        {uniqueSuggestedTags === "ERROR" ? (
+          <Text variant="v4">Something went wrong while suggesting tags...</Text>
+        ) : (
+          uniqueSuggestedTags &&
+          uniqueSuggestedTags.length > 0 && (
+            <>
+              <Text variant="v4">Suggested tags</Text>
+              <Stack orientation="horizontal" animation={true} gap="1">
+                {uniqueSuggestedTags.map((tag) => (
+                  <Tag
+                    variant="v4"
+                    padding="0 0 0 .5"
+                    key={tag.id}
+                    onClick={() => set({ tags: [...tags, tag] })}
+                  >
+                    {tag.name}
+                    <Icon variant="v4" name="addTag" />
+                  </Tag>
+                ))}
+              </Stack>
+            </>
+          )
+        )}
+      </>
+    ),
+    [tags, uniqueSuggestedTags]
+  );
 
   return (
     <Stack orientation="vertical" fullWidth align="start" maxWidth={600} margin="auto">
@@ -92,7 +144,16 @@ export const Page: FC = () => {
         </Link>
       </Stack>
       {/* Create Post */}
-      <Stack orientation="vertical" align="start" stretch gap="1" padding="3 1">
+      <Stack orientation="vertical" align="start" stretch gap="1" padding="3 1" position="relative">
+        {!isMediumScreen && (
+          <div
+            style={{ position: "absolute", right: 0, transform: "translateX(100%)", width: 300 }}
+          >
+            <Stack orientation="vertical" gap="1">
+              {Tags}
+            </Stack>
+          </div>
+        )}
         <Text variant="v4">Looking for</Text>
         <DebouncedValueInput
           disabled={disabledInputs}
@@ -177,48 +238,9 @@ export const Page: FC = () => {
               autoRows={true}
               variant="v4"
               id="description"
+              resize="vertical"
             />
-            {tags.length > 0 && (
-              <>
-                <Text variant="v4">Applied tags</Text>
-                <Stack orientation="horizontal" animation={true} gap="1">
-                  {tags.map((tag) => (
-                    <Tag
-                      variant="v4"
-                      padding="0 0 0 .5"
-                      key={tag.id}
-                      onClick={() => set({ tags: tags.filter((t) => t.id !== tag.id) })}
-                    >
-                      {tag.name}
-                      <Icon variant="v4" name="removeTag" />
-                    </Tag>
-                  ))}
-                </Stack>
-              </>
-            )}
-            {uniqueSuggestedTags === "ERROR" ? (
-              <Text variant="v4">Something went wrong while suggesting tags...</Text>
-            ) : (
-              uniqueSuggestedTags &&
-              uniqueSuggestedTags.length > 0 && (
-                <>
-                  <Text variant="v4">Suggested tags</Text>
-                  <Stack orientation="horizontal" animation={true} gap="1">
-                    {uniqueSuggestedTags.map((tag) => (
-                      <Tag
-                        variant="v4"
-                        padding="0 0 0 .5"
-                        key={tag.id}
-                        onClick={() => set({ tags: [...tags, tag] })}
-                      >
-                        {tag.name}
-                        <Icon variant="v4" name="addTag" />
-                      </Tag>
-                    ))}
-                  </Stack>
-                </>
-              )
-            )}
+            {isMediumScreen && Tags}
           </>
         )}
         <Stack orientation="vertical" align="center" stretch>

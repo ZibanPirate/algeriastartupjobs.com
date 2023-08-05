@@ -9,7 +9,7 @@ export interface StackProps
   extends PropsWithChildren,
     StyleProps,
     AnimationProps,
-    Pick<CSSProperties, "minWidth" | "maxWidth" | "flex"> {
+    Pick<CSSProperties, "minWidth" | "maxWidth" | "flex" | "justifyContent" | "position"> {
   orientation: "horizontal" | "vertical";
   align?: "start" | "center" | "end" | "baseline" | "stretch" | "space-between";
   gap?: CSSNumber;
@@ -34,6 +34,8 @@ export const Stack: FC<StackProps> = ({
   flex,
   animation = false,
   fullWidth = false,
+  justifyContent,
+  position,
 }) => {
   const classes = [
     "stack",
@@ -54,6 +56,8 @@ export const Stack: FC<StackProps> = ({
   if (maxWidth) style["maxWidth"] = maxWidth;
   if (minWidth) style["minWidth"] = minWidth;
   if (flex) style["flex"] = flex;
+  if (justifyContent) style["justifyContent"] = justifyContent;
+  if (position) style["position"] = position;
   if (animation)
     return (
       <div style={style}>

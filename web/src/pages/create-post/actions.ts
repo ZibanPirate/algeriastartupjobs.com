@@ -121,9 +121,10 @@ export const createPost = async (): Promise<void> => {
     confirmEmailPage.set({ ...initialStateForConfirmEmailPage, confirmation_id, post_id });
     getBrowserRouter().navigate(CONFIRM_EMAIL_PAGE_URL);
   } catch (error) {
-    createPostPage.set({ creation_status: "ERROR" });
-    // @TODO-ZM: use Logger abstraction instead of console
     console.log("Error creating post", error);
     // Sentry.captureException(error, { tags: { type: "WEB_FETCH" } });
+    // @TODO-ZM: skip when 429
+    createPostPage.set({ creation_status: "ERROR" });
+    // @TODO-ZM: use Logger abstraction instead of console
   }
 };

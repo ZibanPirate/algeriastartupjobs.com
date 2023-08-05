@@ -5,7 +5,8 @@ import { FontVariantProps, StyleProps, marginToClasses } from "src/utils/props/s
 export interface RichInputProps
   extends StyleProps,
     FontVariantProps,
-    Pick<HTMLAttributes<HTMLTextAreaElement>, "id"> {
+    Pick<HTMLAttributes<HTMLTextAreaElement>, "id">,
+    Pick<CSSProperties, "resize"> {
   placeholder?: string;
   value: string;
   setValue: (value: string) => void;
@@ -24,6 +25,7 @@ export const RichInput: FC<RichInputProps> = ({
   stretch = false,
   width,
   autoRows = false,
+  resize = "none",
   ...props
 }) => {
   const classes = [
@@ -35,6 +37,7 @@ export const RichInput: FC<RichInputProps> = ({
 
   const style: CSSProperties = {};
   if (width) style.width = width;
+  if (resize) style.resize = resize;
 
   return (
     <textarea
