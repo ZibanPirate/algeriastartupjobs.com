@@ -66,7 +66,23 @@ async fn run_indexing_cron_job(app_state: AppState) {
   }
   let posts = posts.unwrap();
 
-  let indexing_result = app_state.search_service.index_posts(posts).await;
+  let tag_ids = posts
+    .iter()
+    .map(|post| post.tag_ids.clone())
+    .flatten()
+    .collect::<Vec<u32>>();
+
+  let tags = app_state
+    .tag_repository
+    .get_many_compact_tags_by_ids(&tag_ids)
+    .await;
+  if tags.is_err() {
+    tracing::error!("Error while getting tags");
+    return;
+  }
+  let tags = tags.unwrap();
+
+  let indexing_result = app_state.search_service.index_posts(posts, tags).await;
   if indexing_result.is_err() {
     tracing::error!("Error while indexing posts");
     return;

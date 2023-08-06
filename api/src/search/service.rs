@@ -5,6 +5,7 @@ use crate::{
     string::{escape_double_quote, get_searchable_words, get_words},
   },
   post::model::Post,
+  tag::model::CompactTag,
 };
 use bk_tree::{metrics, BKTree};
 use itertools::Itertools;
@@ -74,7 +75,11 @@ impl SearchService {
     Ok(())
   }
 
-  pub async fn index_posts(&self, posts: Vec<Post>) -> Result<(), SearchError> {
+  pub async fn index_posts(
+    &self,
+    posts: Vec<Post>,
+    tags: Vec<CompactTag>,
+  ) -> Result<(), SearchError> {
     let mut word_indexes: Vec<WordIndex> = vec![];
     for post in posts {
       // @TODO-ZM: use regex \d to split the string
@@ -88,18 +93,38 @@ impl SearchService {
         });
       });
 
-      get_words(&post.short_description).for_each(|word| {
+      get_words(&post.description).for_each(|word| {
         let word = word.to_lowercase();
 
         word_indexes.push(WordIndex {
           word,
           model_id: post.id,
-          appear_in: "post_short_description".to_string(),
+          appear_in: "post_description".to_string(),
         });
       });
 
-      // @TODO-ZM: add post description to the index
-      // @TODO-ZM: populate tags by tag_ids and index them.
+      for tag_id in post.tag_ids {
+        let tag = tags
+          .iter()
+          .find(|tag| tag.id == tag_id)
+          .map(|tag| tag.clone());
+
+        if tag.is_none() {
+          return Err(SearchError::InternalError);
+        };
+        let tag = tag.unwrap();
+
+        get_words(&tag.name).for_each(|word| {
+          let word = word.to_lowercase();
+
+          word_indexes.push(WordIndex {
+            word,
+            model_id: post.id,
+            appear_in: "post_tag_name".to_string(),
+          });
+        });
+      }
+
       // @TODO-ZM: populate poster by poster_id and index it.
     }
 
@@ -193,7 +218,7 @@ impl SearchService {
               100
             ELSE IF appear_in="post_short_description" THEN
               25
-            ELSE IF appear_in="post_tags" THEN
+            ELSE IF appear_in="post_tag_name" THEN
               5
             ELSE
               1
