@@ -67,7 +67,7 @@ export const fetchSimilarPostsForPostPage = async (postId: string): Promise<void
       posts: CompactPost[];
       tags: CompactTag[];
       posters: CompactAccount[];
-    }>(getConfig().api.base_url + "/posts/" + postId + "/similar?per_page=5&page=0");
+    }>(getConfig().api.base_url + "/posts/" + postId + "/similar");
 
     const similarPosts: PostPageState["similarPosts"] = data.posts.map((post) => {
       const { tag_ids, poster_id, ...lonePost } = post;

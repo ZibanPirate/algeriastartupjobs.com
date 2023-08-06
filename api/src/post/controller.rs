@@ -1,7 +1,7 @@
 use std::net::SocketAddr;
 
 use axum::{
-  extract::{ConnectInfo, Path, Query, State},
+  extract::{ConnectInfo, Path, State},
   response::IntoResponse,
   Json, Router,
 };
@@ -14,7 +14,6 @@ use crate::{
   _entry::state::AppState,
   _utils::{
     error::{DataAccessError, SecurityError},
-    query::{PaginationQuery, PaginationQueryTrait},
     string::slugify,
     vec::sort_and_dedup_vec,
   },
@@ -28,7 +27,12 @@ use super::model::{DBPost, PartialPost};
 pub async fn get_all_posts_for_feed(State(app_state): State<AppState>) -> impl IntoResponse {
   let compact_posts = app_state
     .post_repository
-    .get_many_compact_posts_by_filter("is_confirmed=true", "published_at NUMERIC DESC", 20, 0)
+    .get_many_compact_posts_by_filter(
+      "is_confirmed=true",
+      "ORDER BY published_at NUMERIC DESC",
+      20,
+      0,
+    )
     .await;
   if !compact_posts.is_ok() {
     return StatusCode::INTERNAL_SERVER_ERROR.into_response();
@@ -124,12 +128,61 @@ pub async fn get_one_post_by_id(
 pub async fn get_many_similar_posts_by_id(
   State(app_state): State<AppState>,
   Path(id): Path<u32>,
-  pagination: Query<PaginationQuery>,
 ) -> impl IntoResponse {
-  let db_pagination = pagination.to_db_query();
+  let post = app_state.post_repository.get_one_post_by_id(id).await;
+  if post.is_err() {
+    // @TODO-ZM: log error reason
+    return StatusCode::NOT_FOUND.into_response();
+  }
+  let post = post.unwrap();
+
+  let poster = app_state
+    .account_repository
+    .get_one_account_by_id(post.poster_id)
+    .await;
+  if poster.is_err() {
+    // @TODO-ZM: log error reason
+    return StatusCode::INTERNAL_SERVER_ERROR.into_response();
+  }
+  let poster = poster.unwrap();
+
+  let tags = app_state
+    .tag_repository
+    .get_many_compact_tags_by_ids(&post.tag_ids)
+    .await;
+  if tags.is_err() {
+    // @TODO-ZM: log error reason
+    return StatusCode::INTERNAL_SERVER_ERROR.into_response();
+  }
+  let tags = tags.unwrap();
+
+  let post_ids = app_state
+    .search_service
+    .search_posts(&format!(
+      "{} {} {}",
+      post.title,
+      poster.get_display_name(),
+      tags
+        .iter()
+        .map(|tag| tag.name.clone())
+        .collect::<Vec<String>>()
+        .join(" ")
+    ))
+    .await;
+
+  if !post_ids.is_ok() {
+    // @TODO-ZM: log error reason
+    return StatusCode::INTERNAL_SERVER_ERROR.into_response();
+  }
+  let post_ids = post_ids.unwrap();
+  let post_ids = post_ids
+    .into_iter()
+    .filter(|&id| id != post.id)
+    .collect::<Vec<u32>>();
+
   let similar_compact_posts = app_state
     .post_repository
-    .get_many_similar_compact_posts_by_id(id, db_pagination.limit, db_pagination.limit)
+    .get_many_compact_posts_by_ids(post_ids.clone())
     .await;
 
   if !similar_compact_posts.is_ok() {

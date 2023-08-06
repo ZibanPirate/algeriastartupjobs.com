@@ -28,7 +28,7 @@ impl PostRepository {
   ) -> Result<Vec<CompactPost>, DataAccessError> {
     let query = format!(
       r#"
-      SELECT slug, title, poster_id, short_description, tag_ids, published_at, id.id as id FROM post WHERE {} ORDER BY {} LIMIT {} START {}
+      SELECT slug, title, poster_id, short_description, tag_ids, published_at, id.id as id FROM post WHERE {} {} LIMIT {} START {}
       "#,
       filter, order, limit, start
     );
@@ -57,6 +57,31 @@ impl PostRepository {
       }
       Err(_) => Err(DataAccessError::InternalError),
     }
+  }
+
+  pub async fn get_many_compact_posts_by_ids(
+    &self,
+    ids: Vec<u32>,
+  ) -> Result<Vec<CompactPost>, DataAccessError> {
+    if ids.len() == 0 {
+      return Ok(vec![]);
+    }
+
+    self
+      .get_many_compact_posts_by_filter(
+        &format!(
+          "array::any([{}])",
+          ids
+            .iter()
+            .map(|id| format!("id.id={}", id))
+            .collect::<Vec<String>>()
+            .join(", "),
+        ),
+        "",
+        ids.len() as u32,
+        0,
+      )
+      .await
   }
 
   pub async fn get_many_posts_by_ids(&self, ids: Vec<u32>) -> Result<Vec<Post>, DataAccessError> {
@@ -125,35 +150,6 @@ impl PostRepository {
       }
       Err(_) => Err(DataAccessError::InternalError),
     }
-  }
-
-  pub async fn get_many_similar_compact_posts_by_id(
-    &self,
-    id: u32,
-    // @TODO-ZM: implement limit and start for all get_many methods
-    limit: u32,
-    start: u32,
-  ) -> Result<Vec<CompactPost>, DataAccessError> {
-    let post = self.get_one_post_by_id(id).await?;
-    let similar_posts = self
-      .get_many_compact_posts_by_filter(
-        &format!(
-          "[{}] ANYINSIDE tag_ids AND id.id != {}",
-          post
-            .tag_ids
-            .iter()
-            .map(|tag_id| tag_id.to_string())
-            .collect::<Vec<String>>()
-            .join(", "),
-          id
-        ),
-        "published_at NUMERIC DESC",
-        limit,
-        start,
-      )
-      .await?;
-
-    Ok(similar_posts)
   }
 
   pub async fn create_one_post(&self, post: &DBPost) -> Result<u32, DataAccessError> {
