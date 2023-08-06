@@ -37,6 +37,8 @@ export const Page: FC = () => {
     suggested_tags,
     tags,
   } = useSliceSelector("createPostPage");
+  const { query } = useSliceSelector("landingPage");
+
   const { set } = getStateActions().createPostPage;
 
   const [uniqueSuggestedTags, setUniqueSuggestedTags] = useState(suggested_tags);
@@ -59,6 +61,10 @@ export const Page: FC = () => {
     if (compact) return;
     fetchTagsForCreatePostPage();
   }, [title, post_description, compact]);
+
+  useEffect(() => {
+    if (!title) set({ title: query });
+  }, []);
 
   const [posterName, setPosterName] = useState("");
 
@@ -156,6 +162,7 @@ export const Page: FC = () => {
         )}
         <Text variant="v4">Looking for</Text>
         <DebouncedValueInput
+          vtName="global-search"
           disabled={disabledInputs}
           placeholder="Job title, eg: Sales Manager"
           stretch={true}

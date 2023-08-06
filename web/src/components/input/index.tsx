@@ -1,10 +1,12 @@
 import { CSSProperties, FC, HTMLAttributes } from "react";
 import "./style.css";
 import { FontVariantProps, StyleProps, marginToClasses } from "src/utils/props/style";
+import { AnimationProps } from "src/utils/props/animation";
 
 export interface InputProps
   extends StyleProps,
     FontVariantProps,
+    AnimationProps,
     Pick<HTMLAttributes<HTMLInputElement>, "onKeyDown" | "id" | "inputMode"> {
   placeholder?: string;
   value: string;
@@ -22,6 +24,7 @@ export const Input: FC<InputProps> = ({
   setValue,
   stretch = false,
   width,
+  vtName,
   ...props
 }) => {
   const classes = [
@@ -33,6 +36,7 @@ export const Input: FC<InputProps> = ({
 
   const style: CSSProperties = {};
   if (width) style.width = width;
+  if (vtName) style["viewTransitionName"] = vtName;
 
   return (
     <input
