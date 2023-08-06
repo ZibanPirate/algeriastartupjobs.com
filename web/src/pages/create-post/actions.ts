@@ -110,6 +110,7 @@ export const createPost = async (): Promise<void> => {
         poster_id: 0,
         tag_ids: tags.map((tag) => tag.id),
         is_confirmed: false,
+        published_at: "",
       } as Omit<Post, "id">,
     });
 

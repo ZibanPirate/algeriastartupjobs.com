@@ -28,7 +28,7 @@ use super::model::{DBPost, PartialPost};
 pub async fn get_all_posts_for_feed(State(app_state): State<AppState>) -> impl IntoResponse {
   let compact_posts = app_state
     .post_repository
-    .get_many_compact_posts_by_filter("true", 20, 0)
+    .get_many_compact_posts_by_filter("is_confirmed=true", "published_at NUMERIC DESC", 20, 0)
     .await;
   if !compact_posts.is_ok() {
     return StatusCode::INTERNAL_SERVER_ERROR.into_response();
@@ -391,6 +391,7 @@ pub async fn confirm_post(
         description: None,
         tag_ids: None,
         is_confirmed: Some(true),
+        published_at: Some(chrono::Utc::now().to_rfc3339()),
       },
     )
     .await;

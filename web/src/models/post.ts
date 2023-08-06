@@ -7,6 +7,7 @@ export interface Post {
   description: string;
   tag_ids: number[];
   is_confirmed: boolean;
+  published_at: string;
 }
 
 export type CompactPost = Pick<

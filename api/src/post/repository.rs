@@ -22,14 +22,15 @@ impl PostRepository {
   pub async fn get_many_compact_posts_by_filter(
     &self,
     filter: &str,
+    order: &str,
     limit: u32,
     start: u32,
   ) -> Result<Vec<CompactPost>, DataAccessError> {
     let query = format!(
       r#"
-      SELECT slug, title, poster_id, short_description, tag_ids, id.id as id FROM post WHERE {} LIMIT {} START {}
+      SELECT slug, title, poster_id, short_description, tag_ids, published_at, id.id as id FROM post WHERE {} ORDER BY {} LIMIT {} START {}
       "#,
-      filter, limit, start
+      filter, order, limit, start
     );
 
     let query_result = self.main_db.query(&query).await;
@@ -146,6 +147,7 @@ impl PostRepository {
             .join(", "),
           id
         ),
+        "published_at NUMERIC DESC",
         limit,
         start,
       )
@@ -169,6 +171,7 @@ impl PostRepository {
         description:'{}',
         tag_ids:[{}],
         is_confirmed: {},
+        published_at: '{}',
       }};
 
       COMMIT TRANSACTION;
@@ -185,6 +188,7 @@ impl PostRepository {
         .collect::<Vec<String>>()
         .join(", "),
       post.is_confirmed.to_string(),
+      escape_single_quote(&post.published_at.to_string()),
     );
 
     let query_result = self.main_db.query(&query).await;
@@ -264,12 +268,17 @@ impl PostRepository {
     // @TODO-ZM: implement updating the rest of the fields
     let query = format!(
       r#"
-      UPDATE task MERGE {{
+      UPDATE post MERGE {{
+        {}
         {}
       }} WHERE {} RETURN NONE;
      "#,
       match post.is_confirmed {
         Some(is_confirmed) => format!("is_confirmed: {},", is_confirmed),
+        None => "".to_string(),
+      },
+      match post.published_at {
+        Some(published_at) => format!("published_at: '{}',", escape_single_quote(&published_at)),
         None => "".to_string(),
       },
       filter,

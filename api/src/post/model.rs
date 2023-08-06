@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 use utility_types::{omit, partial, pick};
 
 #[omit(DBPost, [id], [Debug, Serialize, Deserialize, Clone])]
-#[pick(CompactPost, [id, slug, title, poster_id, short_description, tag_ids], [Debug, Serialize, Deserialize, Clone])]
+#[pick(CompactPost, [id, slug, title, poster_id, short_description, tag_ids, published_at], [Debug, Serialize, Deserialize, Clone])]
 #[partial(PartialPost)]
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Post {
@@ -14,6 +14,7 @@ pub struct Post {
   pub description: String,
   pub tag_ids: Vec<u32>,
   pub is_confirmed: bool,
+  pub published_at: String,
 }
 
 pub trait PostTrait {
@@ -29,6 +30,7 @@ impl PostTrait for Post {
       poster_id: self.poster_id,
       short_description: self.short_description.clone(),
       tag_ids: self.tag_ids.clone(),
+      published_at: self.published_at.clone(),
     }
   }
 }
@@ -54,6 +56,10 @@ impl PartialPostTrait for PartialPost {
         .unwrap_or(fallback_post.description),
       tag_ids: self.tag_ids.clone().unwrap_or(fallback_post.tag_ids),
       is_confirmed: self.is_confirmed.unwrap_or(fallback_post.is_confirmed),
+      published_at: self
+        .published_at
+        .clone()
+        .unwrap_or(fallback_post.published_at),
     }
   }
 }
