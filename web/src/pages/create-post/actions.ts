@@ -39,10 +39,7 @@ const concurrentFetchTagsForCreatePostPage = async (): Promise<void> => {
   const { compact, title, post_description } = getState().createPostPage;
   const { tagEntities, createPostPage } = getStateActions();
 
-  if (!post_description) {
-    createPostPage.set({ suggested_tags: [] });
-    if (!title) createPostPage.set({ suggested_categories: [] });
-  }
+  if (!post_description) createPostPage.set({ suggested_tags: [] });
   if (compact || !post_description) return;
 
   try {
@@ -111,7 +108,6 @@ export const createPost = async (): Promise<void> => {
         short_description: "",
         description: post_description,
         poster_id: 0,
-        category_id: 0,
         tag_ids: tags.map((tag) => tag.id),
         is_confirmed: false,
       } as Omit<Post, "id">,

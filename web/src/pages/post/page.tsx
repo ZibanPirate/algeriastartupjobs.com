@@ -169,13 +169,6 @@ export const Page: FC = () => {
                   <Skeleton variant="v3" width="10rem" vtName={`post-poster-${loadedPost?.id}`} />
                 </>
               )}
-              {loadedPost?.category ? (
-                <Text variant="v4" vtName={`post-category-${loadedPost?.id}`}>
-                  {loadedPost.category.name}
-                </Text>
-              ) : (
-                <Skeleton variant="v4" width="10rem" vtName={`post-category-${loadedPost?.id}`} />
-              )}
             </Stack>
             <Stack orientation="horizontal" margin="3 0 0" align="center" gap="1">
               <Button

@@ -1,6 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { Account } from "src/models/account";
-import { Category } from "src/models/category";
 import { Tag } from "src/models/tag";
 import { LOADABLE } from "src/utils/loadable";
 import { overWriterReducerFactory, setterReducerFactory } from "src/utils/state/reducer";
@@ -15,11 +14,9 @@ export type CreatePostPageState = {
   poster: LOADABLE<Account>;
   creation_status: "IDLE" | "CREATING" | "CREATED" | "ERROR";
   suggested_tags: LOADABLE<Tag[]>;
-  suggested_categories: LOADABLE<Category[]>;
   compact: boolean;
   post_description: string;
   tags: Tag[];
-  category?: Category;
 };
 
 export const initialStateForCreatePostPage: CreatePostPageState = {
@@ -35,7 +32,6 @@ export const initialStateForCreatePostPage: CreatePostPageState = {
   post_description: "",
   tags: [],
   suggested_tags: null,
-  suggested_categories: null,
 };
 
 export const createPostPage = createSlice({

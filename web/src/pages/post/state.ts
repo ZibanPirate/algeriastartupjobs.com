@@ -1,7 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { PostCardProps } from "src/components/card/post";
 import { Account, AccountType, CompactAccount } from "src/models/account";
-import { CompactCategory } from "src/models/category";
 import { CompactPost, Post } from "src/models/post";
 import { CompactTag } from "src/models/tag";
 import { LOADABLE } from "src/utils/loadable";
@@ -17,7 +16,6 @@ export interface PostPageState {
       CompactPost &
         Partial<
           Post & {
-            category: LoneModel<CompactCategory>;
             tags: Array<LoneModel<CompactTag>>;
             poster: LoneModel<UnionWithOptionalDiscriminatedProps<Account, CompactAccount>> &
               AccountType;

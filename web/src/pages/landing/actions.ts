@@ -2,14 +2,12 @@ import { getState, getStateActions } from "src/state";
 import Axios from "axios";
 import { getConfig } from "src/utils/config/get-config";
 import { CompactPost } from "src/models/post";
-import { CompactCategory } from "src/models/category";
 import { CompactTag } from "src/models/tag";
 import { CompactAccount } from "src/models/account";
 import { LandingPageState } from "./state";
 
 export const fetchPostsForLandingPage = async (): Promise<void> => {
-  const { landingPage, postEntities, categoryEntities, tagEntities, accountEntities } =
-    getStateActions();
+  const { landingPage, postEntities, tagEntities, accountEntities } = getStateActions();
   const { posts, query } = getState().landingPage;
   if (posts === "ERROR") landingPage.set({ posts: null });
 
@@ -18,17 +16,12 @@ export const fetchPostsForLandingPage = async (): Promise<void> => {
     // @TODO-ZM: auto-generate types for API endpoints
     const { data } = await Axios.get<{
       posts: CompactPost[];
-      categories: CompactCategory[];
       tags: CompactTag[];
       posters: CompactAccount[];
     }>(getConfig().api.base_url + endpoint);
 
     const posts: LandingPageState["posts"] = data.posts.map((post) => {
-      const { category_id, tag_ids, poster_id, ...lonePost } = post;
-
-      const category = data.categories.find((category) => category.id === category_id);
-      if (!category)
-        throw new Error(`Category with id ${category_id} not found for post ${post.id}`);
+      const { tag_ids, poster_id, ...lonePost } = post;
 
       const tags = data.tags.filter((tag) => tag_ids.includes(tag.id));
       if (tags.length !== tag_ids.length)
@@ -43,7 +36,6 @@ export const fetchPostsForLandingPage = async (): Promise<void> => {
 
       return {
         ...lonePost,
-        category,
         tags,
         poster,
       };
@@ -53,7 +45,6 @@ export const fetchPostsForLandingPage = async (): Promise<void> => {
 
     // update cache:
     postEntities.upsertMany(data.posts);
-    categoryEntities.upsertMany(data.categories);
     tagEntities.upsertMany(data.tags);
     accountEntities.upsertMany(data.posters);
   } catch (error) {

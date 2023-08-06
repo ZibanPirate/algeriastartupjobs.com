@@ -4,7 +4,6 @@ import { StyleProps } from "src/utils/props/style";
 import { Text } from "src/components/text";
 import { LoneModel } from "src/utils/models/lone-model";
 import { CompactPost } from "src/models/post";
-import { CompactCategory } from "src/models/category";
 import { CompactTag } from "src/models/tag";
 import { AccountType, CompactAccount } from "src/models/account";
 import "./style.css";
@@ -16,7 +15,6 @@ import { getPostUrl } from "src/utils/urls/post-url";
 
 export interface PostCardProps extends StyleProps {
   post: LoneModel<CompactPost> & {
-    category: LoneModel<CompactCategory>;
     tags: Array<LoneModel<CompactTag>>;
     poster: LoneModel<CompactAccount> & AccountType;
   };
@@ -29,7 +27,7 @@ export const PostCard = forwardRef<HTMLAnchorElement, PostCardProps>(
       <Link
         className={`post-card${stretch ? "stretch" : ""}`}
         variant="v4"
-        to={getPostUrl(post, post.category, post.poster)}
+        to={getPostUrl(post, post.poster)}
         margin={margin}
         ref={ref}
       >
@@ -62,9 +60,6 @@ export const PostCard = forwardRef<HTMLAnchorElement, PostCardProps>(
             <Text variant="v5">{getAccountName(post.poster)}</Text>
           </div>
           <Divider margin="0 1" orientation="vertical" />
-          <div style={{ viewTransitionName: `post-category-${post.id}` }}>
-            <Text variant="v5">{post.category.name}</Text>
-          </div>
         </Stack>
       </Link>
     );
