@@ -81,6 +81,22 @@ impl AccountNameTrait for DBAccount {
   }
 }
 
+impl AccountNameTrait for CompactAccount {
+  fn get_display_name(&self) -> String {
+    match &self.r#type {
+      AccountType::Admin {
+        first_name,
+        last_name,
+      } => format!("{} {}", first_name, last_name),
+      AccountType::Individual {
+        first_name,
+        last_name,
+      } => format!("{} {}", first_name, last_name),
+      AccountType::Company { company_name } => company_name.to_string(),
+    }
+  }
+}
+
 pub trait PartialAccountTrait {
   fn to_account(&self, fallback_account: Account) -> Account;
 }

@@ -4,6 +4,7 @@ use crate::{
     error::SearchError,
     string::{escape_double_quote, get_searchable_words, get_words},
   },
+  account::model::{AccountNameTrait, CompactAccount},
   post::model::Post,
   tag::model::CompactTag,
 };
@@ -79,6 +80,7 @@ impl SearchService {
     &self,
     posts: Vec<Post>,
     tags: Vec<CompactTag>,
+    posters: Vec<CompactAccount>,
   ) -> Result<(), SearchError> {
     let mut word_indexes: Vec<WordIndex> = vec![];
     for post in posts {
@@ -125,7 +127,22 @@ impl SearchService {
         });
       }
 
-      // @TODO-ZM: populate poster by poster_id and index it.
+      let poster = posters.iter().find(|poster| poster.id == post.poster_id);
+      if poster.is_none() {
+        tracing::error!("Failed to find the poster");
+        return Err(SearchError::InternalError);
+      }
+      let poster = poster.unwrap();
+
+      get_words(&poster.get_display_name()).for_each(|word| {
+        let word = word.to_lowercase();
+
+        word_indexes.push(WordIndex {
+          word,
+          model_id: post.id,
+          appear_in: "post_poster_display_name".to_string(),
+        });
+      });
     }
 
     let word_indexes_length = word_indexes.len();
