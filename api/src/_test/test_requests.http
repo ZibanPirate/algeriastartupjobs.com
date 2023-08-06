@@ -61,7 +61,6 @@ DB: main
 DELETE account;
 DELETE post;
 DELETE tag;
-DELETE category;
 
 ###
 POST {{dbBaseUrl}}/sql
@@ -79,7 +78,7 @@ Authorization: Basic root root
 NS: asj
 DB: main
 
-SELECT slug, title, poster_id, short_description, category_id, tag_ids, id.id as id FROM post WHERE true LIMIT 10 START 0
+SELECT slug, title, poster_id, short_description, tag_ids, id.id as id FROM post WHERE true LIMIT 10 START 0
 
 ###
 POST {{dbBaseUrl}}/sql

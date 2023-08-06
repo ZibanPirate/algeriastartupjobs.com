@@ -19,7 +19,6 @@ use crate::{
     vec::sort_and_dedup_vec,
   },
   account::model::{AccountNameTrait, DBAccount},
-  category::model::CategoryTrait,
   security::service::RateLimitConstraint,
   task::model::{DBTask, TaskName, TaskStatus, TaskType},
 };
@@ -36,29 +35,16 @@ pub async fn get_all_posts_for_feed(State(app_state): State<AppState>) -> impl I
   }
   let compact_posts = compact_posts.unwrap();
 
-  let mut unique_category_ids: Vec<u32> = Vec::new();
   let mut unique_tag_ids: Vec<u32> = Vec::new();
   let mut unique_poster_ids: Vec<u32> = Vec::new();
 
   for post in compact_posts.iter() {
-    unique_category_ids.push(post.category_id);
     unique_tag_ids.append(&mut post.tag_ids.clone());
     unique_poster_ids.push(post.poster_id);
   }
 
-  sort_and_dedup_vec(&mut unique_category_ids);
   sort_and_dedup_vec(&mut unique_tag_ids);
   sort_and_dedup_vec(&mut unique_poster_ids);
-
-  let compact_categories = app_state
-    .category_repository
-    .get_many_compact_categories_by_ids(unique_category_ids.clone())
-    .await;
-  if !compact_categories.is_ok() {
-    // @TODO-ZM: log error reason
-    return StatusCode::INTERNAL_SERVER_ERROR.into_response();
-  }
-  let compact_categories = compact_categories.unwrap();
 
   let compact_tags = app_state
     .tag_repository
@@ -82,7 +68,6 @@ pub async fn get_all_posts_for_feed(State(app_state): State<AppState>) -> impl I
 
   Json(json!({
       "posts": compact_posts,
-      "categories": compact_categories,
       "tags": compact_tags,
       "posters": compact_posters,
   }))
@@ -108,16 +93,6 @@ pub async fn get_one_post_by_id(
   }
   let post = post.unwrap();
 
-  let category = app_state
-    .category_repository
-    .get_one_category_by_id(post.category_id)
-    .await;
-  if !category.is_ok() {
-    // @TODO-ZM: log error reason
-    return StatusCode::INTERNAL_SERVER_ERROR.into_response();
-  }
-  let category = category.unwrap();
-
   let compact_tags = app_state
     .tag_repository
     .get_many_compact_tags_by_ids(&post.tag_ids)
@@ -138,11 +113,8 @@ pub async fn get_one_post_by_id(
   }
   let poster = poster.unwrap();
 
-  let compact_category = category.to_compact_category();
-
   Json(json!({
       "post": post,
-      "category": compact_category,
       "tags": compact_tags,
       "poster": poster,
   }))
@@ -173,29 +145,16 @@ pub async fn get_many_similar_posts_by_id(
   }
   let similar_compact_posts = similar_compact_posts.unwrap();
 
-  let mut unique_category_ids: Vec<u32> = Vec::new();
   let mut unique_tag_ids: Vec<u32> = Vec::new();
   let mut unique_poster_ids: Vec<u32> = Vec::new();
 
   for post in similar_compact_posts.iter() {
-    unique_category_ids.push(post.category_id);
     unique_tag_ids.append(&mut post.tag_ids.clone());
     unique_poster_ids.push(post.poster_id);
   }
 
-  sort_and_dedup_vec(&mut unique_category_ids);
   sort_and_dedup_vec(&mut unique_tag_ids);
   sort_and_dedup_vec(&mut unique_poster_ids);
-
-  let compact_categories = app_state
-    .category_repository
-    .get_many_compact_categories_by_ids(unique_category_ids.clone())
-    .await;
-  if !compact_categories.is_ok() {
-    // @TODO-ZM: log error reason
-    return StatusCode::INTERNAL_SERVER_ERROR.into_response();
-  }
-  let compact_categories = compact_categories.unwrap();
 
   let compact_tags = app_state
     .tag_repository
@@ -219,7 +178,6 @@ pub async fn get_many_similar_posts_by_id(
 
   Json(json!({
       "posts": similar_compact_posts,
-      "categories": compact_categories,
       "tags": compact_tags,
       "posters": compact_posters,
   }))
@@ -431,7 +389,6 @@ pub async fn confirm_post(
         poster_id: None,
         short_description: None,
         description: None,
-        category_id: None,
         tag_ids: None,
         is_confirmed: Some(true),
       },
@@ -468,17 +425,6 @@ pub async fn confirm_post(
     return StatusCode::INTERNAL_SERVER_ERROR.into_response();
   }
 
-  let category = app_state
-    .category_repository
-    .get_one_category_by_id(post.category_id)
-    .await;
-  if !category.is_ok() {
-    // @TODO-ZM: log error reason
-    return StatusCode::INTERNAL_SERVER_ERROR.into_response();
-  }
-  let category = category.unwrap();
-  let compact_category = category.to_compact_category();
-
   let poster = app_state
     .account_repository
     .get_one_account_by_id(post.poster_id)
@@ -501,7 +447,6 @@ pub async fn confirm_post(
 
   Json(json!({
       "post": post,
-      "category": compact_category,
       "poster": poster,
       "tags": compact_tags,
   }))

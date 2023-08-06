@@ -101,7 +101,6 @@ impl SearchService {
       // @TODO-ZM: add post description to the index
       // @TODO-ZM: populate tags by tag_ids and index them.
       // @TODO-ZM: populate poster by poster_id and index it.
-      // @TODO-ZM: populate category by category_id and index it.
     }
 
     let word_indexes_length = word_indexes.len();

@@ -3,7 +3,6 @@ mod _test;
 mod _utils;
 mod account;
 mod ai;
-mod category;
 mod config;
 mod email;
 mod post;

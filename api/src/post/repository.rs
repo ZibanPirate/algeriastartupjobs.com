@@ -27,7 +27,7 @@ impl PostRepository {
   ) -> Result<Vec<CompactPost>, DataAccessError> {
     let query = format!(
       r#"
-      SELECT slug, title, poster_id, short_description, category_id, tag_ids, id.id as id FROM post WHERE {} LIMIT {} START {}
+      SELECT slug, title, poster_id, short_description, tag_ids, id.id as id FROM post WHERE {} LIMIT {} START {}
       "#,
       filter, limit, start
     );
@@ -167,7 +167,6 @@ impl PostRepository {
         poster_id: {},
         short_description:'{}',
         description:'{}',
-        category_id: {},
         tag_ids:[{}],
         is_confirmed: {},
       }};
@@ -179,7 +178,6 @@ impl PostRepository {
       escape_single_quote(&post.poster_id.to_string()),
       escape_single_quote(&post.short_description),
       escape_single_quote(&post.description),
-      escape_single_quote(&post.category_id.to_string()),
       post
         .tag_ids
         .iter()

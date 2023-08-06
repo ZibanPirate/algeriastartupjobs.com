@@ -1,10 +1,9 @@
 use super::database::{create_db_client, create_kv_db};
 use crate::{
   _utils::error::BootError, account::repository::AccountRepository, ai::service::AIService,
-  category::repository::CategoryRepository, config::service::ConfigService,
-  email::service::EmailService, post::repository::PostRepository, search::service::SearchService,
-  security::service::SecurityService, tag::repository::TagRepository,
-  task::repository::TaskRepository,
+  config::service::ConfigService, email::service::EmailService, post::repository::PostRepository,
+  search::service::SearchService, security::service::SecurityService,
+  tag::repository::TagRepository, task::repository::TaskRepository,
 };
 use std::sync::Arc;
 use surrealdb::{engine::remote::ws::Client, Surreal};
@@ -16,7 +15,6 @@ pub struct AppState {
   pub main_kv_db: Arc<sled::Db>,
   pub rate_limit_kv_db: Arc<sled::Db>,
   pub post_repository: Arc<PostRepository>,
-  pub category_repository: Arc<CategoryRepository>,
   pub tag_repository: Arc<TagRepository>,
   pub account_repository: Arc<AccountRepository>,
   pub config_service: Arc<ConfigService>,
@@ -59,7 +57,6 @@ pub async fn create_app_state() -> Result<AppState, BootError> {
 
   let search_service = Arc::new(SearchService::new(Arc::clone(&search_db)));
   let post_repository = Arc::new(PostRepository::new(Arc::clone(&main_db)));
-  let category_repository = Arc::new(CategoryRepository::new(Arc::clone(&main_db)));
   let tag_repository = Arc::new(TagRepository::new(Arc::clone(&main_db)));
   let account_repository = Arc::new(AccountRepository::new(Arc::clone(&main_db)));
   let task_repository = Arc::new(TaskRepository::new(Arc::clone(&main_db)));
@@ -73,7 +70,6 @@ pub async fn create_app_state() -> Result<AppState, BootError> {
     main_kv_db: Arc::clone(&main_kv_db),
     rate_limit_kv_db: Arc::clone(&rate_limit_kv_db),
     post_repository: Arc::clone(&post_repository),
-    category_repository: Arc::clone(&category_repository),
     tag_repository: Arc::clone(&tag_repository),
     account_repository: Arc::clone(&account_repository),
     config_service: Arc::clone(&config_service),

@@ -7,7 +7,6 @@ use crate::{
   _entry::state::AppState,
   _utils::{is_admin::is_admin, string::slugify},
   account::model::{AccountType, DBAccount},
-  category::model::DBCategory,
   post::model::DBPost,
   tag::model::DBTag,
   task::model::{DBTask, TaskName, TaskStatus, TaskType},
@@ -62,30 +61,6 @@ pub async fn seed_the_database_with_mocks(
     match account_id {
       Ok(account_id) => {
         account_ids.push(account_id);
-      }
-      Err(e) => {
-        tracing::error!("error {:?}", e);
-        return StatusCode::INTERNAL_SERVER_ERROR.into_response();
-      }
-    }
-  }
-
-  let mut category_ids: Vec<u32> = [].to_vec();
-  for _ in 0..10 {
-    let name = fake::faker::lorem::en::Sentence(1..3).fake::<String>();
-    let slug = slugify(&name);
-    let description = fake::faker::lorem::en::Paragraph(2..10).fake::<String>();
-    let category_id = app_state
-      .category_repository
-      .create_one_category(DBCategory {
-        slug,
-        name,
-        description,
-      })
-      .await;
-    match category_id {
-      Ok(category_id) => {
-        category_ids.push(category_id);
       }
       Err(e) => {
         tracing::error!("error {:?}", e);
@@ -214,7 +189,6 @@ pub async fn seed_the_database_with_mocks(
       .create_one_post(&DBPost {
         slug,
         title,
-        category_id: category_ids[index % category_ids.len()],
         poster_id: account_ids[index % account_ids.len()],
         description: fake::faker::lorem::en::Paragraph(20..30).fake::<String>(),
         short_description,
@@ -260,7 +234,6 @@ pub async fn seed_the_database_with_mocks(
 
   Json(json!({
     "account_ids": account_ids,
-    "category_ids": category_ids,
     "tag_ids": tag_ids,
     "post_ids": post_ids,
     "task_ids": task_ids,
@@ -282,7 +255,6 @@ pub async fn clean_the_database_from_mocks(
     DELETE account;
     DELETE post;
     DELETE tag;
-    DELETE category;
     DELETE task;
     "#,
   );
