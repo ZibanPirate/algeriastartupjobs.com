@@ -57,6 +57,7 @@ const concurrentFetchTagsForCreatePostPage = async (): Promise<void> => {
     tagEntities.upsertMany(data.tags);
   } catch (error) {
     // @TODO-ZM: set it to null when status is 404
+    // @TODO-ZM: skip when 429
     createPostPage.set({ suggested_tags: "ERROR" });
     // @TODO-ZM: use Logger abstraction instead of console.log
     console.log("Error fetching suggested tags for create post page", error);
@@ -120,7 +121,6 @@ export const createPost = async (): Promise<void> => {
   } catch (error) {
     console.log("Error creating post", error);
     // Sentry.captureException(error, { tags: { type: "WEB_FETCH" } });
-    // @TODO-ZM: skip when 429
     createPostPage.set({ creation_status: "ERROR" });
     // @TODO-ZM: use Logger abstraction instead of console
   }
