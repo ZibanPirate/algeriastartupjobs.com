@@ -12,8 +12,9 @@ import { Button } from "src/components/button";
 import { Skeleton } from "src/components/skeleton";
 import { getStateActions } from "src/state";
 import { Icon } from "src/components/icon";
-import { CREATE_POST_PAGE_URL } from "src/utils/urls/common";
+import { CREATE_POST_PAGE_URL, LOGIN_PAGE_URL } from "src/utils/urls/common";
 import { useNavigate } from "react-router-dom";
+import { Divider } from "src/components/divider";
 
 export const Page: FC = () => {
   usePageTitle("Join a startup in Algeria");
@@ -35,16 +36,22 @@ export const Page: FC = () => {
       {/* Header */}
       <Stack orientation="vertical" margin="1 0 0" stretch={true} align="center">
         <Stack orientation="vertical" stretch={true} align="end">
-          <Button
-            variant="v3"
-            paddingPreset="rectangle-end"
-            margin="0 1"
-            onClick={() => navigate(CREATE_POST_PAGE_URL)}
-            vtName="new-post"
-          >
-            <Icon variant="v3" name="newPost" />
-            Free Post
-          </Button>
+          <Stack orientation="horizontal" align="center" margin="0 1">
+            <Link to={LOGIN_PAGE_URL} variant="v4" vtName="login">
+              Login
+            </Link>
+            <Divider orientation="vertical" margin="0 1" />
+            <Button
+              variant="v3"
+              paddingPreset="rectangle-end"
+              margin="0 1"
+              onClick={() => navigate(CREATE_POST_PAGE_URL)}
+              vtName="new-post"
+            >
+              <Icon variant="v3" name="newPost" />
+              Free Post
+            </Button>
+          </Stack>
         </Stack>
         <Text variant="v1" margin="0 1">
           Join a startup in Algeria
