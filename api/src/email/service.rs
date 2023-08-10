@@ -5,7 +5,7 @@ use crate::{
     error::EmailError,
     string::{escape_double_quote, escape_new_line, escape_new_line_with_br},
   },
-  config::service::ConfigService,
+  config::service::{ConfigService, Stage},
 };
 
 pub struct EmailService {
@@ -17,13 +17,26 @@ impl EmailService {
     Self { config_service }
   }
 
-  // @TODO-ZM: gmail groups emails by subject, so we need to add a random string to the subject or something
+  // @TODO-ZM: gmail groups emails by body, so we need to add a random string at the bottom of the body
   pub async fn send_one_email(
     &self,
     email: &String,
     subject: &String,
     body: &String,
   ) -> Result<(), EmailError> {
+    match self.config_service.get_config().stage {
+      Stage::Development => {
+        tracing::info!(
+          "\n\nEmail: {}\nSubject: {}\nBody:\n{}\n\n",
+          email,
+          subject,
+          body
+        );
+        return Ok(());
+      }
+      _ => {}
+    }
+
     let client = reqwest::Client::new();
 
     let res = client
