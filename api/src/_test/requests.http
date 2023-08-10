@@ -112,3 +112,19 @@ Content-Type: application/json
   "confirmation_id": "VII6BHSQVLCF",
   "confirmation_code": "BQJO"
 }
+
+### Non-existing account
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "zakman.dev+non-existant@gmail.com"
+}
+
+###
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "zakman.dev+test-1@gmail.com"
+}

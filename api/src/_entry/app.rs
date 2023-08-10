@@ -4,6 +4,7 @@ use crate::{
   _test::controller::create_test_router,
   _utils::error::BootError,
   account::controller::create_account_router,
+  auth::controller::create_auth_router,
   post::controller::create_post_router,
   search::{controller::create_search_router, cron_job::SearchCronJob},
   tag::controller::create_tag_router,
@@ -66,6 +67,7 @@ async fn create_app(app_state: AppState) -> Result<Router, BootError> {
     .nest("/search", create_search_router())
     .nest("/account", create_account_router())
     .nest("/tags", create_tag_router())
+    .nest("/auth", create_auth_router())
     // @TODO-ZM: route this only on development
     .nest("/test", create_test_router())
     .route(
