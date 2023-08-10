@@ -1,23 +1,21 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { overWriterReducerFactory, setterReducerFactory } from "src/utils/state/reducer";
 
-export interface LoginPageState {
+export interface ConfirmLoginPageState {
   confirmation_id: string;
   confirmation_code: string;
-  email: string;
-  login_status: "IDLE" | "LOGGING_IN" | "CODE_SENT" | "ERROR";
+  confirmation_status: "IDLE" | "CONFIRMING" | "CONFIRMED" | "ERROR";
 }
 
-export const initialStateForLoginPage: LoginPageState = {
+export const initialStateForConfirmLoginPage: ConfirmLoginPageState = {
   confirmation_id: "",
   confirmation_code: "",
-  email: "",
-  login_status: "IDLE",
+  confirmation_status: "IDLE",
 };
 
-export const loginPage = createSlice({
-  name: "loginPage",
-  initialState: initialStateForLoginPage,
+export const confirmLoginPage = createSlice({
+  name: "confirmLoginPage",
+  initialState: initialStateForConfirmLoginPage,
   reducers: {
     set: setterReducerFactory(),
     overwrite: overWriterReducerFactory(),

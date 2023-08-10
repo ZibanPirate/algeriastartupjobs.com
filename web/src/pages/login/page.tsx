@@ -39,13 +39,12 @@ export const Page: FC = () => {
           stretch={true}
         />
         <Stack orientation="vertical" align="center" stretch>
-          {["LOGGING_IN", "CONFIRMING", "CONFIRMED"].includes(login_status) ? (
+          {["LOGGING_IN", "CODE_SENT"].includes(login_status) ? (
             <Icon
               variant="v3"
-              name={login_status === "CONFIRMED" ? "success" : "loadingSpinner"}
-              animation={login_status !== "CONFIRMED" ? "rotate" : undefined}
+              name={login_status === "CODE_SENT" ? "success" : "loadingSpinner"}
+              animation={login_status !== "CODE_SENT" ? "rotate" : undefined}
               margin="3 0"
-              vtName="create-post-icon"
             />
           ) : (
             <>
@@ -53,8 +52,8 @@ export const Page: FC = () => {
                 {login_status === "ERROR" ? "Something went wrong, please try again" : <br />}
               </Text>
               <Stack orientation="horizontal" align="center" gap="1">
-                <Button variant="v3" onClick={() => login()}>
-                  {login_status === "CODE_SENT" ? "Confirm code" : "Login"}
+                <Button variant="v3" vtName="login-button" onClick={() => login()}>
+                  Login
                 </Button>
               </Stack>
             </>

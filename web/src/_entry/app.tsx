@@ -6,8 +6,10 @@ import { LazyPages, pageLoaders } from "src/pages";
 import { useHtmlThemeColor } from "src/utils/hooks/html-theme-color";
 import {
   CONFIRM_EMAIL_PAGE_URL,
+  CONFIRM_LOGIN_PAGE_URL,
   CREATE_POST_PAGE_URL,
   LOGIN_PAGE_URL,
+  ME_PAGE_URL,
   POST_PAGE_URL,
 } from "src/utils/urls/common";
 import LoadingBar, { LoadingBarRef } from "react-top-loading-bar";
@@ -61,6 +63,8 @@ export const App: FC = () => {
         <Route path={CREATE_POST_PAGE_URL} Component={pageToRenderSetter("create-post")} />
         <Route path={CONFIRM_EMAIL_PAGE_URL} Component={pageToRenderSetter("confirm-email")} />
         <Route path={LOGIN_PAGE_URL} Component={pageToRenderSetter("login")} />
+        <Route path={CONFIRM_LOGIN_PAGE_URL} Component={pageToRenderSetter("confirm-login")} />
+        <Route path={ME_PAGE_URL} Component={pageToRenderSetter("me")} />
         <Route path="*" Component={pageToRenderSetter("404")} />
       </Routes>
       {LazyPages[currentPage]}
