@@ -1,27 +1,28 @@
-// import Axios from "axios";
+import Axios from "axios";
 import { getState, getStateActions } from "src/state";
-// import { getConfig } from "src/utils/config/get-config";
+import { getConfig } from "src/utils/config/get-config";
 import { initialStateForLoginPage } from "./state";
 import { getBrowserRouter } from "src/components/router-provider";
 import { CONFIRM_LOGIN_PAGE_URL } from "src/utils/urls/common";
+import { initialStateForConfirmLoginPage } from "../confirm-login/state";
 
 export const login = async () => {
-  const { loginPage } = getStateActions();
+  const { loginPage, confirmLoginPage } = getStateActions();
   loginPage.set({ login_status: "LOGGING_IN" });
 
   try {
     const { email } = getState().loginPage;
 
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    // const {
-    //   data: { confirmation_id },
-    // } = await Axios.post<{ confirmation_id: string }>(getConfig().api.base_url + "/auth/login", {
-    //   email,
-    // });
+    const {
+      data: { confirmation_id },
+    } = await Axios.post<{ confirmation_id: string }>(getConfig().api.base_url + "/auth/login", {
+      email,
+    });
 
     // @TODO-ZM: fix typing on overwrite reducer.
+    // @TODO-ZM: first "set" login_status, then timeout for animationDuration, then overwrite to initialStateForLoginPage.
     loginPage.overwrite({ ...initialStateForLoginPage, login_status: "CODE_SENT" });
-    //   confirmEmailPage.set({ ...initialStateForConfirmEmailPage, confirmation_id, post_id });
+    confirmLoginPage.set({ ...initialStateForConfirmLoginPage, confirmation_id });
     getBrowserRouter().navigate(CONFIRM_LOGIN_PAGE_URL);
   } catch (error) {
     console.log("Error creating post", error);
