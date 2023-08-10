@@ -1,9 +1,10 @@
 use super::database::{create_db_client, create_kv_db};
 use crate::{
   _utils::error::BootError, account::repository::AccountRepository, ai::service::AIService,
-  config::service::ConfigService, email::service::EmailService, post::repository::PostRepository,
-  search::service::SearchService, security::service::SecurityService,
-  tag::repository::TagRepository, task::repository::TaskRepository,
+  auth::service::AuthService, config::service::ConfigService, email::service::EmailService,
+  post::repository::PostRepository, search::service::SearchService,
+  security::service::SecurityService, tag::repository::TagRepository,
+  task::repository::TaskRepository,
 };
 use std::sync::Arc;
 use surrealdb::{engine::remote::ws::Client, Surreal};
@@ -23,6 +24,7 @@ pub struct AppState {
   pub email_service: Arc<EmailService>,
   pub security_service: Arc<SecurityService>,
   pub ai_service: Arc<AIService>,
+  pub auth_service: Arc<AuthService>,
 }
 
 pub async fn create_app_state() -> Result<AppState, BootError> {
@@ -61,6 +63,10 @@ pub async fn create_app_state() -> Result<AppState, BootError> {
   let account_repository = Arc::new(AccountRepository::new(Arc::clone(&main_db)));
   let task_repository = Arc::new(TaskRepository::new(Arc::clone(&main_db)));
   let email_service = Arc::new(EmailService::new(Arc::clone(&config_service)));
+  let auth_service = Arc::new(AuthService::new(
+    Arc::clone(&config_service),
+    Arc::clone(&main_kv_db),
+  ));
   let security_service = Arc::new(SecurityService::new(Arc::clone(&rate_limit_kv_db)));
   let ai_service = Arc::new(AIService::new(Arc::clone(&config_service)));
 
@@ -78,5 +84,6 @@ pub async fn create_app_state() -> Result<AppState, BootError> {
     email_service: Arc::clone(&email_service),
     security_service: Arc::clone(&security_service),
     ai_service: Arc::clone(&ai_service),
+    auth_service: Arc::clone(&auth_service),
   })
 }

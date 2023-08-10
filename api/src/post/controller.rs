@@ -352,6 +352,7 @@ pub async fn create_one_post_with_poster(
   }
   let post_id = post_id.unwrap();
 
+  // @TODO-ZM: use generate_confirmation_object from AuthService
   let random_16: String = Alphanumeric
     .sample_iter(&mut thread_rng())
     .take(16)

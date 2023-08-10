@@ -35,3 +35,8 @@ pub enum SecurityError {
 pub enum AIError {
   InternalError,
 }
+
+#[derive(Debug)]
+pub enum AuthError {
+  InternalError,
+}
