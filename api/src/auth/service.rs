@@ -55,6 +55,24 @@ impl AuthService {
     })
   }
 
+  pub async fn verify_confirmation_object(
+    &self,
+    confirmation_object: ConfirmationObject,
+  ) -> Result<(), AuthError> {
+    let kv_db_result = self.main_kv_db.compare_and_swap(
+      confirmation_object.id,
+      Some(confirmation_object.code),
+      None as Option<&[u8]>,
+    );
+
+    if !kv_db_result.is_ok() || kv_db_result.unwrap().is_err() {
+      // @TODO-ZM: log error reason
+      return Err(AuthError::InternalError);
+    }
+
+    Ok(())
+  }
+
   pub async fn generate_scoped_token(
     &self,
     scopes: Vec<TokenScope>,

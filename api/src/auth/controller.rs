@@ -15,6 +15,8 @@ use crate::{
   security::service::RateLimitConstraint,
 };
 
+use super::service::ConfirmationObject;
+
 #[derive(Deserialize)]
 pub struct LoginBody {
   pub email: String,
@@ -129,6 +131,61 @@ https://www.algeriastartupjobs.com
   .into_response()
 }
 
+#[derive(Deserialize)]
+pub struct ConfirmLoginBody {
+  email: String,
+  confirmation_id: String,
+  confirmation_code: String,
+}
+
+pub async fn confirm_login(
+  State(app_state): State<AppState>,
+  Json(body): Json<ConfirmLoginBody>,
+) -> impl IntoResponse {
+  let account = app_state
+    .account_repository
+    .get_one_account_by_email(&body.email)
+    .await;
+
+  if account.is_err() {
+    match account.unwrap_err() {
+      DataAccessError::NotFound => {
+        // @TODO-ZM: log error reason
+        return StatusCode::NOT_FOUND.into_response();
+      }
+      _ => {
+        // @TODO-ZM: log error reason
+        return StatusCode::INTERNAL_SERVER_ERROR.into_response();
+      }
+    }
+  }
+  let account = account.unwrap();
+
+  let verification_result = app_state
+    .auth_service
+    .verify_confirmation_object(ConfirmationObject {
+      id: format!("account:{}", account.id),
+      code: format!("{}{}", body.confirmation_id, body.confirmation_code),
+    })
+    .await;
+
+  if verification_result.is_err() {
+    // @TODO-ZM: log error reason
+    return StatusCode::UNAUTHORIZED.into_response();
+  }
+
+  // @TODO-ZM: generate JWT token
+  let token = "jwt-token";
+
+  Json(json!({
+      "token": token,
+      "account": account,
+  }))
+  .into_response()
+}
+
 pub fn create_auth_router() -> Router<AppState> {
-  Router::new().route("/login", axum::routing::post(login))
+  Router::new()
+    .route("/login", axum::routing::post(login))
+    .route("/confirm-login", axum::routing::post(confirm_login))
 }

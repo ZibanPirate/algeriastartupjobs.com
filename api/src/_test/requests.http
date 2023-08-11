@@ -128,3 +128,13 @@ Content-Type: application/json
 {
   "email": "zakman.dev+test-1@gmail.com"
 }
+
+###
+POST {{baseUrl}}/auth/confirm-login
+Content-Type: application/json
+
+{
+  "email": "zakman.dev+test-1@gmail.com",
+  "confirmation_id": "L4ITAFY6HFGX",
+  "confirmation_code": "TS2Q"
+}
