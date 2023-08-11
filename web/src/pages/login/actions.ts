@@ -22,7 +22,7 @@ export const login = async () => {
     // @TODO-ZM: fix typing on overwrite reducer.
     // @TODO-ZM: first "set" login_status, then timeout for animationDuration, then overwrite to initialStateForLoginPage.
     loginPage.overwrite({ ...initialStateForLoginPage, login_status: "CODE_SENT" });
-    confirmLoginPage.set({ ...initialStateForConfirmLoginPage, confirmation_id });
+    confirmLoginPage.set({ ...initialStateForConfirmLoginPage, confirmation_id, email });
     getBrowserRouter().navigate(CONFIRM_LOGIN_PAGE_URL);
   } catch (error) {
     console.log("Error creating post", error);

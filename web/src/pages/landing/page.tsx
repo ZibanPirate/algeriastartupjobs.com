@@ -12,9 +12,10 @@ import { Button } from "src/components/button";
 import { Skeleton } from "src/components/skeleton";
 import { getStateActions } from "src/state";
 import { Icon } from "src/components/icon";
-import { CREATE_POST_PAGE_URL, LOGIN_PAGE_URL } from "src/utils/urls/common";
+import { CREATE_POST_PAGE_URL, LOGIN_PAGE_URL, ME_PAGE_URL } from "src/utils/urls/common";
 import { useNavigate } from "react-router-dom";
 import { Divider } from "src/components/divider";
+import { useIsAuthenticated } from "src/utils/hooks/is-authenticated";
 
 export const Page: FC = () => {
   usePageTitle("Join a startup in Algeria");
@@ -22,6 +23,7 @@ export const Page: FC = () => {
 
   const { posts, query, total_post_count } = useSliceSelector("landingPage");
   const { set } = getStateActions().landingPage;
+  const { isAuthenticated } = useIsAuthenticated();
 
   useEffect(() => {
     fetchPostsForLandingPage();
@@ -37,8 +39,8 @@ export const Page: FC = () => {
       <Stack orientation="vertical" margin="1 0 0" stretch={true} align="center">
         <Stack orientation="vertical" stretch={true} align="end">
           <Stack orientation="horizontal" align="center" margin="0 1">
-            <Link to={LOGIN_PAGE_URL} variant="v4" vtName="login">
-              Login
+            <Link to={isAuthenticated ? ME_PAGE_URL : LOGIN_PAGE_URL} variant="v4" vtName="login">
+              {isAuthenticated ? "My Account" : "Login"}
             </Link>
             <Divider orientation="vertical" margin="0 1" />
             <Button

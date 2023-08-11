@@ -186,7 +186,7 @@ pub async fn confirm_login(
   let token = token.unwrap();
 
   Json(json!({
-      "token": token,
+      "auth_token": token,
       "account": account,
   }))
   .into_response()
