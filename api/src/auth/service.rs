@@ -1,15 +1,21 @@
 use std::sync::Arc;
 
+use jsonwebtoken::{EncodingKey, Header};
 use rand::{distributions::Alphanumeric, prelude::Distribution, thread_rng};
+use serde::{Deserialize, Serialize};
 
-use crate::{
-  _utils::error::{AIError, AuthError},
-  config::service::ConfigService,
-};
+use crate::{_utils::error::AuthError, config::service::ConfigService};
 
-enum TokenScope {
+#[derive(Debug, Serialize, Deserialize)]
+pub enum TokenScope {
   CreatePost,
   Login,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+struct ScopedToken {
+  scope: TokenScope,
+  id: u32,
 }
 
 pub struct ConfirmationObject {
@@ -75,9 +81,23 @@ impl AuthService {
 
   pub async fn generate_scoped_token(
     &self,
-    scopes: Vec<TokenScope>,
-    account_id: i32,
-  ) -> Result<String, AIError> {
-    todo!("generate_scoped_token")
+    scope: TokenScope,
+    id: u32,
+  ) -> Result<String, AuthError> {
+    let header = Header::new(jsonwebtoken::Algorithm::HS512);
+    let secret = self.config_service.get_config().jwt_secret;
+    let key = EncodingKey::from_secret(secret.as_ref());
+
+    let scoped_token = ScopedToken { scope, id };
+
+    let token = jsonwebtoken::encode(&header, &scoped_token, &key);
+
+    if token.is_err() {
+      // @TODO-ZM: log error reason
+      return Err(AuthError::InternalError);
+    }
+    let token = token.unwrap();
+
+    Ok(token)
   }
 }

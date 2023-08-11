@@ -15,7 +15,7 @@ use crate::{
   security::service::RateLimitConstraint,
 };
 
-use super::service::ConfirmationObject;
+use super::service::{ConfirmationObject, TokenScope};
 
 #[derive(Deserialize)]
 pub struct LoginBody {
@@ -174,8 +174,16 @@ pub async fn confirm_login(
     return StatusCode::UNAUTHORIZED.into_response();
   }
 
-  // @TODO-ZM: generate JWT token
-  let token = "jwt-token";
+  let token = app_state
+    .auth_service
+    .generate_scoped_token(TokenScope::Login, account.id)
+    .await;
+
+  if token.is_err() {
+    // @TODO-ZM: log error reason
+    return StatusCode::INTERNAL_SERVER_ERROR.into_response();
+  }
+  let token = token.unwrap();
 
   Json(json!({
       "token": token,
