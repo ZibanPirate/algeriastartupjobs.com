@@ -30,10 +30,10 @@ GET {{baseUrl}}/search/posts?query=softare+developer&per_page=10&page=0
 GET {{baseUrl}}/posts/count
 
 ###
-GET {{baseUrl}}/account/by_email?email=test%2Bdeckow-inc.0@algeriastartupjobs.com
+GET {{baseUrl}}/accounts/by_email?email=test%2Bdeckow-inc.0@algeriastartupjobs.com
 
 ### Non-existing account
-GET {{baseUrl}}/account/by_email?email=test@0@algeriastartupjobs.com
+GET {{baseUrl}}/accounts/by_email?email=test@0@algeriastartupjobs.com
 
 ###
 POST {{baseUrl}}/posts

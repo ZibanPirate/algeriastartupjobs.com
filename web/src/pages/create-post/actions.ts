@@ -20,7 +20,7 @@ export const fetchAccountForCreatePostPage = async (): Promise<void> => {
     // @TODO-ZM: auto-generate types for API endpoints
     const { data } = await Axios.get<{
       account: Account;
-    }>(getConfig().api.base_url + "/account/by_email?email=" + encodeURIComponent(poster_contact));
+    }>(getConfig().api.base_url + "/accounts/by_email?email=" + encodeURIComponent(poster_contact));
 
     createPostPage.set({ poster: data.account });
 

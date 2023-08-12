@@ -65,7 +65,7 @@ async fn create_app(app_state: AppState) -> Result<Router, BootError> {
     // @TODO-ZM: align on model naming convention
     .nest("/posts", create_post_router())
     .nest("/search", create_search_router())
-    .nest("/account", create_account_router())
+    .nest("/accounts", create_account_router())
     .nest("/tags", create_tag_router())
     .nest("/auth", create_auth_router())
     // @TODO-ZM: route this only on development
