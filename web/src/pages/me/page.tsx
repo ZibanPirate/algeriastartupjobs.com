@@ -1,4 +1,4 @@
-import { FC } from "react";
+import { FC, useEffect } from "react";
 import { Link } from "src/components/link";
 import { Stack } from "src/components/stack";
 import { Text } from "src/components/text";
@@ -10,13 +10,17 @@ import { Button } from "src/components/button";
 import { useIsAuthenticated } from "src/utils/hooks/is-authenticated";
 import { useSliceSelector } from "src/utils/state/selector";
 import { authRevoke } from "src/utils/auth/revoke";
+import { fetchAccountForMePage } from "./actions";
 
 export const Page: FC = () => {
   usePageTitle("My Account");
 
   const { isAuthenticated } = useIsAuthenticated();
   const { account } = useSliceSelector("mePage");
-  // @TODO-ZM: fetch account details on mount
+
+  useEffect(() => {
+    if (isAuthenticated) fetchAccountForMePage();
+  }, [isAuthenticated]);
 
   return (
     <Stack orientation="vertical" fullWidth align="center" maxWidth={600} margin="auto">
