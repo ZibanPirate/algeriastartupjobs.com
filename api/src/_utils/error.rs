@@ -38,5 +38,6 @@ pub enum AIError {
 
 #[derive(Debug)]
 pub enum AuthError {
+  InvalidToken,
   InternalError,
 }

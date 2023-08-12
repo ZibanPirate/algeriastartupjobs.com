@@ -7,7 +7,7 @@ use hyper::StatusCode;
 use serde::Deserialize;
 use serde_json::json;
 
-use crate::{_entry::state::AppState, _utils::error::DataAccessError};
+use crate::{_entry::state::AppState, _utils::error::DataAccessError, auth::service::ScopedToken};
 
 #[derive(Deserialize)]
 pub struct EmailQuery {
@@ -33,8 +33,14 @@ pub async fn get_one_account_by_email(
   }
 }
 
-pub async fn get_me_account(State(app_state): State<AppState>) -> impl IntoResponse {
-  let account = app_state.account_repository.get_one_account_by_id(0).await;
+pub async fn get_me_account(
+  State(app_state): State<AppState>,
+  scoped_token: ScopedToken,
+) -> impl IntoResponse {
+  let account = app_state
+    .account_repository
+    .get_one_account_by_id(scoped_token.id)
+    .await;
 
   match account {
     Ok(account) => Json(json!({

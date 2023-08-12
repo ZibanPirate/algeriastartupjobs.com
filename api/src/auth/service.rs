@@ -1,10 +1,20 @@
 use std::sync::Arc;
 
-use jsonwebtoken::{EncodingKey, Header};
+use axum::{
+  async_trait,
+  extract::FromRequestParts,
+  headers::{authorization::Bearer, Authorization},
+  response::{IntoResponse, Response},
+  RequestPartsExt, TypedHeader,
+};
+
+use chrono::{Duration, Utc};
+use hyper::{http::request::Parts, StatusCode};
+use jsonwebtoken::{decode, Algorithm, DecodingKey, EncodingKey, Header, Validation};
 use rand::{distributions::Alphanumeric, prelude::Distribution, thread_rng};
 use serde::{Deserialize, Serialize};
 
-use crate::{_utils::error::AuthError, config::service::ConfigService};
+use crate::{_entry::state::AppState, _utils::error::AuthError, config::service::ConfigService};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub enum TokenScope {
@@ -13,9 +23,48 @@ pub enum TokenScope {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-struct ScopedToken {
-  scope: TokenScope,
-  id: u32,
+pub struct ScopedToken {
+  pub exp: usize,
+  pub scope: TokenScope,
+  pub id: u32,
+}
+
+// @TODO-ZM: move this into middleware?
+#[async_trait]
+impl FromRequestParts<AppState> for ScopedToken {
+  type Rejection = AuthError;
+
+  async fn from_request_parts(
+    parts: &mut Parts,
+    app_state: &AppState,
+  ) -> Result<Self, Self::Rejection> {
+    let TypedHeader(Authorization(bearer)) = parts
+      .extract::<TypedHeader<Authorization<Bearer>>>()
+      .await
+      .map_err(|_| AuthError::InvalidToken)?;
+
+    let decode_key =
+      DecodingKey::from_secret(app_state.config_service.get_config().jwt_secret.as_ref());
+
+    let token_data = decode::<ScopedToken>(
+      bearer.token(),
+      &decode_key,
+      &Validation::new(Algorithm::HS512),
+    )
+    .map_err(|_| AuthError::InvalidToken)?;
+
+    Ok(token_data.claims)
+  }
+}
+
+impl IntoResponse for AuthError {
+  fn into_response(self) -> Response {
+    let status = match self {
+      // @TODO-ZM: log error reason
+      _ => StatusCode::UNAUTHORIZED,
+    };
+    status.into_response()
+  }
 }
 
 pub struct ConfirmationObject {
@@ -88,7 +137,11 @@ impl AuthService {
     let secret = self.config_service.get_config().jwt_secret;
     let key = EncodingKey::from_secret(secret.as_ref());
 
-    let scoped_token = ScopedToken { scope, id };
+    let scoped_token = ScopedToken {
+      exp: (Utc::now() + Duration::hours(5)).timestamp() as usize,
+      scope,
+      id,
+    };
 
     let token = jsonwebtoken::encode(&header, &scoped_token, &key);
 

@@ -7,7 +7,7 @@ repository = "https://github.com/algeriastartupjobs/algeriastartupjobs.com"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-axum = "0.6.16"
+axum = { version = "0.6.16", features = ["headers"] }
 hyper = { version = "0.14.26", features = ["full"] }
 serde = { version = "1", features = ["derive"] }
 tokio = { version = "1.27.0", features = ["full"] }
