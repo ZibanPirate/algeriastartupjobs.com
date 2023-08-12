@@ -18,7 +18,7 @@ use crate::{
     vec::sort_and_dedup_vec,
   },
   account::model::{AccountNameTrait, DBAccount},
-  auth::service::ScopedToken,
+  auth::service::{ScopedToken, TokenScope},
   security::service::RateLimitConstraint,
   task::model::{DBTask, TaskName, TaskStatus, TaskType},
 };
@@ -501,10 +501,21 @@ pub async fn confirm_post(
   }
   let compact_tags = compact_tags.unwrap();
 
+  let auth_token = app_state
+    .auth_service
+    .generate_scoped_token(TokenScope::CreatePost, poster.id)
+    .await;
+  if !auth_token.is_ok() {
+    // @TODO-ZM: log error reason
+    return StatusCode::INTERNAL_SERVER_ERROR.into_response();
+  }
+  let auth_token = auth_token.unwrap();
+
   Json(json!({
       "post": post,
       "poster": poster,
       "tags": compact_tags,
+      "auth_token": auth_token,
   }))
   .into_response()
 }

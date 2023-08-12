@@ -9,6 +9,7 @@ import { PostPageState } from "../post/state";
 import { getPostUrl } from "src/utils/urls/post-url";
 import { fetch } from "src/utils/fetch/fetch";
 import { ANIMATION_DURATION } from "src/utils/animation/consts";
+import { authSave } from "src/utils/auth/save";
 
 export const confirmEmail = async (): Promise<void> => {
   const { confirmEmailPage, createPostPage, postPage, postEntities, tagEntities, accountEntities } =
@@ -22,6 +23,7 @@ export const confirmEmail = async (): Promise<void> => {
       post: Post;
       poster: Account;
       tags: CompactTag[];
+      auth_token: string;
     }>("/posts/confirm", {
       post_id,
       confirmation_id,
@@ -34,6 +36,8 @@ export const confirmEmail = async (): Promise<void> => {
     }, ANIMATION_DURATION);
 
     createPostPage.set(initialStateForCreatePostPage);
+
+    authSave(data.auth_token);
 
     const { tag_ids, poster_id, ...lonePost } = data.post;
     const post: PostPageState["post"] = {
