@@ -419,9 +419,27 @@ pub struct ConfirmPostBody {
 }
 
 pub async fn confirm_post(
+  ConnectInfo(ip): ConnectInfo<SocketAddr>,
   State(app_state): State<AppState>,
   Json(body): Json<ConfirmPostBody>,
 ) -> impl IntoResponse {
+  match app_state
+    .security_service
+    .rate_limit(vec![RateLimitConstraint {
+      id: format!("confirm_login-ip-{}", ip.ip()),
+      max_requests: 60,
+      duration_ms: 60_000,
+    }]) {
+    Ok(_) => {}
+    Err(SecurityError::InternalError) => {
+      // @TODO-ZM: log error reason
+      return StatusCode::INTERNAL_SERVER_ERROR.into_response();
+    }
+    Err(SecurityError::RateLimitError) => {
+      return StatusCode::TOO_MANY_REQUESTS.into_response();
+    }
+  }
+
   let kv_db_result = app_state.main_kv_db.compare_and_swap(
     body.post_id.to_be_bytes(),
     Some(format!("{}{}", body.confirmation_id, body.confirmation_code).as_bytes()),

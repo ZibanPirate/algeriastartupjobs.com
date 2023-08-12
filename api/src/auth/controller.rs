@@ -139,9 +139,27 @@ pub struct ConfirmLoginBody {
 }
 
 pub async fn confirm_login(
+  ConnectInfo(ip): ConnectInfo<SocketAddr>,
   State(app_state): State<AppState>,
   Json(body): Json<ConfirmLoginBody>,
 ) -> impl IntoResponse {
+  match app_state
+    .security_service
+    .rate_limit(vec![RateLimitConstraint {
+      id: format!("confirm_login-ip-{}", ip.ip()),
+      max_requests: 60,
+      duration_ms: 60_000,
+    }]) {
+    Ok(_) => {}
+    Err(SecurityError::InternalError) => {
+      // @TODO-ZM: log error reason
+      return StatusCode::INTERNAL_SERVER_ERROR.into_response();
+    }
+    Err(SecurityError::RateLimitError) => {
+      return StatusCode::TOO_MANY_REQUESTS.into_response();
+    }
+  }
+
   let account = app_state
     .account_repository
     .get_one_account_by_email(&body.email)
@@ -193,9 +211,26 @@ pub async fn confirm_login(
 }
 
 pub async fn refresh_token(
+  ConnectInfo(ip): ConnectInfo<SocketAddr>,
   State(app_state): State<AppState>,
   scoped_token: ScopedToken,
 ) -> impl IntoResponse {
+  match app_state
+    .security_service
+    .rate_limit(vec![RateLimitConstraint {
+      id: format!("confirm_login-ip-{}", ip.ip()),
+      max_requests: 60,
+      duration_ms: 60_000,
+    }]) {
+    Ok(_) => {}
+    Err(SecurityError::InternalError) => {
+      // @TODO-ZM: log error reason
+      return StatusCode::INTERNAL_SERVER_ERROR.into_response();
+    }
+    Err(SecurityError::RateLimitError) => {
+      return StatusCode::TOO_MANY_REQUESTS.into_response();
+    }
+  }
   let token = app_state
     .auth_service
     .generate_scoped_token(scoped_token.scope, scoped_token.id)
