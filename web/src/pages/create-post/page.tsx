@@ -13,6 +13,7 @@ import { useSliceSelector } from "src/utils/state/selector";
 import { getStateActions } from "src/state";
 import { DebouncedValueInput } from "src/components/input/debounced-value";
 import {
+  createPost,
   createPostViaEmail,
   fetchAccountForCreatePostPage,
   fetchTagsForCreatePostPage,
@@ -283,7 +284,11 @@ export const Page: FC = () => {
                 {creation_status === "ERROR" ? "Something went wrong, please try again" : <br />}
               </Text>
               <Stack orientation="horizontal" align="center" gap="1">
-                <Button variant="v3" onClick={() => createPostViaEmail()} vtName="new-post">
+                <Button
+                  variant="v3"
+                  onClick={() => (isAuthenticated ? createPost() : createPostViaEmail())}
+                  vtName="new-post"
+                >
                   Post now
                 </Button>
                 {(compact || canHideDetails) && (

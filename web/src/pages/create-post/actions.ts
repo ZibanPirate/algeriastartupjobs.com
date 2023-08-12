@@ -8,6 +8,8 @@ import { Post } from "src/models/post";
 import { CompactTag } from "src/models/tag";
 import { onceAtATime } from "src/utils/concurrency/once-at-a-time";
 import { fetch } from "src/utils/fetch/fetch";
+import { PostPageState } from "../post/state";
+import { getPostUrl } from "src/utils/urls/post-url";
 
 export const fetchAccountForCreatePostPage = async (): Promise<void> => {
   const { poster_contact } = getState().createPostPage;
@@ -117,6 +119,57 @@ export const createPostViaEmail = async (): Promise<void> => {
     createPostPage.overwrite({ ...initialStateForCreatePostPage, creation_status: "CREATED" });
     confirmEmailPage.set({ ...initialStateForConfirmEmailPage, confirmation_id, post_id });
     getBrowserRouter().navigate(CONFIRM_EMAIL_PAGE_URL);
+  } catch (error) {
+    console.log("Error creating post", error);
+    // Sentry.captureException(error, { tags: { type: "WEB_FETCH" } });
+    createPostPage.set({ creation_status: "ERROR" });
+    // @TODO-ZM: use Logger abstraction instead of console
+  }
+};
+
+export const createPost = async (): Promise<void> => {
+  const { createPostPage, postPage, postEntities, tagEntities, accountEntities } =
+    getStateActions();
+  createPostPage.set({ creation_status: "CREATING" });
+
+  try {
+    const { title, post_description = "", tags = [] } = getState().createPostPage;
+
+    const { data } = await fetch.post<{
+      post: Post;
+      poster: Account;
+      tags: CompactTag[];
+    }>("/posts", {
+      post: {
+        title,
+        slug: "",
+        short_description: "",
+        description: post_description,
+        poster_id: 0,
+        tag_ids: tags.map((tag) => tag.id),
+        is_confirmed: false,
+        published_at: "",
+      } as Omit<Post, "id">,
+    });
+
+    createPostPage.overwrite({ ...initialStateForCreatePostPage, creation_status: "CREATED" });
+
+    const { tag_ids, poster_id, ...lonePost } = data.post;
+    const post: PostPageState["post"] = {
+      ...lonePost,
+      tags: data.tags,
+      poster: data.poster,
+    };
+
+    postPage.set({ post });
+
+    const postUrl = getPostUrl(data.post, data.poster);
+    getBrowserRouter().navigate(postUrl);
+
+    // update cache:
+    postEntities.upsertMany([data.post]);
+    tagEntities.upsertMany(data.tags);
+    accountEntities.upsertMany([data.poster]);
   } catch (error) {
     console.log("Error creating post", error);
     // Sentry.captureException(error, { tags: { type: "WEB_FETCH" } });
