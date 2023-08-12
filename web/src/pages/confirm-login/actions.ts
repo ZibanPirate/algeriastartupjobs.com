@@ -6,6 +6,7 @@ import { getBrowserRouter } from "src/components/router-provider";
 import { ME_PAGE_URL } from "src/utils/urls/common";
 import { authSave } from "src/utils/auth/save";
 import { fetch } from "src/utils/fetch/fetch";
+import { ANIMATION_DURATION } from "src/utils/animation/consts";
 
 export const confirmLogin = async (): Promise<void> => {
   const { confirmLoginPage, loginPage, mePage } = getStateActions();
@@ -23,7 +24,10 @@ export const confirmLogin = async (): Promise<void> => {
       confirmation_code,
     });
 
-    confirmLoginPage.set({ ...initialStateForConfirmLoginPage, confirmation_status: "CONFIRMED" });
+    confirmLoginPage.set({ confirmation_status: "CONFIRMED" });
+    setTimeout(() => {
+      confirmLoginPage.overwrite(initialStateForConfirmLoginPage);
+    }, ANIMATION_DURATION);
     loginPage.set(initialStateForLoginPage);
 
     const { account, auth_token } = data;

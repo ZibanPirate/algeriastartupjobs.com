@@ -10,6 +10,7 @@ import { onceAtATime } from "src/utils/concurrency/once-at-a-time";
 import { fetch } from "src/utils/fetch/fetch";
 import { PostPageState } from "../post/state";
 import { getPostUrl } from "src/utils/urls/post-url";
+import { ANIMATION_DURATION } from "src/utils/animation/consts";
 
 export const fetchAccountForCreatePostPage = async (): Promise<void> => {
   const { poster_contact } = getState().createPostPage;
@@ -116,7 +117,10 @@ export const createPostViaEmail = async (): Promise<void> => {
       } as Omit<Post, "id">,
     });
 
-    createPostPage.overwrite({ ...initialStateForCreatePostPage, creation_status: "CREATED" });
+    createPostPage.set({ creation_status: "CREATED" });
+    setTimeout(() => {
+      createPostPage.overwrite(initialStateForCreatePostPage);
+    }, ANIMATION_DURATION);
     confirmEmailPage.set({ ...initialStateForConfirmEmailPage, confirmation_id, post_id });
     getBrowserRouter().navigate(CONFIRM_EMAIL_PAGE_URL);
   } catch (error) {
@@ -152,7 +156,10 @@ export const createPost = async (): Promise<void> => {
       } as Omit<Post, "id">,
     });
 
-    createPostPage.overwrite({ ...initialStateForCreatePostPage, creation_status: "CREATED" });
+    createPostPage.set({ creation_status: "CREATED" });
+    setTimeout(() => {
+      createPostPage.overwrite(initialStateForCreatePostPage);
+    }, ANIMATION_DURATION);
 
     const { tag_ids, poster_id, ...lonePost } = data.post;
     const post: PostPageState["post"] = {

@@ -8,6 +8,7 @@ import { CompactTag } from "src/models/tag";
 import { PostPageState } from "../post/state";
 import { getPostUrl } from "src/utils/urls/post-url";
 import { fetch } from "src/utils/fetch/fetch";
+import { ANIMATION_DURATION } from "src/utils/animation/consts";
 
 export const confirmEmail = async (): Promise<void> => {
   const { confirmEmailPage, createPostPage, postPage, postEntities, tagEntities, accountEntities } =
@@ -27,7 +28,11 @@ export const confirmEmail = async (): Promise<void> => {
       confirmation_code,
     });
 
-    confirmEmailPage.set({ ...initialStateForConfirmEmailPage, confirmation_status: "CONFIRMED" });
+    confirmEmailPage.set({ confirmation_status: "CONFIRMED" });
+    setTimeout(() => {
+      confirmEmailPage.overwrite(initialStateForConfirmEmailPage);
+    }, ANIMATION_DURATION);
+
     createPostPage.set(initialStateForCreatePostPage);
 
     const { tag_ids, poster_id, ...lonePost } = data.post;
