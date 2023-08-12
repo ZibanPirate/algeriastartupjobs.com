@@ -1,12 +1,11 @@
 import { getState, getStateActions } from "src/state";
-import Axios from "axios";
-import { getConfig } from "src/utils/config/get-config";
 import { CompactPost, Post } from "src/models/post";
 import { CompactTag } from "src/models/tag";
 import { Account, CompactAccount } from "src/models/account";
 import { PostPageState } from "./state";
 import { isLoaded } from "src/utils/loadable";
 import { TagEntity } from "src/state/entities/tag";
+import { fetch } from "src/utils/fetch/fetch";
 
 export const fetchPostForPostPage = async (postId: string): Promise<void> => {
   const { postPage, postEntities, tagEntities, accountEntities } = getStateActions();
@@ -29,11 +28,11 @@ export const fetchPostForPostPage = async (postId: string): Promise<void> => {
 
   try {
     // @TODO-ZM: auto-generate types for API endpoints
-    const { data } = await Axios.get<{
+    const { data } = await fetch.get<{
       post: Post;
       tags: CompactTag[];
       poster: Account;
-    }>(getConfig().api.base_url + "/posts/" + postId);
+    }>("/posts/" + postId);
 
     const { tag_ids, poster_id, ...lonePost } = data.post;
     const post: PostPageState["post"] = {
@@ -63,11 +62,11 @@ export const fetchSimilarPostsForPostPage = async (postId: string): Promise<void
 
   try {
     // @TODO-ZM: auto-generate types for API endpoints
-    const { data } = await Axios.get<{
+    const { data } = await fetch.get<{
       posts: CompactPost[];
       tags: CompactTag[];
       posters: CompactAccount[];
-    }>(getConfig().api.base_url + "/posts/" + postId + "/similar");
+    }>("/posts/" + postId + "/similar");
 
     const similarPosts: PostPageState["similarPosts"] = data.posts.map((post) => {
       const { tag_ids, poster_id, ...lonePost } = post;

@@ -1,10 +1,9 @@
 import { getState, getStateActions } from "src/state";
-import Axios from "axios";
-import { getConfig } from "src/utils/config/get-config";
 import { CompactPost } from "src/models/post";
 import { CompactTag } from "src/models/tag";
 import { CompactAccount } from "src/models/account";
 import { LandingPageState } from "./state";
+import { fetch } from "src/utils/fetch/fetch";
 
 export const fetchPostsForLandingPage = async (): Promise<void> => {
   const { landingPage, postEntities, tagEntities, accountEntities } = getStateActions();
@@ -14,11 +13,11 @@ export const fetchPostsForLandingPage = async (): Promise<void> => {
   try {
     const endpoint = query.trim().length >= 3 ? `/search/posts?query=${query}` : "/posts/feed";
     // @TODO-ZM: auto-generate types for API endpoints
-    const { data } = await Axios.get<{
+    const { data } = await fetch.get<{
       posts: CompactPost[];
       tags: CompactTag[];
       posters: CompactAccount[];
-    }>(getConfig().api.base_url + endpoint);
+    }>(endpoint);
 
     const posts: LandingPageState["posts"] = data.posts.map((post) => {
       const { tag_ids, poster_id, ...lonePost } = post;
@@ -58,7 +57,7 @@ export const fetchPostsForLandingPage = async (): Promise<void> => {
 export const fetchPostCountForLandingPage = async (): Promise<void> => {
   const { landingPage } = getStateActions();
   try {
-    const { data } = await Axios.get<{ count: number }>(getConfig().api.base_url + "/posts/count");
+    const { data } = await fetch.get<{ count: number }>("/posts/count");
     landingPage.set({ total_post_count: data.count });
   } catch (error) {
     // @TODO-ZM: use Logger abstraction instead of console.log

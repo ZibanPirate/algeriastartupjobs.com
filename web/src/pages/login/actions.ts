@@ -1,10 +1,9 @@
-import Axios from "axios";
 import { getState, getStateActions } from "src/state";
-import { getConfig } from "src/utils/config/get-config";
 import { initialStateForLoginPage } from "./state";
 import { getBrowserRouter } from "src/components/router-provider";
 import { CONFIRM_LOGIN_PAGE_URL } from "src/utils/urls/common";
 import { initialStateForConfirmLoginPage } from "../confirm-login/state";
+import { fetch } from "src/utils/fetch/fetch";
 
 export const login = async () => {
   const { loginPage, confirmLoginPage } = getStateActions();
@@ -15,7 +14,7 @@ export const login = async () => {
 
     const {
       data: { confirmation_id },
-    } = await Axios.post<{ confirmation_id: string }>(getConfig().api.base_url + "/auth/login", {
+    } = await fetch.post<{ confirmation_id: string }>("/auth/login", {
       email,
     });
 

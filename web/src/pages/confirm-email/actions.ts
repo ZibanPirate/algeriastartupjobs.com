@@ -1,4 +1,3 @@
-import Axios from "axios";
 import { getState, getStateActions } from "src/state";
 import { initialStateForConfirmEmailPage } from "./state";
 import { getBrowserRouter } from "src/components/router-provider";
@@ -6,9 +5,9 @@ import { initialStateForCreatePostPage } from "../create-post/state";
 import { Post } from "src/models/post";
 import { Account } from "src/models/account";
 import { CompactTag } from "src/models/tag";
-import { getConfig } from "src/utils/config/get-config";
 import { PostPageState } from "../post/state";
 import { getPostUrl } from "src/utils/urls/post-url";
+import { fetch } from "src/utils/fetch/fetch";
 
 export const confirmEmail = async (): Promise<void> => {
   const { confirmEmailPage, createPostPage, postPage, postEntities, tagEntities, accountEntities } =
@@ -18,11 +17,11 @@ export const confirmEmail = async (): Promise<void> => {
   try {
     const { post_id, confirmation_id, confirmation_code } = getState().confirmEmailPage;
 
-    const { data } = await Axios.post<{
+    const { data } = await fetch.post<{
       post: Post;
       poster: Account;
       tags: CompactTag[];
-    }>(getConfig().api.base_url + "/posts/confirm", {
+    }>("/posts/confirm", {
       post_id,
       confirmation_id,
       confirmation_code,

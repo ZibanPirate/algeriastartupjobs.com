@@ -1,7 +1,5 @@
-import Axios from "axios";
 import { Account } from "src/models/account";
 import { getState, getStateActions } from "src/state";
-import { getConfig } from "src/utils/config/get-config";
 import { initialStateForCreatePostPage } from "./state";
 import { getBrowserRouter } from "src/components/router-provider";
 import { CONFIRM_EMAIL_PAGE_URL } from "src/utils/urls/common";
@@ -9,6 +7,7 @@ import { initialStateForConfirmEmailPage } from "../confirm-email/state";
 import { Post } from "src/models/post";
 import { CompactTag } from "src/models/tag";
 import { onceAtATime } from "src/utils/concurrency/once-at-a-time";
+import { fetch } from "src/utils/fetch/fetch";
 
 export const fetchAccountForCreatePostPage = async (): Promise<void> => {
   const { poster_contact } = getState().createPostPage;
@@ -18,9 +17,9 @@ export const fetchAccountForCreatePostPage = async (): Promise<void> => {
 
   try {
     // @TODO-ZM: auto-generate types for API endpoints
-    const { data } = await Axios.get<{
+    const { data } = await fetch.get<{
       account: Account;
-    }>(getConfig().api.base_url + "/accounts/by_email?email=" + encodeURIComponent(poster_contact));
+    }>("/accounts/by_email?email=" + encodeURIComponent(poster_contact));
 
     createPostPage.set({ poster: data.account });
 
@@ -44,9 +43,9 @@ const concurrentFetchTagsForCreatePostPage = async (): Promise<void> => {
 
   try {
     // @TODO-ZM: auto-generate types for API endpoints
-    const { data } = await Axios.post<{
+    const { data } = await fetch.post<{
       tags: CompactTag[];
-    }>(getConfig().api.base_url + "/tags/suggestions_for_post", {
+    }>("/tags/suggestions_for_post", {
       description: post_description,
       title,
     });
@@ -85,11 +84,11 @@ export const createPost = async (): Promise<void> => {
 
     const {
       data: { confirmation_id, post_id },
-    } = await Axios.post<{
+    } = await fetch.post<{
       post_id: number;
       poster_id: number;
       confirmation_id: string;
-    }>(getConfig().api.base_url + "/posts", {
+    }>("/posts", {
       poster: {
         email: poster_contact,
         slug: "",
