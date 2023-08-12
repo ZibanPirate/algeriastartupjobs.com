@@ -6,7 +6,7 @@ import { Post } from "src/models/post";
  * @returns String `/jobs/[post_slug_without_id]_by_[poster_slug_without_id]_[post_id]`
  */
 
-export const _getPostUrl = (
+const _getPostUrl = (
   post: Pick<Post, "slug" | "id">,
   poster: Pick<Account, "slug"> & AccountType
 ) => {

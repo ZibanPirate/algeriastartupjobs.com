@@ -12,13 +12,20 @@ import { Account } from "src/models/account";
 import { useSliceSelector } from "src/utils/state/selector";
 import { getStateActions } from "src/state";
 import { DebouncedValueInput } from "src/components/input/debounced-value";
-import { createPost, fetchAccountForCreatePostPage, fetchTagsForCreatePostPage } from "./actions";
+import {
+  createPostViaEmail,
+  fetchAccountForCreatePostPage,
+  fetchTagsForCreatePostPage,
+} from "./actions";
 import { isLoaded } from "src/utils/loadable";
 import { getAccountName } from "src/utils/models/account-name";
 import { POST_PAGE_URL } from "src/utils/urls/common";
 import { DebouncedValueRichInput } from "src/components/rich-input/debounced-value";
 import { Tag } from "src/components/tag";
 import { useMediaQuery } from "src/utils/hooks/use-media-query";
+import { useIsAuthenticated } from "src/utils/hooks/is-authenticated";
+import { fetchAccountForMePage } from "../me/actions";
+import { Skeleton } from "src/components/skeleton";
 
 export const Page: FC = () => {
   usePageTitle("Post a job ad for free!");
@@ -54,10 +61,6 @@ export const Page: FC = () => {
   }, [compact, post_description, tags]);
 
   useEffect(() => {
-    fetchAccountForCreatePostPage();
-  }, [poster_contact]);
-
-  useEffect(() => {
     if (compact) return;
     fetchTagsForCreatePostPage();
   }, [title, post_description, compact]);
@@ -68,9 +71,17 @@ export const Page: FC = () => {
 
   const [posterName, setPosterName] = useState("");
 
+  const { isAuthenticated } = useIsAuthenticated();
+  const { account } = useSliceSelector("mePage");
+
   useEffect(() => {
-    const loadedPoster = isLoaded(poster);
-    if (loadedPoster && loadedPoster.email === poster_contact) {
+    if (isAuthenticated) fetchAccountForMePage();
+    else fetchAccountForCreatePostPage();
+  }, [poster_contact, isAuthenticated]);
+
+  useEffect(() => {
+    const loadedPoster = isAuthenticated ? isLoaded(account) : isLoaded(poster);
+    if (loadedPoster && (isAuthenticated || loadedPoster.email === poster_contact)) {
       set({
         poster_type: loadedPoster.type,
         ...(loadedPoster.type === "Company"
@@ -86,7 +97,7 @@ export const Page: FC = () => {
     } else {
       setPosterName("");
     }
-  }, [poster]);
+  }, [poster, account, isAuthenticated]);
 
   const isMediumScreen = useMediaQuery("(max-width: 1300px)");
 
@@ -171,20 +182,27 @@ export const Page: FC = () => {
           variant="v4"
         />
 
-        <Text variant="v4">Candidate apply by sending email to</Text>
-        <DebouncedValueInput
-          disabled={disabledInputs}
-          placeholder="Contact email"
-          stretch={true}
-          value={poster_contact}
-          setValue={(value) => set({ poster_contact: value })}
-          variant="v4"
-          id="email"
-          inputMode="email"
-        />
-
-        {posterName ? (
-          <Text variant="v4">{posterName}</Text>
+        {!isAuthenticated && (
+          <>
+            <Text variant="v4">Candidate apply by sending email to</Text>
+            <DebouncedValueInput
+              disabled={disabledInputs}
+              placeholder="Contact email"
+              stretch={true}
+              value={poster_contact}
+              setValue={(value) => set({ poster_contact: value })}
+              variant="v4"
+              id="email"
+              inputMode="email"
+            />
+          </>
+        )}
+        {posterName || isAuthenticated ? (
+          posterName ? (
+            <Text variant="v4">{posterName}</Text>
+          ) : (
+            <Skeleton variant="v4" width={100} height={20} />
+          )
         ) : (
           <>
             <Select<Account["type"]>
@@ -265,7 +283,7 @@ export const Page: FC = () => {
                 {creation_status === "ERROR" ? "Something went wrong, please try again" : <br />}
               </Text>
               <Stack orientation="horizontal" align="center" gap="1">
-                <Button variant="v3" onClick={() => createPost()} vtName="new-post">
+                <Button variant="v3" onClick={() => createPostViaEmail()} vtName="new-post">
                   Post now
                 </Button>
                 {(compact || canHideDetails) && (

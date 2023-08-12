@@ -66,7 +66,7 @@ const concurrentFetchTagsForCreatePostPage = async (): Promise<void> => {
 
 export const fetchTagsForCreatePostPage = onceAtATime(concurrentFetchTagsForCreatePostPage);
 
-export const createPost = async (): Promise<void> => {
+export const createPostViaEmail = async (): Promise<void> => {
   const { createPostPage, confirmEmailPage } = getStateActions();
   createPostPage.set({ creation_status: "CREATING" });
 
@@ -88,7 +88,7 @@ export const createPost = async (): Promise<void> => {
       post_id: number;
       poster_id: number;
       confirmation_id: string;
-    }>("/posts", {
+    }>("/posts/via_email", {
       poster: {
         email: poster_contact,
         slug: "",

@@ -18,6 +18,7 @@ use crate::{
     vec::sort_and_dedup_vec,
   },
   account::model::{AccountNameTrait, DBAccount},
+  auth::service::ScopedToken,
   security::service::RateLimitConstraint,
   task::model::{DBTask, TaskName, TaskStatus, TaskType},
 };
@@ -253,7 +254,7 @@ pub async fn get_post_count(State(app_state): State<AppState>) -> impl IntoRespo
 }
 
 #[derive(Deserialize)]
-pub struct CreateOnePostBody {
+pub struct CreateOnePostWithPosterBody {
   poster: DBAccount,
   post: DBPost,
 }
@@ -262,7 +263,7 @@ pub async fn create_one_post_with_poster(
   // @TODO-ZM: make sure this is a secure ip
   ConnectInfo(ip): ConnectInfo<SocketAddr>,
   State(app_state): State<AppState>,
-  Json(body): Json<CreateOnePostBody>,
+  Json(body): Json<CreateOnePostWithPosterBody>,
 ) -> impl IntoResponse {
   match body.poster.r#type.to_string().as_str() {
     "Individual" | "Company" => {}
@@ -508,6 +509,134 @@ pub async fn confirm_post(
   .into_response()
 }
 
+#[derive(Deserialize)]
+pub struct CreateOnePostBody {
+  post: DBPost,
+}
+
+pub async fn create_one_post(
+  ConnectInfo(ip): ConnectInfo<SocketAddr>,
+  State(app_state): State<AppState>,
+  scoped_token: ScopedToken,
+  Json(body): Json<CreateOnePostBody>,
+) -> impl IntoResponse {
+  let poster = app_state
+    .account_repository
+    .get_one_account_by_id(scoped_token.id)
+    .await;
+
+  if !poster.is_ok() {
+    // @TODO-ZM: log error reason
+    return StatusCode::INTERNAL_SERVER_ERROR.into_response();
+  }
+  let poster = poster.unwrap();
+
+  match poster.r#type.to_string().as_str() {
+    "Individual" | "Company" => {}
+    _ => {
+      return StatusCode::BAD_REQUEST.into_response();
+    }
+  }
+
+  // @TODO-ZM: write a macro for this
+  match app_state.security_service.rate_limit(vec![
+    RateLimitConstraint {
+      id: format!("create_one_post_with_poster-1-{}", poster.email),
+      max_requests: 1,
+      duration_ms: 2000,
+    },
+    RateLimitConstraint {
+      id: format!("create_one_post_with_poster-2-{}", ip.ip()),
+      max_requests: 60,
+      duration_ms: 60_000,
+    },
+  ]) {
+    Ok(_) => {}
+    Err(SecurityError::InternalError) => {
+      // @TODO-ZM: log error reason
+      return StatusCode::INTERNAL_SERVER_ERROR.into_response();
+    }
+    Err(SecurityError::RateLimitError) => {
+      return StatusCode::TOO_MANY_REQUESTS.into_response();
+    }
+  }
+
+  let post_id = app_state
+    .post_repository
+    .create_one_post(&DBPost {
+      poster_id: poster.id,
+      slug: slugify(&body.post.title),
+      is_confirmed: true,
+      // @TODO-ZM: summarize description using AI
+      short_description: body
+        .post
+        .description
+        .split_whitespace()
+        .take(20)
+        .collect::<Vec<&str>>()
+        .join(" "),
+      published_at: chrono::Utc::now().to_rfc3339(),
+      ..body.post.clone()
+    })
+    .await;
+
+  if !post_id.is_ok() {
+    // @TODO-ZM: log error reason
+    return StatusCode::INTERNAL_SERVER_ERROR.into_response();
+  }
+  let post_id = post_id.unwrap();
+
+  let post = app_state.post_repository.get_one_post_by_id(post_id).await;
+  if !post.is_ok() {
+    // @TODO-ZM: log error reason
+    return StatusCode::INTERNAL_SERVER_ERROR.into_response();
+  }
+  let post = post.unwrap();
+
+  let task_id = app_state
+    .task_repository
+    .create_one_task(DBTask {
+      name: TaskName::Indexing {
+        model_name: "post".to_string(),
+        model_id: post.id,
+      },
+      status: TaskStatus::Pending,
+      r#type: TaskType::Automated,
+    })
+    .await;
+  if !task_id.is_ok() {
+    // @TODO-ZM: log error reason
+    return StatusCode::INTERNAL_SERVER_ERROR.into_response();
+  }
+
+  let poster = app_state
+    .account_repository
+    .get_one_account_by_id(post.poster_id)
+    .await;
+  if !poster.is_ok() {
+    // @TODO-ZM: log error reason
+    return StatusCode::INTERNAL_SERVER_ERROR.into_response();
+  }
+  let poster = poster.unwrap();
+
+  let compact_tags = app_state
+    .tag_repository
+    .get_many_compact_tags_by_ids(&post.tag_ids)
+    .await;
+  if !compact_tags.is_ok() {
+    // @TODO-ZM: log error reason
+    return StatusCode::INTERNAL_SERVER_ERROR.into_response();
+  }
+  let compact_tags = compact_tags.unwrap();
+
+  Json(json!({
+      "post": post,
+      "poster": poster,
+      "tags": compact_tags,
+  }))
+  .into_response()
+}
+
 pub fn create_post_router() -> Router<AppState> {
   Router::new()
     .route("/feed", axum::routing::get(get_all_posts_for_feed))
@@ -518,5 +647,9 @@ pub fn create_post_router() -> Router<AppState> {
     )
     .route("/count", axum::routing::get(get_post_count))
     .route("/confirm", axum::routing::post(confirm_post))
-    .route("/", axum::routing::post(create_one_post_with_poster))
+    .route(
+      "/via_email",
+      axum::routing::post(create_one_post_with_poster),
+    )
+    .route("/", axum::routing::post(create_one_post))
 }
