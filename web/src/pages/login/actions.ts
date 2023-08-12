@@ -4,7 +4,7 @@ import { getBrowserRouter } from "src/components/router-provider";
 import { CONFIRM_LOGIN_PAGE_URL } from "src/utils/urls/common";
 import { initialStateForConfirmLoginPage } from "../confirm-login/state";
 import { fetch } from "src/utils/fetch/fetch";
-import { ANIMATION_DURATION } from "src/utils/animation/consts";
+import { ANIMATION_DURATION } from "src/utils/animation/const";
 
 export const login = async () => {
   const { loginPage, confirmLoginPage } = getStateActions();

@@ -22,6 +22,8 @@ pub enum TokenScope {
   Login,
 }
 
+const AUTH_TOKEN_EXPIRATION_MINUTES: i64 = 5;
+
 #[derive(Debug, Serialize, Deserialize)]
 pub struct ScopedToken {
   pub exp: usize,
@@ -43,17 +45,12 @@ impl FromRequestParts<AppState> for ScopedToken {
       .await
       .map_err(|_| AuthError::InvalidToken)?;
 
-    let decode_key =
-      DecodingKey::from_secret(app_state.config_service.get_config().jwt_secret.as_ref());
+    let scoped_token = app_state
+      .auth_service
+      .decode_scoped_token(bearer.token().to_string())
+      .await?;
 
-    let token_data = decode::<ScopedToken>(
-      bearer.token(),
-      &decode_key,
-      &Validation::new(Algorithm::HS512),
-    )
-    .map_err(|_| AuthError::InvalidToken)?;
-
-    Ok(token_data.claims)
+    Ok(scoped_token)
   }
 }
 
@@ -138,7 +135,7 @@ impl AuthService {
     let key = EncodingKey::from_secret(secret.as_ref());
 
     let scoped_token = ScopedToken {
-      exp: (Utc::now() + Duration::hours(5)).timestamp() as usize,
+      exp: (Utc::now() + Duration::minutes(AUTH_TOKEN_EXPIRATION_MINUTES)).timestamp() as usize,
       scope,
       id,
     };
@@ -152,5 +149,19 @@ impl AuthService {
     let token = token.unwrap();
 
     Ok(token)
+  }
+
+  pub async fn decode_scoped_token(&self, token: String) -> Result<ScopedToken, AuthError> {
+    let decode_key = DecodingKey::from_secret(self.config_service.get_config().jwt_secret.as_ref());
+
+    let token_data = decode::<ScopedToken>(&token, &decode_key, &Validation::new(Algorithm::HS512))
+      .map_err(|_| AuthError::InvalidToken)?;
+
+    if (token_data.claims.exp as i64) < Utc::now().timestamp() {
+      // @TODO-ZM: log error reason
+      return Err(AuthError::InvalidToken);
+    }
+
+    Ok(token_data.claims)
   }
 }

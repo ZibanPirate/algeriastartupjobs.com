@@ -6,7 +6,7 @@ import { getBrowserRouter } from "src/components/router-provider";
 import { ME_PAGE_URL } from "src/utils/urls/common";
 import { authSave } from "src/utils/auth/save";
 import { fetch } from "src/utils/fetch/fetch";
-import { ANIMATION_DURATION } from "src/utils/animation/consts";
+import { ANIMATION_DURATION } from "src/utils/animation/const";
 
 export const confirmLogin = async (): Promise<void> => {
   const { confirmLoginPage, loginPage, mePage } = getStateActions();
@@ -18,7 +18,7 @@ export const confirmLogin = async (): Promise<void> => {
     const { data } = await fetch.post<{
       account: Account;
       auth_token: string;
-    }>("/auth/confirm-login", {
+    }>("/auth/confirm_login", {
       email,
       confirmation_id,
       confirmation_code,

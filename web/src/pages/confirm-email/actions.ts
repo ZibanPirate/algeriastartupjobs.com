@@ -8,7 +8,7 @@ import { CompactTag } from "src/models/tag";
 import { PostPageState } from "../post/state";
 import { getPostUrl } from "src/utils/urls/post-url";
 import { fetch } from "src/utils/fetch/fetch";
-import { ANIMATION_DURATION } from "src/utils/animation/consts";
+import { ANIMATION_DURATION } from "src/utils/animation/const";
 import { authSave } from "src/utils/auth/save";
 
 export const confirmEmail = async (): Promise<void> => {

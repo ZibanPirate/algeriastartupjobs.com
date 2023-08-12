@@ -132,7 +132,7 @@ Content-Type: application/json
 
 ###
 # @name confirmLogin
-POST {{base_url}}/auth/confirm-login
+POST {{base_url}}/auth/confirm_login
 Content-Type: application/json
 
 {

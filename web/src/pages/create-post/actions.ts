@@ -10,7 +10,7 @@ import { onceAtATime } from "src/utils/concurrency/once-at-a-time";
 import { fetch } from "src/utils/fetch/fetch";
 import { PostPageState } from "../post/state";
 import { getPostUrl } from "src/utils/urls/post-url";
-import { ANIMATION_DURATION } from "src/utils/animation/consts";
+import { ANIMATION_DURATION } from "src/utils/animation/const";
 
 export const fetchAccountForCreatePostPage = async (): Promise<void> => {
   const { poster_contact } = getState().createPostPage;
@@ -157,6 +157,7 @@ export const createPost = async (): Promise<void> => {
     });
 
     createPostPage.set({ creation_status: "CREATED" });
+    // @TODO-ZM: subscribe to next page navigation event instead of using setTimeout
     setTimeout(() => {
       createPostPage.overwrite(initialStateForCreatePostPage);
     }, ANIMATION_DURATION);

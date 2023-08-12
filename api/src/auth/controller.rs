@@ -15,7 +15,7 @@ use crate::{
   security::service::RateLimitConstraint,
 };
 
-use super::service::{ConfirmationObject, TokenScope};
+use super::service::{ConfirmationObject, ScopedToken, TokenScope};
 
 #[derive(Deserialize)]
 pub struct LoginBody {
@@ -192,8 +192,29 @@ pub async fn confirm_login(
   .into_response()
 }
 
+pub async fn refresh_token(
+  State(app_state): State<AppState>,
+  scoped_token: ScopedToken,
+) -> impl IntoResponse {
+  let token = app_state
+    .auth_service
+    .generate_scoped_token(scoped_token.scope, scoped_token.id)
+    .await;
+  if token.is_err() {
+    // @TODO-ZM: log error reason
+    return StatusCode::INTERNAL_SERVER_ERROR.into_response();
+  }
+  let token = token.unwrap();
+
+  Json(json!({
+      "auth_token": token,
+  }))
+  .into_response()
+}
+
 pub fn create_auth_router() -> Router<AppState> {
   Router::new()
     .route("/login", axum::routing::post(login))
-    .route("/confirm-login", axum::routing::post(confirm_login))
+    .route("/confirm_login", axum::routing::post(confirm_login))
+    .route("/refresh_token", axum::routing::post(refresh_token))
 }
