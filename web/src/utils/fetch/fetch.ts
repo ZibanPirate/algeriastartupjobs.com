@@ -37,5 +37,6 @@ fetch.interceptors.response.use(
 
 authSubscribe(setupAuth);
 setupAuth();
+if (authVerify()) authRefresh();
 
 export { fetch };

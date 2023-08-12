@@ -4,7 +4,7 @@ import { getBrowserRouter } from "src/components/router-provider";
 import { CONFIRM_LOGIN_PAGE_URL } from "src/utils/urls/common";
 import { initialStateForConfirmLoginPage } from "../confirm-login/state";
 import { fetch } from "src/utils/fetch/fetch";
-import { ANIMATION_DURATION } from "src/utils/animation/const";
+import { viewTransitionSubscribeOnce } from "src/utils/animation/view-transition";
 
 export const login = async () => {
   const { loginPage, confirmLoginPage } = getStateActions();
@@ -21,9 +21,9 @@ export const login = async () => {
 
     // @TODO-ZM: fix typing on overwrite reducer.
     loginPage.set({ login_status: "CODE_SENT" });
-    setTimeout(() => {
+    viewTransitionSubscribeOnce(() => {
       loginPage.overwrite(initialStateForLoginPage);
-    }, ANIMATION_DURATION);
+    });
     confirmLoginPage.set({ ...initialStateForConfirmLoginPage, confirmation_id, email });
     getBrowserRouter().navigate(CONFIRM_LOGIN_PAGE_URL);
   } catch (error) {

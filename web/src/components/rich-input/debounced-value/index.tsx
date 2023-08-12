@@ -25,7 +25,7 @@ export const DebouncedValueRichInput: FC<DebouncedValueRichInputProps> = ({
 
   useEffect(() => {
     debouncedSetValue(localValue);
-  });
+  }, [localValue]);
 
   return <RichInput value={localValue} setValue={setLocalValue} {...props} />;
 };

@@ -25,7 +25,7 @@ export const DebouncedValueInput: FC<DebouncedValueInputProps> = ({
 
   useEffect(() => {
     debouncedSetValue(localValue);
-  });
+  }, [localValue]);
 
   return <Input value={localValue} setValue={setLocalValue} {...props} />;
 };
