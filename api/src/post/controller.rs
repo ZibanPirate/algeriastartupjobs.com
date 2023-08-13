@@ -239,7 +239,7 @@ pub async fn get_many_similar_posts_by_id(
 }
 
 pub async fn get_post_count(State(app_state): State<AppState>) -> impl IntoResponse {
-  let post_count = app_state.post_repository.get_post_count().await;
+  let post_count = app_state.post_repository.get_published_post_count().await;
 
   if !post_count.is_ok() {
     // @TODO-ZM: log error reason

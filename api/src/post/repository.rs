@@ -222,9 +222,10 @@ impl PostRepository {
     }
   }
 
-  pub async fn get_post_count(&self) -> Result<u32, DataAccessError> {
+  pub async fn get_published_post_count(&self) -> Result<u32, DataAccessError> {
+    // @TODO-ZM: introduce status field "Published", "Draft", "Deleted" ...etc
     let query = r#"
-      SELECT count() FROM post GROUP BY count
+      SELECT count() FROM post WHERE is_confirmed=true GROUP BY count
       "#;
 
     let query_result = self.main_db.query(query).await;
