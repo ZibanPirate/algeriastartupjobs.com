@@ -35,10 +35,11 @@ Sentry.init({
     new Sentry.Replay(),
   ],
   // Performance Monitoring
-  tracesSampleRate: stage === "development" ? 1.0 : 0.1,
+  // @TODO-ZM: reduce once we have actual users
+  tracesSampleRate: stage === "development" ? 1.0 : 1.0,
   // Session Replay
-  replaysSessionSampleRate: stage === "development" ? 1.0 : 0.1,
-  replaysOnErrorSampleRate: stage === "development" ? 1.0 : 0.1,
+  // replaysSessionSampleRate: stage === "development" ? 1.0 : 0.1,
+  // replaysOnErrorSampleRate: stage === "development" ? 1.0 : 0.1,
   //
   release: web.version,
   environment: stage,
