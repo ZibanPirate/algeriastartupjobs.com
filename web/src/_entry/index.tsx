@@ -1,4 +1,4 @@
-import { FC, StrictMode } from "react";
+import { FC, StrictMode, useEffect } from "react";
 import "./style.css";
 import { Providers } from "./providers";
 import { App } from "./app";
@@ -6,6 +6,12 @@ import { createRoot } from "react-dom/client";
 import * as Sentry from "@sentry/react";
 import { getConfig } from "src/utils/config/get-config";
 import { getStage } from "src/utils/config/get-stage";
+import {
+  createRoutesFromChildren,
+  matchRoutes,
+  useLocation,
+  useNavigationType,
+} from "react-router-dom";
 
 const { stage } = getStage();
 const { api, web } = getConfig();
@@ -18,6 +24,13 @@ Sentry.init({
     new Sentry.BrowserTracing({
       // Set 'tracePropagationTargets' to control for which URLs distributed tracing should be enabled
       tracePropagationTargets: [api.base_url],
+      routingInstrumentation: Sentry.reactRouterV6Instrumentation(
+        useEffect,
+        useLocation,
+        useNavigationType,
+        createRoutesFromChildren,
+        matchRoutes
+      ),
     }),
     new Sentry.Replay(),
   ],

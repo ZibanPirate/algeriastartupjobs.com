@@ -1,10 +1,12 @@
 import { FC, PropsWithChildren, useEffect, useState } from "react";
 import {
+  Routes,
   RouterProvider as SRP,
   createBrowserRouter,
   useLocation,
   useNavigationType,
 } from "react-router-dom";
+import * as Sentry from "@sentry/react";
 
 let browserRouter: ReturnType<typeof createBrowserRouter>;
 export const getBrowserRouter = () => browserRouter;
@@ -57,3 +59,5 @@ export const LocationListenerProvider: FC<PropsWithChildren> = ({ children }) =>
   }, [location, navigationType]);
   return <>{children}</>;
 };
+
+export const SentryRoutes = Sentry.withSentryReactRouterV6Routing(Routes);

@@ -1,7 +1,7 @@
 import { FC, useEffect, useRef, useState } from "react";
 import "./style.css";
 import "src/utils/css/index.css";
-import { Route, Routes } from "react-router-dom";
+import { Route } from "react-router-dom";
 import { LazyPages, pageLoaders } from "src/pages";
 import { useHtmlThemeColor } from "src/utils/hooks/html-theme-color";
 import {
@@ -14,6 +14,7 @@ import {
 } from "src/utils/urls/common";
 import LoadingBar, { LoadingBarRef } from "react-top-loading-bar";
 import { viewTransition } from "src/utils/animation/view-transition";
+import { SentryRoutes } from "src/components/router-provider";
 
 export const App: FC = () => {
   useHtmlThemeColor();
@@ -57,7 +58,7 @@ export const App: FC = () => {
   return (
     <>
       <LoadingBar color="#41aa55" ref={loadingBarRef} height={4} />
-      <Routes>
+      <SentryRoutes>
         <Route path="/" Component={pageToRenderSetter("landing")} />
         <Route path={POST_PAGE_URL} Component={pageToRenderSetter("post")} />
         <Route path={CREATE_POST_PAGE_URL} Component={pageToRenderSetter("create-post")} />
@@ -66,7 +67,7 @@ export const App: FC = () => {
         <Route path={CONFIRM_LOGIN_PAGE_URL} Component={pageToRenderSetter("confirm-login")} />
         <Route path={ME_PAGE_URL} Component={pageToRenderSetter("me")} />
         <Route path="*" Component={pageToRenderSetter("404")} />
-      </Routes>
+      </SentryRoutes>
       {LazyPages[currentPage]}
     </>
   );
