@@ -10,6 +10,8 @@ import { getStage } from "src/utils/config/get-stage";
 const { stage } = getStage();
 const { api, web } = getConfig();
 
+const SENTRY_ON_DEVELOPMENT: boolean = false;
+
 Sentry.init({
   dsn: "https://62bd4b5f29373523b20df4381ba81910@o4505697083457536.ingest.sentry.io/4505697169637376",
   integrations: [
@@ -27,7 +29,7 @@ Sentry.init({
   //
   release: web.version,
   environment: stage,
-  enabled: stage !== "development",
+  enabled: stage !== "development" || SENTRY_ON_DEVELOPMENT,
 });
 
 const EntryPoint: FC = () => (

@@ -34,6 +34,9 @@ reqwest = { version = "0.11.17", features = ["json"] }
 sled = "0.34.7"
 chrono = "0.4.26"
 jsonwebtoken = "8.3.0"
+sentry = { version = "0.31.5", features = ["tracing", "tower", "tower-http"] }
+sentry-tracing = "0.31.5"
+sentry-tower = "0.31.5"
 
 [dev-dependencies]
 cargo-watch = "8.4.0"

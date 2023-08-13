@@ -1,5 +1,3 @@
-use std::sync::Arc;
-
 use crate::{
   _test::controller::create_test_router,
   _utils::error::BootError,
@@ -12,6 +10,7 @@ use crate::{
 use axum::{routing::get, Json, Router};
 use local_ip_address::local_ip;
 use serde_json::json;
+use std::sync::Arc;
 use tokio_cron_scheduler::JobScheduler;
 
 use super::{
@@ -24,7 +23,7 @@ use super::{
 };
 
 pub async fn actual_main() {
-  enable_tracing();
+  let _guard = enable_tracing();
 
   // create a shared-by-reference state
   let app_state = create_app_state().await.unwrap();
@@ -57,9 +56,6 @@ pub async fn actual_main() {
 
 // create and configure the app router
 async fn create_app(app_state: AppState) -> Result<Router, BootError> {
-  let cors_layer = create_cors_layer();
-  let trace_layer = create_trace_layer();
-
   let app = Router::new();
   let app = app
     // @TODO-ZM: align on model naming convention
@@ -80,21 +76,23 @@ async fn create_app(app_state: AppState) -> Result<Router, BootError> {
       }),
     )
     .with_state(app_state);
-  let app = app.layer(cors_layer).layer(trace_layer);
+
+  let app = app.layer(create_cors_layer()).layer(create_trace_layer());
+
   Ok(app)
 }
 
 async fn create_cron_jobs(app_state: AppState) -> Result<JobScheduler, BootError> {
-  let sched = JobScheduler::new().await;
-  if sched.is_err() {
+  let schedule = JobScheduler::new().await;
+  if schedule.is_err() {
     return Err(BootError::CronJobSetupError);
   }
-  let sched = sched.unwrap();
+  let schedule = schedule.unwrap();
 
   let search_cron_job = Arc::new(SearchCronJob { app_state });
 
   // @TODO-ZM: add un-indexing cron job
-  let registration_result = sched
+  let registration_result = schedule
     .add(search_cron_job.create_indexing_cron_job().unwrap())
     .await;
   if registration_result.is_err() {
@@ -105,7 +103,7 @@ async fn create_cron_jobs(app_state: AppState) -> Result<JobScheduler, BootError
     return Err(BootError::CronJobSetupError);
   }
 
-  let registration_result = sched
+  let registration_result = schedule
     .add(search_cron_job.create_bk_tree_refresher_cron_job().unwrap())
     .await;
   if registration_result.is_err() {
@@ -116,5 +114,5 @@ async fn create_cron_jobs(app_state: AppState) -> Result<JobScheduler, BootError
     return Err(BootError::CronJobSetupError);
   }
 
-  Ok(sched)
+  Ok(schedule)
 }
