@@ -1,6 +1,7 @@
 import { Account } from "src/models/account";
 import { getState, getStateActions } from "src/state";
 import { fetch } from "src/utils/fetch/fetch";
+import * as Sentry from "@sentry/react";
 
 // @TODO-ZM: throttle this and other actions as well
 export const fetchAccountForMePage = async () => {
@@ -22,6 +23,6 @@ export const fetchAccountForMePage = async () => {
     mePage.set({ account: "ERROR" });
     // @TODO-ZM: use Logger abstraction instead of console.log
     console.log("Error fetching post for post page", error);
-    // Sentry.captureException(error, { tags: { type: "WEB_FETCH" } });
+    Sentry.captureException(error, { tags: { type: "WEB_FETCH" } });
   }
 };

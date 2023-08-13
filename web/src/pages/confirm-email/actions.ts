@@ -10,6 +10,7 @@ import { getPostUrl } from "src/utils/urls/post-url";
 import { fetch } from "src/utils/fetch/fetch";
 import { authSave } from "src/utils/auth/save";
 import { viewTransitionSubscribeOnce } from "src/utils/animation/view-transition";
+import * as Sentry from "@sentry/react";
 
 export const confirmEmail = async (): Promise<void> => {
   const { confirmEmailPage, createPostPage, postPage, postEntities, tagEntities, accountEntities } =
@@ -58,7 +59,7 @@ export const confirmEmail = async (): Promise<void> => {
   } catch (error) {
     confirmEmailPage.set({ confirmation_status: "ERROR" });
     // @TODO-ZM: use Logger abstraction instead of console
+    Sentry.captureException(error, { tags: { type: "WEB_FETCH" } });
     console.log("Error confirming email", error);
-    // Sentry.captureException(error, { tags: { type: "WEB_FETCH" } });
   }
 };

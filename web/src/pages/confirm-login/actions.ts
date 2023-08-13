@@ -7,6 +7,7 @@ import { ME_PAGE_URL } from "src/utils/urls/common";
 import { authSave } from "src/utils/auth/save";
 import { fetch } from "src/utils/fetch/fetch";
 import { viewTransitionSubscribeOnce } from "src/utils/animation/view-transition";
+import * as Sentry from "@sentry/react";
 
 export const confirmLogin = async (): Promise<void> => {
   const { confirmLoginPage, loginPage, mePage } = getStateActions();
@@ -37,7 +38,7 @@ export const confirmLogin = async (): Promise<void> => {
   } catch (error) {
     confirmLoginPage.set({ confirmation_status: "ERROR" });
     // @TODO-ZM: use Logger abstraction instead of console
+    Sentry.captureException(error, { tags: { type: "WEB_FETCH" } });
     console.log("Error confirming login", error);
-    // Sentry.captureException(error, { tags: { type: "WEB_FETCH" } });
   }
 };

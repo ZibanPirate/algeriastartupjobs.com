@@ -11,5 +11,13 @@ const _getConfig = () => ({
       "https://production.api.algeriastartupjobs.com",
     ][stageIndex],
   },
+  web: {
+    base_url: [
+      `http://${location.hostname}:3000`,
+      "https://staging.algeriastartupjobs.com",
+      "https://www.algeriastartupjobs.com",
+    ][stageIndex],
+    version: APP_VERSION,
+  },
 });
 export const getConfig = memoize(_getConfig);

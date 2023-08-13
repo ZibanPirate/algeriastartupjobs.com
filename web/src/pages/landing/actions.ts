@@ -4,6 +4,7 @@ import { CompactTag } from "src/models/tag";
 import { CompactAccount } from "src/models/account";
 import { LandingPageState } from "./state";
 import { fetch } from "src/utils/fetch/fetch";
+import * as Sentry from "@sentry/react";
 
 export const fetchPostsForLandingPage = async (): Promise<void> => {
   const { landingPage, postEntities, tagEntities, accountEntities } = getStateActions();
@@ -50,7 +51,7 @@ export const fetchPostsForLandingPage = async (): Promise<void> => {
     landingPage.set({ posts: "ERROR" });
     // @TODO-ZM: use Logger abstraction instead of console.log
     console.log("Error fetching posts for landing page", error);
-    // Sentry.captureException(error, { tags: { type: "WEB_FETCH" } });
+    Sentry.captureException(error, { tags: { type: "WEB_FETCH" } });
   }
 };
 
@@ -62,6 +63,6 @@ export const fetchPostCountForLandingPage = async (): Promise<void> => {
   } catch (error) {
     // @TODO-ZM: use Logger abstraction instead of console.log
     console.log("Error fetching post count for landing page", error);
-    // Sentry.captureException(error, { tags: { type: "WEB_FETCH" } });
+    Sentry.captureException(error, { tags: { type: "WEB_FETCH" } });
   }
 };

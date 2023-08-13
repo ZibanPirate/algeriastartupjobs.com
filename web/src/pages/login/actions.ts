@@ -5,6 +5,7 @@ import { CONFIRM_LOGIN_PAGE_URL } from "src/utils/urls/common";
 import { initialStateForConfirmLoginPage } from "../confirm-login/state";
 import { fetch } from "src/utils/fetch/fetch";
 import { viewTransitionSubscribeOnce } from "src/utils/animation/view-transition";
+import * as Sentry from "@sentry/react";
 
 export const login = async () => {
   const { loginPage, confirmLoginPage } = getStateActions();
@@ -28,8 +29,8 @@ export const login = async () => {
     getBrowserRouter().navigate(CONFIRM_LOGIN_PAGE_URL);
   } catch (error) {
     console.log("Error creating post", error);
-    // Sentry.captureException(error, { tags: { type: "WEB_FETCH" } });
-    loginPage.set({ login_status: "ERROR" });
     // @TODO-ZM: use Logger abstraction instead of console
+    Sentry.captureException(error, { tags: { type: "WEB_FETCH" } });
+    loginPage.set({ login_status: "ERROR" });
   }
 };

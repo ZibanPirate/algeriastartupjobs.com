@@ -11,6 +11,7 @@ import { fetch } from "src/utils/fetch/fetch";
 import { PostPageState } from "../post/state";
 import { getPostUrl } from "src/utils/urls/post-url";
 import { viewTransitionSubscribeOnce } from "src/utils/animation/view-transition";
+import * as Sentry from "@sentry/react";
 
 export const fetchAccountForCreatePostPage = async (): Promise<void> => {
   const { poster_contact } = getState().createPostPage;
@@ -32,8 +33,8 @@ export const fetchAccountForCreatePostPage = async (): Promise<void> => {
     // @TODO-ZM: set it to null when status is 404
     createPostPage.set({ poster: "ERROR" });
     // @TODO-ZM: use Logger abstraction instead of console.log
+    Sentry.captureException(error, { tags: { type: "WEB_FETCH" } });
     console.log("Error fetching posts for landing page", error);
-    // Sentry.captureException(error, { tags: { type: "WEB_FETCH" } });
   }
 };
 
@@ -53,6 +54,7 @@ const concurrentFetchTagsForCreatePostPage = async (): Promise<void> => {
       title,
     });
 
+    // @TODO-ZM: skip when tags array is empty
     createPostPage.set({ suggested_tags: data.tags });
 
     // update cache:
@@ -63,7 +65,7 @@ const concurrentFetchTagsForCreatePostPage = async (): Promise<void> => {
     createPostPage.set({ suggested_tags: "ERROR" });
     // @TODO-ZM: use Logger abstraction instead of console.log
     console.log("Error fetching suggested tags for create post page", error);
-    // Sentry.captureException(error, { tags: { type: "WEB_FETCH" } });
+    Sentry.captureException(error, { tags: { type: "WEB_FETCH" } });
   }
 };
 
@@ -124,10 +126,10 @@ export const createPostViaEmail = async (): Promise<void> => {
     confirmEmailPage.set({ ...initialStateForConfirmEmailPage, confirmation_id, post_id });
     getBrowserRouter().navigate(CONFIRM_EMAIL_PAGE_URL);
   } catch (error) {
-    console.log("Error creating post", error);
-    // Sentry.captureException(error, { tags: { type: "WEB_FETCH" } });
-    createPostPage.set({ creation_status: "ERROR" });
     // @TODO-ZM: use Logger abstraction instead of console
+    Sentry.captureException(error, { tags: { type: "WEB_FETCH" } });
+    console.log("Error creating post", error);
+    createPostPage.set({ creation_status: "ERROR" });
   }
 };
 
@@ -180,8 +182,8 @@ export const createPost = async (): Promise<void> => {
     accountEntities.upsertMany([data.poster]);
   } catch (error) {
     console.log("Error creating post", error);
-    // Sentry.captureException(error, { tags: { type: "WEB_FETCH" } });
-    createPostPage.set({ creation_status: "ERROR" });
     // @TODO-ZM: use Logger abstraction instead of console
+    Sentry.captureException(error, { tags: { type: "WEB_FETCH" } });
+    createPostPage.set({ creation_status: "ERROR" });
   }
 };

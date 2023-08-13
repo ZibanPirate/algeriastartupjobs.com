@@ -1,5 +1,6 @@
 import { fetch } from "../fetch/fetch";
 import { authSave } from "./save";
+import * as Sentry from "@sentry/react";
 
 export const authRefresh = async () => {
   try {
@@ -9,8 +10,8 @@ export const authRefresh = async () => {
 
     authSave(auth_token);
   } catch (error) {
-    console.log("Error refreshing auth token");
-    // Sentry.captureException(error, { tags: { type: "WEB_FETCH" } });
     // @TODO-ZM: use Logger abstraction instead of console
+    console.log("Error refreshing auth token");
+    Sentry.captureException(error, { tags: { type: "WEB_FETCH" } });
   }
 };

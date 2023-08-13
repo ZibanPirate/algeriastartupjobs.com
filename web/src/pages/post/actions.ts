@@ -6,6 +6,7 @@ import { PostPageState } from "./state";
 import { isLoaded } from "src/utils/loadable";
 import { TagEntity } from "src/state/entities/tag";
 import { fetch } from "src/utils/fetch/fetch";
+import * as Sentry from "@sentry/react";
 
 export const fetchPostForPostPage = async (postId: string): Promise<void> => {
   const { postPage, postEntities, tagEntities, accountEntities } = getStateActions();
@@ -51,7 +52,7 @@ export const fetchPostForPostPage = async (postId: string): Promise<void> => {
     postPage.set({ post: "ERROR" });
     // @TODO-ZM: use Logger abstraction instead of console.log
     console.log("Error fetching post for post page", error);
-    // Sentry.captureException(error, { tags: { type: "WEB_FETCH" } });
+    Sentry.captureException(error, { tags: { type: "WEB_FETCH" } });
   }
 };
 
@@ -99,6 +100,6 @@ export const fetchSimilarPostsForPostPage = async (postId: string): Promise<void
     postPage.set({ similarPosts: "ERROR" });
     // @TODO-ZM: use Logger abstraction instead of console.log
     console.log("Error fetching similar posts for post page", error);
-    // Sentry.captureException(error, { tags: { type: "WEB_FETCH" } });
+    Sentry.captureException(error, { tags: { type: "WEB_FETCH" } });
   }
 };

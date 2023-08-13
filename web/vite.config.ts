@@ -1,3 +1,4 @@
+import { sentryVitePlugin } from "@sentry/vite-plugin";
 import { defineConfig } from "vite";
 import vitePluginFaviconsInject from "vite-plugin-favicons-inject";
 import react from "@vitejs/plugin-react-swc";
@@ -14,6 +15,10 @@ export default defineConfig({
     ViteEjsPlugin(({ mode }) => ({ mode })),
     qrcode(),
     ViteImageOptimizer(),
+    sentryVitePlugin({
+      org: "algeria-startup-jobs-qh",
+      project: "web",
+    }),
   ],
   publicDir: "dist",
   resolve: {
@@ -28,5 +33,8 @@ export default defineConfig({
     postcss: {
       plugins: [autoprefixer()],
     },
+  },
+  define: {
+    APP_VERSION: JSON.stringify(require("./package.json").version),
   },
 });
