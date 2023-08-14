@@ -91,6 +91,8 @@ resource "digitalocean_droplet" "api" {
 
         [Service]
         ExecStart=sudo /home/${var.do_droplet_user}/${local.app_folder_name}/${local.app_name}
+        StandardOutput=syslog
+        SyslogIdentifier=${local.service_name}
         WorkingDirectory=/home/${var.do_droplet_user}/${local.app_folder_name}
         Restart=always
         RestartSec=5
