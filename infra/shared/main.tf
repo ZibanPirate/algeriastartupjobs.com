@@ -12,11 +12,12 @@ terraform {
 }
 
 locals {
-  root_domain_name      = "algeriastartupjobs.com"
-  is_shared_workspace   = terraform.workspace == "shared"
-  count                 = local.is_shared_workspace ? 1 : 0
-  contact_email_address = "contact@algeriastartupjobs.com"
-  api_root_domain_name  = "api.algeriastartupjobs.com"
+  root_domain_name        = "algeriastartupjobs.com"
+  is_shared_workspace     = terraform.workspace == "shared"
+  count                   = local.is_shared_workspace ? 1 : 0
+  contact_email_address   = "contact@algeriastartupjobs.com"
+  api_root_domain_name    = "api.algeriastartupjobs.com"
+  assets_root_domain_name = "assets.algeriastartupjobs.com"
   # @TODO-ZM: make this more generic
   email_dns_records = [
     { type : "MX", name : "", value : ["10 mx.zoho.com", "20 mx2.zoho.com", "50 mx3.zoho.com"] },
@@ -57,9 +58,9 @@ output "route53_zone_id" {
 
 resource "aws_acm_certificate" "website" {
   count                     = local.count
-  domain_name               = local.root_domain_name
+  domain_name               = local.assets_root_domain_name
   validation_method         = "DNS"
-  subject_alternative_names = ["staging.${local.root_domain_name}", "www.${local.root_domain_name}"]
+  subject_alternative_names = ["*.${local.assets_root_domain_name}"]
   lifecycle {
     create_before_destroy = true
   }
@@ -88,6 +89,11 @@ resource "aws_route53_record" "website" {
   zone_id         = aws_route53_zone.website[0].id
 }
 
+resource "aws_acm_certificate_validation" "website" {
+  certificate_arn         = aws_acm_certificate.website[0].arn
+  validation_record_fqdns = [for record in aws_route53_record.website : record.fqdn]
+  provider                = aws.virginia
+}
 
 resource "aws_route53_record" "email" {
   for_each = {
@@ -113,13 +119,6 @@ resource "aws_route53_record" "github" {
   type            = "TXT"
   zone_id         = aws_route53_zone.website[0].id
   records         = ["029060ef0f"]
-}
-
-
-resource "aws_acm_certificate_validation" "website" {
-  certificate_arn         = aws_acm_certificate.website[0].arn
-  validation_record_fqdns = [for record in aws_route53_record.website : record.fqdn]
-  provider                = aws.virginia
 }
 
 variable "do_api_key" {
@@ -171,8 +170,8 @@ resource "acme_registration" "api" {
 resource "acme_certificate" "api" {
   count                     = local.count
   account_key_pem           = acme_registration.api[0].account_key_pem
-  common_name               = local.api_root_domain_name
-  subject_alternative_names = ["*.${local.api_root_domain_name}"]
+  common_name               = local.root_domain_name
+  subject_alternative_names = ["*.${local.root_domain_name}", "*.${local.api_root_domain_name}"]
 
   dns_challenge {
     provider = "route53"

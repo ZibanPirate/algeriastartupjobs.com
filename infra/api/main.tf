@@ -46,18 +46,20 @@ variable "do_droplet_password" {
 }
 
 locals {
-  app_port           = "9090"
-  app_folder_name    = "asj"
-  app_folder         = "~/${local.app_folder_name}"
-  certificate_folder = "/etc/ssl/certs"
-  upload_tmp_name    = "~/upload_tmp"
-  app_name           = "algeriastartupjobs-api"
-  service_name       = "algeriastartupjobs-api"
-  db_service_name    = "algeriastartupjobs-db"
-  stage              = terraform.workspace
-  root_domain_name   = "api.algeriastartupjobs.com"
-  sub_domain_name    = local.stage
-  domain_name        = "${local.sub_domain_name}.${local.root_domain_name}"
+  app_port             = "9090"
+  app_folder_name      = "asj"
+  app_folder           = "~/${local.app_folder_name}"
+  certificate_folder   = "/etc/ssl/certs"
+  upload_tmp_name      = "~/upload_tmp"
+  app_name             = "algeriastartupjobs-api"
+  service_name         = "algeriastartupjobs-api"
+  db_service_name      = "algeriastartupjobs-db"
+  stage                = terraform.workspace
+  root_domain_name     = "api.algeriastartupjobs.com"
+  web_root_domain_name = "algeriastartupjobs.com"
+  sub_domain_name      = local.stage
+  domain_name          = "${local.sub_domain_name}.${local.root_domain_name}"
+  web_domain_name      = "${local.stage == "production" ? "www" : "staging"}.${local.web_root_domain_name}"
 }
 
 provider "digitalocean" {
@@ -133,6 +135,10 @@ resource "digitalocean_droplet" "api" {
               ssl_certificate_key ${local.certificate_folder}/${local.service_name}.key;
 
               location / {
+                  if (\$host != ${local.domain_name}) {
+                      rewrite ^(.*)\$ /web\$1 break;
+                  }
+
                   proxy_pass http://127.0.0.1:${local.app_port};
                   proxy_set_header Host \$host;
                   proxy_set_header X-Real-IP \$remote_addr;
@@ -167,7 +173,6 @@ resource "ssh_resource" "upload_ssl_certificates_to_vps" {
   ]
 }
 
-
 resource "digitalocean_project_resources" "api" {
   project = data.terraform_remote_state.shared.outputs.digitalocean_project_id
   resources = [
@@ -183,9 +188,27 @@ resource "aws_route53_record" "api" {
   records = [digitalocean_droplet.api.ipv4_address]
 }
 
+resource "aws_route53_record" "web" {
+  zone_id = data.terraform_remote_state.shared.outputs.route53_zone_id
+  name    = local.web_domain_name
+  type    = "A"
+  ttl     = "300"
+  records = [digitalocean_droplet.api.ipv4_address]
+}
+
+resource "aws_route53_record" "web-naked" {
+  count   = local.stage == "production" ? 1 : 0
+  zone_id = data.terraform_remote_state.shared.outputs.route53_zone_id
+  name    = local.web_root_domain_name
+  type    = "A"
+  ttl     = "300"
+  records = [digitalocean_droplet.api.ipv4_address]
+}
+
+
 resource "ssh_resource" "upload_dot_env_to_vps" {
   triggers = {
-    # always       = timestamp()
+    always       = timestamp()
     vps_id       = digitalocean_droplet.api.id
     dot_env_hash = filesha256("${path.module}/../../api/${local.stage}.env")
     app_hash     = filesha256("${path.module}/../../api/ubuntu-target/target/release/${local.app_name}")
@@ -205,7 +228,7 @@ resource "ssh_resource" "upload_dot_env_to_vps" {
 
 resource "ssh_resource" "upload_app_to_vps" {
   triggers = {
-    # always     = timestamp()
+    always     = timestamp()
     vps_id     = digitalocean_droplet.api.id
     dot_env_id = ssh_resource.upload_dot_env_to_vps.id
     app_hash   = filesha256("${path.module}/../../api/ubuntu-target/target/release/${local.app_name}")

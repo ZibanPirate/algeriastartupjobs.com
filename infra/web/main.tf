@@ -4,11 +4,11 @@ data "terraform_remote_state" "shared" {
 }
 
 locals {
-  stage            = terraform.workspace
-  root_domain_name = "algeriastartupjobs.com"
-  sub_domain_name  = local.stage == "production" ? "www" : local.stage
-  domainName       = "${local.sub_domain_name}.${local.root_domain_name}"
-  bucketName       = "${local.sub_domain_name}.${local.root_domain_name}"
+  stage                   = terraform.workspace
+  assets_root_domain_name = "assets.algeriastartupjobs.com"
+  sub_domain_name         = local.stage
+  domainName              = "${local.sub_domain_name}.${local.assets_root_domain_name}"
+  bucketName              = "${local.sub_domain_name}.${local.assets_root_domain_name}"
 }
 
 provider "aws" {
@@ -70,14 +70,6 @@ resource "aws_s3_bucket_policy" "website" {
   })
 }
 
-# https://stackoverflow.com/a/57457344
-resource "null_resource" "upload_website_to_s3" {
-  triggers = { always_run = "${timestamp()}" }
-  provisioner "local-exec" {
-    command = "aws s3 sync ${path.module}/../../web/dist s3://${aws_s3_bucket.website.id}"
-  }
-}
-
 resource "aws_cloudfront_distribution" "website" {
   origin {
     domain_name = aws_s3_bucket.website.bucket_regional_domain_name
@@ -89,13 +81,7 @@ resource "aws_cloudfront_distribution" "website" {
   default_root_object = "index.html"
   enabled             = true
   is_ipv6_enabled     = true
-  aliases             = local.stage == "production" ? [local.domainName, local.root_domain_name] : [local.domainName]
-  custom_error_response {
-    error_caching_min_ttl = 3000
-    error_code            = 404
-    response_code         = 200
-    response_page_path    = "/index.html"
-  }
+  aliases             = [local.domainName]
   default_cache_behavior {
     allowed_methods  = ["DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"]
     cached_methods   = ["GET", "HEAD"]
@@ -120,13 +106,19 @@ resource "aws_cloudfront_distribution" "website" {
 }
 
 resource "aws_route53_record" "website-a" {
-  count   = local.stage == "production" ? 2 : 1
   zone_id = data.terraform_remote_state.shared.outputs.route53_zone_id
-  name    = [local.domainName, local.root_domain_name][count.index]
+  name    = local.domainName
   type    = "A"
   alias {
     name                   = aws_cloudfront_distribution.website.domain_name
     zone_id                = aws_cloudfront_distribution.website.hosted_zone_id
     evaluate_target_health = false
+  }
+}
+
+resource "null_resource" "upload_website_to_s3" {
+  triggers = { always_run = "${timestamp()}" }
+  provisioner "local-exec" {
+    command = "aws s3 sync ${path.module}/../../web/dist s3://${aws_s3_bucket.website.id}"
   }
 }
