@@ -87,7 +87,13 @@ export const Page: FC = () => {
             </Button>
           </Stack>
         ) : (
-          <Stack orientation="horizontal" gap="1" margin="0 1" align="stretch" animation={true}>
+          <Stack
+            orientation="horizontal"
+            gap="1"
+            margin="0 1"
+            align="stretch"
+            animation={!!posts?.length}
+          >
             {posts ? (
               posts.length > 0 ? (
                 posts.map((post) => <PostCard key={post.id} post={post} />)

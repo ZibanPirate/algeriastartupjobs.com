@@ -12,6 +12,7 @@ import { PostPageState } from "../post/state";
 import { getPostUrl } from "src/utils/urls/post-url";
 import { viewTransitionSubscribeOnce } from "src/utils/animation/view-transition";
 import * as Sentry from "@sentry/react";
+import { AxiosError } from "axios";
 
 export const fetchAccountForCreatePostPage = async (): Promise<void> => {
   const { poster_contact } = getState().createPostPage;
@@ -54,14 +55,15 @@ const concurrentFetchTagsForCreatePostPage = async (): Promise<void> => {
       title,
     });
 
-    // @TODO-ZM: skip when tags array is empty
+    if (!data.tags.length) return;
+
     createPostPage.set({ suggested_tags: data.tags });
 
     // update cache:
     tagEntities.upsertMany(data.tags);
   } catch (error) {
-    // @TODO-ZM: set it to null when status is 404
-    // @TODO-ZM: skip when 429
+    if ((error as AxiosError)?.status === 429) return;
+
     createPostPage.set({ suggested_tags: "ERROR" });
     // @TODO-ZM: use Logger abstraction instead of console.log
     console.log("Error fetching suggested tags for create post page", error);
