@@ -329,6 +329,16 @@ pub async fn create_one_post_with_poster(
     poster_id = existing_poster.unwrap().id;
   }
 
+  let compact_tags = app_state
+    .tag_repository
+    .get_many_compact_tags_by_ids(&body.post.tag_ids)
+    .await;
+  if !compact_tags.is_ok() {
+    // @TODO-ZM: log error reason
+    return StatusCode::INTERNAL_SERVER_ERROR.into_response();
+  }
+  let compact_tags = compact_tags.unwrap();
+
   let post_id = app_state
     .post_repository
     .create_one_post(&DBPost {
@@ -343,6 +353,7 @@ pub async fn create_one_post_with_poster(
         .take(20)
         .collect::<Vec<&str>>()
         .join(" "),
+      tag_ids: compact_tags.iter().map(|tag| tag.id).collect::<Vec<u32>>(),
       ..body.post.clone()
     })
     .await;
@@ -590,6 +601,16 @@ pub async fn create_one_post(
     }
   }
 
+  let compact_tags = app_state
+    .tag_repository
+    .get_many_compact_tags_by_ids(&body.post.tag_ids)
+    .await;
+  if !compact_tags.is_ok() {
+    // @TODO-ZM: log error reason
+    return StatusCode::INTERNAL_SERVER_ERROR.into_response();
+  }
+  let compact_tags = compact_tags.unwrap();
+
   let post_id = app_state
     .post_repository
     .create_one_post(&DBPost {
@@ -605,6 +626,7 @@ pub async fn create_one_post(
         .collect::<Vec<&str>>()
         .join(" "),
       published_at: chrono::Utc::now().to_rfc3339(),
+      tag_ids: compact_tags.iter().map(|tag| tag.id).collect::<Vec<u32>>(),
       ..body.post.clone()
     })
     .await;
@@ -647,16 +669,6 @@ pub async fn create_one_post(
     return StatusCode::INTERNAL_SERVER_ERROR.into_response();
   }
   let poster = poster.unwrap();
-
-  let compact_tags = app_state
-    .tag_repository
-    .get_many_compact_tags_by_ids(&post.tag_ids)
-    .await;
-  if !compact_tags.is_ok() {
-    // @TODO-ZM: log error reason
-    return StatusCode::INTERNAL_SERVER_ERROR.into_response();
-  }
-  let compact_tags = compact_tags.unwrap();
 
   Json(json!({
       "post": post,
