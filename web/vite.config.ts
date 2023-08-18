@@ -6,9 +6,10 @@ import { ViteEjsPlugin } from "vite-plugin-ejs";
 import { qrcode } from "vite-plugin-qrcode";
 import autoprefixer from "autoprefixer";
 import { ViteImageOptimizer } from "vite-plugin-image-optimizer";
+import ogPlugin from "vite-plugin-open-graph";
 
 // https://vitejs.dev/config/
-export default defineConfig(({ mode }) => ({
+export default defineConfig(({ mode: stage }) => ({
   plugins: [
     react(),
     vitePluginFaviconsInject("./src/assets/svg/logo-square.svg"),
@@ -19,8 +20,15 @@ export default defineConfig(({ mode }) => ({
       org: "algeria-startup-jobs-qh",
       project: "web",
     }),
+    ogPlugin({
+      basic: {
+        title: "{{HTML_TITLE}}",
+        description: "{{HTML_DESCRIPTION}}",
+        image: "{{HTML_IMAGE}}",
+      },
+    }),
   ],
-  base: mode === "development" ? "/" : `https://${mode}.assets.algeriastartupjobs.com/`,
+  base: stage === "development" ? "/" : `https://${stage}.assets.algeriastartupjobs.com/`,
   publicDir: "dist",
   resolve: {
     alias: {

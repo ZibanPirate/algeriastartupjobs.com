@@ -29,7 +29,7 @@ import { fetchAccountForMePage } from "../me/actions";
 import { Skeleton } from "src/components/skeleton";
 
 export const Page: FC = () => {
-  usePageTitle("Post a job ad for free!");
+  usePageTitle("Post a job ad for free");
 
   const {
     title,
