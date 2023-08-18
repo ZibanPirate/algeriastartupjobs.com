@@ -37,6 +37,7 @@ jsonwebtoken = "8.3.0"
 sentry = { version = "0.31.5", features = ["tracing", "tower", "tower-http"] }
 sentry-tracing = "0.31.5"
 sentry-tower = "0.31.5"
+sitewriter = "1.0.2"
 
 [dev-dependencies]
 cargo-watch = "8.4.0"

@@ -1,14 +1,14 @@
-use std::fs;
-
+use crate::{_entry::state::AppState, _utils::post_url::get_post_url};
 use axum::{
   extract::{Path, State},
+  headers::ContentType,
   response::{Html, IntoResponse},
-  Json, Router,
+  Router, TypedHeader,
 };
+use hyper::StatusCode;
 use serde::Deserialize;
-use serde_json::json;
-
-use crate::_entry::state::AppState;
+use sitewriter::{UrlEntry, UrlEntryBuilder};
+use std::fs;
 
 #[derive(Deserialize)]
 pub struct EmailQuery {
@@ -66,9 +66,72 @@ pub async fn fallback(
   .into_response()
 }
 
+pub async fn sitemap(State(app_state): State<AppState>) -> impl IntoResponse {
+  // @TODO-ZM: fetch post count
+  let count = 1_000_000;
+  let mut url_string = vec![];
+
+  url_string.extend(vec!["/".to_string(), "/post_a_job_ad_for_free".to_string()]);
+
+  let all_posts = app_state
+    .post_repository
+    .get_many_compact_posts_by_filter("true", "", count, 0)
+    .await;
+  if all_posts.is_err() {
+    // @TODO-ZM: log error
+    return StatusCode::INTERNAL_SERVER_ERROR.into_response();
+  }
+  let all_posts = all_posts.unwrap();
+
+  // post_ids dedup
+  let poster_ids = all_posts
+    .iter()
+    .map(|post| post.poster_id)
+    .collect::<Vec<u32>>();
+  let posters = app_state
+    .account_repository
+    .get_many_compact_accounts_by_ids(poster_ids)
+    .await;
+  if posters.is_err() {
+    // @TODO-ZM: log error
+    return StatusCode::INTERNAL_SERVER_ERROR.into_response();
+  }
+  let posters = posters.unwrap();
+
+  for post in all_posts {
+    url_string.push(get_post_url(
+      &post,
+      &posters
+        .iter()
+        .find(|poster| poster.id == post.poster_id)
+        .unwrap(),
+    ));
+  }
+
+  // @TODO-ZM: add other info to sitemap urls, like frequency, priority, etc.
+  let urls = url_string
+    .iter()
+    .map(|url| {
+      UrlEntryBuilder::default()
+        .loc(
+          format!("https://www.algeriastartupjobs.com{}", url)
+            .parse()
+            .unwrap(),
+        )
+        .build()
+        .unwrap()
+    })
+    .collect::<Vec<UrlEntry>>();
+
+  let xml_content = sitewriter::generate_str(&urls);
+
+  (TypedHeader(ContentType::xml()), xml_content).into_response()
+}
+
 pub fn create_web_router() -> Router<AppState> {
   Router::new()
     .route("/", axum::routing::get(index))
     .route("/jobs/:job_slug", axum::routing::get(jobs))
+    .route("/sitemap.xml", axum::routing::get(sitemap))
     .route("/*path", axum::routing::get(fallback))
 }
