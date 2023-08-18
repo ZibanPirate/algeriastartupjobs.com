@@ -135,6 +135,9 @@ resource "digitalocean_droplet" "api" {
               ssl_certificate_key ${local.certificate_folder}/${local.service_name}.key;
 
               location / {
+                  if (\$host = ${local.web_root_domain_name}) {
+                      return 301 https://www.${local.web_root_domain_name}\$request_uri;
+                  }
                   if (\$host != ${local.domain_name}) {
                       rewrite ^(.*)\$ /web/\$1 break;
                   }
