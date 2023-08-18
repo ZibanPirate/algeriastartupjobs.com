@@ -46,7 +46,7 @@
     {
       "label": "terraform web staging",
       "type": "shell",
-      "command": "TF_WORKSPACE=staging terraform apply -auto-approve",
+      "command": "TF_WORKSPACE=staging terraform apply -auto-approve -var-file=\"secret.tfvars\"",
       "problemMatcher": [],
       "options": { "cwd": "${workspaceFolder}/infra/web" },
       "dependsOn": ["build web staging", "terraform shared"]
@@ -54,7 +54,7 @@
     {
       "label": "terraform web production",
       "type": "shell",
-      "command": "TF_WORKSPACE=production terraform apply -auto-approve",
+      "command": "TF_WORKSPACE=production terraform apply -auto-approve -var-file=\"secret.tfvars\"",
       "problemMatcher": [],
       "options": { "cwd": "${workspaceFolder}/infra/web" },
       "dependsOn": ["build web production", "terraform shared"]

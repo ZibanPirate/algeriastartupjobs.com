@@ -23,6 +23,7 @@ pub struct Config {
   pub kv_db_dir: String,
   pub ai_service_auth_token: String,
   pub jwt_secret: String,
+  pub html_path: String,
 }
 
 pub struct ConfigService {}
@@ -62,6 +63,7 @@ impl ConfigService {
       ai_service_auth_token: std::env::var("AI_SERVICE_AUTH_TOKEN")
         .expect("AI_SERVICE_AUTH_TOKEN env variable is missing!"),
       jwt_secret: std::env::var("JWT_SECRET").expect("JWT_SECRET env variable is missing!"),
+      html_path: std::env::var("HTML_PATH").expect("HTML_PATH env variable is missing!"),
     }
   }
 }

@@ -5,14 +5,25 @@ data "terraform_remote_state" "shared" {
 
 locals {
   stage                   = terraform.workspace
+  root_domain_name        = "algeriastartupjobs.com"
   assets_root_domain_name = "assets.algeriastartupjobs.com"
   sub_domain_name         = local.stage
   domainName              = "${local.sub_domain_name}.${local.assets_root_domain_name}"
   bucketName              = "${local.sub_domain_name}.${local.assets_root_domain_name}"
+  api_app_folder_name     = "asj"
+  api_app_folder          = "/home/${var.do_droplet_user}/${local.api_app_folder_name}"
 }
 
 provider "aws" {
   region = "eu-west-1"
+}
+
+terraform {
+  required_providers {
+    ssh = {
+      source = "loafoe/ssh"
+    }
+  }
 }
 
 resource "aws_cloudfront_origin_access_identity" "website" {}
@@ -20,6 +31,17 @@ resource "aws_cloudfront_origin_access_identity" "website" {}
 resource "aws_s3_bucket" "website" {
   bucket        = local.bucketName
   force_destroy = true
+}
+
+resource "aws_s3_bucket_cors_configuration" "website" {
+  bucket = aws_s3_bucket.website.id
+  cors_rule {
+    allowed_origins = [local.root_domain_name, "*.${local.root_domain_name}"]
+    allowed_methods = ["GET", "HEAD"]
+    allowed_headers = ["*"]
+    expose_headers  = ["ETag"]
+    max_age_seconds = 3000
+  }
 }
 
 resource "aws_s3_bucket_ownership_controls" "website" {
@@ -70,6 +92,40 @@ resource "aws_s3_bucket_policy" "website" {
   })
 }
 
+resource "aws_cloudfront_cache_policy" "website" {
+  name        = "${local.stage}_aws_cloudfront_cache_policy"
+  default_ttl = 3600
+  min_ttl     = 0
+  max_ttl     = 86400
+  parameters_in_cache_key_and_forwarded_to_origin {
+    cookies_config {
+      cookie_behavior = "none"
+    }
+    query_strings_config {
+      query_string_behavior = "none"
+    }
+    headers_config {
+      header_behavior = "none"
+    }
+  }
+}
+
+resource "aws_cloudfront_origin_request_policy" "website" {
+  name = "${local.stage}_aws_cloudfront_origin_request_policy"
+  cookies_config {
+    cookie_behavior = "all"
+  }
+  headers_config {
+    header_behavior = "whitelist"
+    headers {
+      items = ["Origin"]
+    }
+  }
+  query_strings_config {
+    query_string_behavior = "all"
+  }
+}
+
 resource "aws_cloudfront_distribution" "website" {
   origin {
     domain_name = aws_s3_bucket.website.bucket_regional_domain_name
@@ -83,17 +139,15 @@ resource "aws_cloudfront_distribution" "website" {
   is_ipv6_enabled     = true
   aliases             = [local.domainName]
   default_cache_behavior {
-    allowed_methods  = ["DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"]
-    cached_methods   = ["GET", "HEAD"]
-    target_origin_id = "S3-${aws_s3_bucket.website.bucket}"
-    forwarded_values {
-      query_string = true
-      cookies { forward = "none" }
-    }
-    viewer_protocol_policy = "redirect-to-https"
-    min_ttl                = 0
-    default_ttl            = 3600
-    max_ttl                = 86400
+    allowed_methods          = ["DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"]
+    cached_methods           = ["GET", "HEAD"]
+    target_origin_id         = "S3-${aws_s3_bucket.website.bucket}"
+    origin_request_policy_id = aws_cloudfront_origin_request_policy.website.id
+    cache_policy_id          = aws_cloudfront_cache_policy.website.id
+    viewer_protocol_policy   = "redirect-to-https"
+    min_ttl                  = 0
+    default_ttl              = 3600
+    max_ttl                  = 86400
   }
   price_class = "PriceClass_100"
   restrictions {
@@ -121,4 +175,38 @@ resource "null_resource" "upload_website_to_s3" {
   provisioner "local-exec" {
     command = "aws s3 sync ${path.module}/../../web/dist s3://${aws_s3_bucket.website.id}"
   }
+}
+
+data "terraform_remote_state" "api" {
+  backend = "local"
+  config  = { path = "${path.module}/../api/terraform.tfstate.d/${local.stage}/terraform.tfstate" }
+}
+
+variable "do_ssh_key" {
+  description = "The private SSH key for the DigitalOcean droptlet"
+  type        = string
+  sensitive   = true
+}
+
+variable "do_droplet_user" {
+  description = "The user for the DigitalOcean droplet"
+  type        = string
+  sensitive   = true
+}
+
+resource "ssh_resource" "upload_html_to_vps" {
+  triggers = {
+    always = timestamp()
+  }
+
+  host        = data.terraform_remote_state.api.outputs.digitalocean_droplet_api_ipv4_address
+  user        = var.do_droplet_user
+  private_key = var.do_ssh_key
+  timeout     = "1m"
+
+  pre_commands = [
+    "sudo touch ${local.api_app_folder}/index.html",
+    "sudo sh -c \"echo '${filebase64("${path.module}/../../web/dist/index.html")}' > ${local.api_app_folder}/index-base64.html\"",
+    "sudo sh -c \"base64 -d ${local.api_app_folder}/index-base64.html > ${local.api_app_folder}/index.html\""
+  ]
 }

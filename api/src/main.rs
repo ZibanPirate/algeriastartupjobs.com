@@ -11,6 +11,7 @@ mod search;
 mod security;
 mod tag;
 mod task;
+mod web;
 
 use _entry::app::actual_main;
 

@@ -8,7 +8,7 @@ import autoprefixer from "autoprefixer";
 import { ViteImageOptimizer } from "vite-plugin-image-optimizer";
 
 // https://vitejs.dev/config/
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
   plugins: [
     react(),
     vitePluginFaviconsInject("./src/assets/svg/logo-square.svg"),
@@ -20,6 +20,7 @@ export default defineConfig({
       project: "web",
     }),
   ],
+  base: mode === "development" ? "/" : `https://${mode}.assets.algeriastartupjobs.com/`,
   publicDir: "dist",
   resolve: {
     alias: {
@@ -37,4 +38,4 @@ export default defineConfig({
   define: {
     APP_VERSION: JSON.stringify(require("./package.json").version),
   },
-});
+}));

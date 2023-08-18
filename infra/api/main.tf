@@ -136,7 +136,7 @@ resource "digitalocean_droplet" "api" {
 
               location / {
                   if (\$host != ${local.domain_name}) {
-                      rewrite ^(.*)\$ /web\$1 break;
+                      rewrite ^(.*)\$ /web/\$1 break;
                   }
 
                   proxy_pass http://127.0.0.1:${local.app_port};
@@ -154,6 +154,11 @@ resource "digitalocean_droplet" "api" {
       - sudo systemctl start ${local.db_service_name}
       - sudo systemctl start ${local.service_name}
     EOT
+}
+
+output "digitalocean_droplet_api_ipv4_address" {
+  value     = digitalocean_droplet.api.ipv4_address
+  sensitive = true
 }
 
 resource "ssh_resource" "upload_ssl_certificates_to_vps" {
