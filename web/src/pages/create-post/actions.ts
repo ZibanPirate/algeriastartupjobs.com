@@ -71,7 +71,9 @@ const concurrentFetchTagsForCreatePostPage = async (): Promise<void> => {
   }
 };
 
-export const fetchTagsForCreatePostPage = onceAtATime(concurrentFetchTagsForCreatePostPage);
+export const fetchTagsForCreatePostPage = onceAtATime(concurrentFetchTagsForCreatePostPage, {
+  runLastCall: true,
+});
 
 export const createPostViaEmail = async (): Promise<void> => {
   const { createPostPage, confirmEmailPage } = getStateActions();

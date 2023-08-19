@@ -1,6 +1,6 @@
 use axum::{
   extract::State,
-  response::sse::{Event, KeepAlive, Sse},
+  response::sse::{Event, Sse},
   Router,
 };
 use futures_util::stream::{self, Stream};
@@ -17,7 +17,8 @@ pub async fn import_status(
   let stream = stream::iter(vec![
     Event::default().data(r#"{"status": "FETCHING"}"#),
     Event::default().data(r#"{"status": "PROCESSING"}"#),
-    Event::default().data(r#"{"status": "DONE"}"#),
+    Event::default().data(r#"{"status": "DONE", "draft_id":0}"#),
+    // Event::default().data(r#"{"status": "ERROR"}"#),
   ])
   .map(Ok)
   .throttle(Duration::from_secs(1));

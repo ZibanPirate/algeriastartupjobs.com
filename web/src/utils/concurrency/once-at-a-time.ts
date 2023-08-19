@@ -1,4 +1,11 @@
-export const onceAtATime = <T extends (...args: any[]) => Promise<void>>(func: T): T => {
+type OnceAtATimeOptions = {
+  runLastCall?: boolean;
+};
+
+export const onceAtATime = <T extends (...args: any[]) => Promise<void>>(
+  func: T,
+  { runLastCall = false }: OnceAtATimeOptions = { runLastCall: false }
+): T => {
   let running = false;
   let latestArgs: Parameters<T> | null = null;
   return async function (...args: Parameters<T>): Promise<void> {
@@ -9,7 +16,7 @@ export const onceAtATime = <T extends (...args: any[]) => Promise<void>>(func: T
     running = true;
     await func(...args);
     running = false;
-    if (latestArgs) {
+    if (latestArgs && runLastCall) {
       await func(...latestArgs);
       latestArgs = null;
     }

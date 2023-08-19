@@ -3,13 +3,13 @@ import { Link } from "src/components/link";
 import { Stack } from "src/components/stack";
 import { Text } from "src/components/text";
 import { usePageTitle } from "src/utils/hooks/page-title";
-
 import { Icon } from "src/components/icon";
-import { CREATE_POST_PAGE_URL, IMPORTED_PAGE_URL, POST_PAGE_URL } from "src/utils/urls/common";
+import { CREATE_POST_PAGE_URL } from "src/utils/urls/common";
 import { Input } from "src/components/input";
 import { useSliceSelector } from "src/utils/state/selector";
 import { getStateActions } from "src/state";
 import { Button } from "src/components/button";
+import { importFromURL } from "./actions";
 
 export const Page: FC = () => {
   usePageTitle("Import your job post from other platforms");
@@ -39,11 +39,9 @@ export const Page: FC = () => {
         />
         <Stack orientation="vertical" align="center" stretch>
           <Stack orientation="horizontal" align="center" gap="1">
-            <Link variant="v4" to={`${IMPORTED_PAGE_URL}?url=${url}`}>
-              <Button variant="v3" vtName="new-post">
-                Import now
-              </Button>
-            </Link>
+            <Button variant="v3" vtName="new-post" onClick={importFromURL}>
+              Import now
+            </Button>
           </Stack>
         </Stack>
       </Stack>

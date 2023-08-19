@@ -9,6 +9,7 @@ import {
   CONFIRM_LOGIN_PAGE_URL,
   CREATE_POST_PAGE_URL,
   IMPORT_PAGE_URL,
+  IMPORT_STATUS_PAGE_URL,
   LOGIN_PAGE_URL,
   ME_PAGE_URL,
   POST_PAGE_URL,
@@ -68,6 +69,7 @@ export const App: FC = () => {
         <Route path={CONFIRM_LOGIN_PAGE_URL} Component={pageToRenderSetter("confirm-login")} />
         <Route path={ME_PAGE_URL} Component={pageToRenderSetter("me")} />
         <Route path={IMPORT_PAGE_URL} Component={pageToRenderSetter("import")} />
+        <Route path={IMPORT_STATUS_PAGE_URL} Component={pageToRenderSetter("import-status")} />
         <Route path="*" Component={pageToRenderSetter("404")} />
       </SentryRoutes>
       {LazyPages[currentPage]}

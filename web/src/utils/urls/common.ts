@@ -5,3 +5,5 @@ export const LOGIN_PAGE_URL = "/login" as const;
 export const CONFIRM_LOGIN_PAGE_URL = "/confirm_your_login" as const;
 export const ME_PAGE_URL = "/me" as const;
 export const IMPORT_PAGE_URL = "/import" as const;
+export const IMPORT_STATUS_PAGE_URL = "/import_status" as const;
+export const DRAFT_PAGE_URL = "/draft" as const;

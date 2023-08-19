@@ -6,7 +6,7 @@ import { authVerify } from "src/utils/auth/verify";
 import { authRevoke } from "../auth/revoke";
 import { authRefresh } from "../auth/refresh";
 
-const fetch = axios.create({
+export const fetch = axios.create({
   baseURL: getConfig().api.base_url,
 });
 
@@ -38,5 +38,3 @@ fetch.interceptors.response.use(
 authSubscribe(setupAuth);
 setupAuth();
 if (authVerify()) authRefresh();
-
-export { fetch };
