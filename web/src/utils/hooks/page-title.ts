@@ -1,10 +1,19 @@
 import { useEffect } from "react";
 
+interface UsePageTitleOptions {
+  suffix?: string;
+  enabled?: boolean;
+}
+
 export const usePageTitle = (
   title: string,
-  suffix = " | Algeria Startup Jobs"
+  { enabled = true, suffix = " | Algeria Startup Jobs" }: UsePageTitleOptions = {
+    suffix: " | Algeria Startup Jobs",
+    enabled: true,
+  }
 ) => {
   useEffect(() => {
-    document.title = title + suffix;
-  }, [title]);
+    if (!enabled) return;
+    document.title = `🇩🇿 ${title}${suffix}`;
+  }, [title, enabled, suffix]);
 };

@@ -42,7 +42,7 @@ fn read_html(
   let file_content = file_content
     .replace(
       "{{HTML_TITLE}}",
-      format!("{} | Algeria Startup Jobs", &title).as_str(),
+      format!("🇩🇿 {} | Algeria Startup Jobs", &title).as_str(),
     )
     .replace("{{HTML_DESCRIPTION}}", &description)
     .replace("{{HTML_IMAGE}}", &image);
@@ -234,7 +234,7 @@ pub fn create_web_router() -> Router<AppState> {
     .route("/jobs/*job_slug", axum::routing::get(jobs))
     .route("/post_a_job_ad_for_free", axum::routing::get(create))
     // @TODO-ZM: add robot.txt route
-    .route("/import/*url", axum::routing::get(import))
+    .route("/import", axum::routing::get(import))
     .route("/sitemap.xml", axum::routing::get(sitemap))
     .route("/*path", axum::routing::get(fallback))
 }
