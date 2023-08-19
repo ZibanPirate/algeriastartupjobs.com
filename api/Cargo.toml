@@ -7,7 +7,7 @@ repository = "https://github.com/algeriastartupjobs/algeriastartupjobs.com"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-axum = { version = "0.6.16", features = ["headers"] }
+axum = { version = "0.6.20", features = ["headers"] }
 hyper = { version = "0.14.26", features = ["full"] }
 serde = { version = "1", features = ["derive"] }
 tokio = { version = "1.27.0", features = ["full"] }
@@ -38,6 +38,9 @@ sentry = { version = "0.31.5", features = ["tracing", "tower", "tower-http"] }
 sentry-tracing = "0.31.5"
 sentry-tower = "0.31.5"
 sitewriter = "1.0.2"
+futures-util = "0.3.28"
+tokio-stream = "0.1.14"
+fs = "0.0.5"
 
 [dev-dependencies]
 cargo-watch = "8.4.0"
