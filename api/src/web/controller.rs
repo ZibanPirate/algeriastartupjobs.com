@@ -40,7 +40,10 @@ fn read_html(
   let file_content = file_content.unwrap();
 
   let file_content = file_content
-    .replace("{{HTML_TITLE}}", &title)
+    .replace(
+      "{{HTML_TITLE}}",
+      format!("{} | Algeria Startup Jobs", &title).as_str(),
+    )
     .replace("{{HTML_DESCRIPTION}}", &description)
     .replace("{{HTML_IMAGE}}", &image);
 
@@ -55,7 +58,7 @@ fn return404(app_state: &AppState) -> impl IntoResponse {
         "{}/index.html",
         app_state.config_service.get_config().html_path
       ),
-      title: "404 - Page Not Found | Algeria Startup Jobs".to_string(),
+      title: "404 - Page Not Found".to_string(),
       description: "You are in the wrong place".to_string(),
       image: "https://images.unsplash.com/photo-1555861496-0666c8981751?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&h=630&q=80".to_string(),
     })),
@@ -68,7 +71,7 @@ pub async fn index(State(app_state): State<AppState>) -> impl IntoResponse {
       "{}/index.html",
       app_state.config_service.get_config().html_path,
     ),
-    title: "Join a startup in Algeria | Algeria Startup Jobs".to_string(),
+    title: "Join a startup in Algeria".to_string(),
     description: "Algeria Startup Jobs is a job board for startups in Algeria".to_string(),
     image: format!(
       "https://{}.assets.algeriastartupjobs.com/assets/apple-touch-startup-image-1136x640.png",
@@ -132,7 +135,7 @@ pub async fn create(State(app_state): State<AppState>) -> impl IntoResponse {
       "{}/index.html",
       app_state.config_service.get_config().html_path
     ),
-    title: "Post a job ad for free | Algeria Startup Jobs".to_string(),
+    title: "Post a job ad for free".to_string(),
     description: "Free job board for startups in Algeria".to_string(),
     image: format!(
       "https://{}.assets.algeriastartupjobs.com/assets/apple-touch-startup-image-1136x640.png",
@@ -215,7 +218,7 @@ pub async fn import(State(app_state): State<AppState>) -> impl IntoResponse {
       "{}/index.html",
       app_state.config_service.get_config().html_path
     ),
-    title: "Import your job post from other platforms | Algeria Startup Jobs".to_string(),
+    title: "Import your job post from other platforms".to_string(),
     description: "Free job board for startups in Algeria".to_string(),
     image: format!(
       "https://{}.assets.algeriastartupjobs.com/assets/apple-touch-startup-image-1136x640.png",

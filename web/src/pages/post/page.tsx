@@ -45,7 +45,9 @@ export const Page: FC = () => {
 
   const { post, similarPosts } = useSliceSelector("postPage");
   const loadedPost = isLoaded(post);
-  usePageTitle(loadedPost ? getPostLongTitle(loadedPost, loadedPost.poster) : "Loading Job...");
+  usePageTitle(loadedPost ? getPostLongTitle(loadedPost, loadedPost.poster) : "Loading Job...", {
+    enabled: !!loadedPost,
+  });
   const isSmallScreen = useMediaQuery("(max-width: 700px)");
 
   return (
