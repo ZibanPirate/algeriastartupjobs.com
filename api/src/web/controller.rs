@@ -20,7 +20,6 @@ pub struct EmailQuery {
 
 struct ReadHtmlParam {
   pub file_name: String,
-  // @TODO-ZM: add title, description, image
   pub title: String,
   pub description: String,
   pub image: String,
@@ -83,7 +82,6 @@ pub async fn jobs(
   Path(job_slug): Path<String>,
   State(app_state): State<AppState>,
 ) -> impl IntoResponse {
-  // [slug]_[...other slugs]_[post_id]
   let post_id = job_slug.split("_").last();
   if post_id.is_none() {
     return return404(&app_state).into_response();
@@ -108,8 +106,6 @@ pub async fn jobs(
     return return404(&app_state).into_response();
   }
   let poster = poster.unwrap();
-
-  // @TODO-ZM: add open-graph meta tags
 
   Html(read_html(ReadHtmlParam {
     file_name: format!(
@@ -151,8 +147,13 @@ pub async fn sitemap(State(app_state): State<AppState>) -> impl IntoResponse {
   let count = 1_000_000;
   let mut url_string = vec![];
 
-  url_string.extend(vec!["/".to_string(), "/post_a_job_ad_for_free".to_string()]);
+  url_string.extend(vec![
+    "/".to_string(),
+    "/post_a_job_ad_for_free".to_string(),
+    "/import".to_string(),
+  ]);
 
+  // @TODO-ZM: fetch only published posts
   let all_posts = app_state
     .post_repository
     .get_many_compact_posts_by_filter("true", "", count, 0)
@@ -208,11 +209,29 @@ pub async fn sitemap(State(app_state): State<AppState>) -> impl IntoResponse {
   (TypedHeader(ContentType::xml()), xml_content).into_response()
 }
 
+pub async fn import(State(app_state): State<AppState>) -> impl IntoResponse {
+  Html(read_html(ReadHtmlParam {
+    file_name: format!(
+      "{}/index.html",
+      app_state.config_service.get_config().html_path
+    ),
+    title: "Import your job post from other platforms | Algeria Startup Jobs".to_string(),
+    description: "Free job board for startups in Algeria".to_string(),
+    image: format!(
+      "https://{}.assets.algeriastartupjobs.com/assets/apple-touch-startup-image-1136x640.png",
+      app_state.config_service.get_config().stage.as_str()
+    ),
+  }))
+  .into_response()
+}
+
 pub fn create_web_router() -> Router<AppState> {
   Router::new()
     .route("/", axum::routing::get(index))
     .route("/jobs/*job_slug", axum::routing::get(jobs))
     .route("/post_a_job_ad_for_free", axum::routing::get(create))
+    // @TODO-ZM: add robot.txt route
+    .route("/import/*url", axum::routing::get(import))
     .route("/sitemap.xml", axum::routing::get(sitemap))
     .route("/*path", axum::routing::get(fallback))
 }

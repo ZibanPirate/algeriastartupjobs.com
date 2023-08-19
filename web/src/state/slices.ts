@@ -9,3 +9,4 @@ export { confirmEmailPage } from "src/pages/confirm-email/state";
 export { loginPage } from "src/pages/login/state";
 export { confirmLoginPage } from "src/pages/confirm-login/state";
 export { mePage } from "src/pages/me/state";
+export { importPage } from "src/pages/import/state";

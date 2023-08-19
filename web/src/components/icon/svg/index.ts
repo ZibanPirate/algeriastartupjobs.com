@@ -7,3 +7,4 @@ export * as success from "./success.svg";
 export * as addTag from "./add-tag.svg";
 export * as removeTag from "./remove-tag.svg";
 export * as login from "./login.svg";
+export * as import from "./import.svg";

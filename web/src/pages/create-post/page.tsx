@@ -20,7 +20,7 @@ import {
 } from "./actions";
 import { isLoaded } from "src/utils/loadable";
 import { getAccountName } from "src/utils/models/account-name";
-import { POST_PAGE_URL } from "src/utils/urls/common";
+import { IMPORT_PAGE_URL, POST_PAGE_URL } from "src/utils/urls/common";
 import { DebouncedValueRichInput } from "src/components/rich-input/debounced-value";
 import { Tag } from "src/components/tag";
 import { useMediaQuery } from "src/utils/hooks/use-media-query";
@@ -156,9 +156,18 @@ export const Page: FC = () => {
   return (
     <Stack orientation="vertical" fullWidth align="start" maxWidth={600} margin="auto">
       {/* Header */}
-      <Stack orientation="vertical" margin="1 0 0" stretch={true} align="start">
+      <Stack
+        orientation="horizontal"
+        margin="1 0 0"
+        stretch={true}
+        align="center"
+        justifyContent="space-between"
+      >
         <Link variant="v4" back={POST_PAGE_URL} to={"/"} vtName="back">
           <Icon variant="v4" name="back" /> Back
+        </Link>
+        <Link variant="v4" to={IMPORT_PAGE_URL} vtName="import">
+          <Icon variant="v4" name="import" /> Import via URL
         </Link>
       </Stack>
       {/* Create Post */}
