@@ -134,6 +134,8 @@ resource "digitalocean_droplet" "api" {
               ssl_certificate ${local.certificate_folder}/${local.service_name}.crt;
               ssl_certificate_key ${local.certificate_folder}/${local.service_name}.key;
 
+              proxy_buffering off;
+
               location / {
                   if (\$host = ${local.web_root_domain_name}) {
                       return 301 https://www.${local.web_root_domain_name}\$request_uri;
