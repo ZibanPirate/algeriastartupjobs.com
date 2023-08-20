@@ -24,7 +24,6 @@ export const Page: FC = () => {
 
   return (
     <Stack orientation="vertical" fullWidth align="center" maxWidth={600} margin="auto">
-      {/* Header */}
       <Stack
         orientation="horizontal"
         stretch={true}
@@ -57,13 +56,6 @@ export const Page: FC = () => {
           <pre>{JSON.stringify(account, null, 2)}</pre>
         </Stack>
       )}
-
-      <Text variant="v4" margin="0 1 1">
-        Source code is publicly available at&nbsp;
-        <Link to="https://github.com/algeriastartupjobs/algeriastartupjobs.com" variant="v4">
-          Github
-        </Link>
-      </Text>
     </Stack>
   );
 };

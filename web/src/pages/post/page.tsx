@@ -52,7 +52,6 @@ export const Page: FC = () => {
 
   return (
     <Stack orientation="vertical" fullWidth align="center" maxWidth={1600} margin="auto">
-      {/* Header */}
       <Stack orientation="vertical" stretch={true} align="stretch" padding="0 1">
         <Stack orientation="horizontal" margin="1 0 0" gap="1" align="space-between">
           <Stack orientation="vertical" align="start">
@@ -83,7 +82,6 @@ export const Page: FC = () => {
           )}
         </Stack>
       </Stack>
-      {/* Post */}
       <Stack orientation="horizontal" align="start" stretch={true} gap="3" padding="0 1">
         {post === "ERROR" ? (
           <Stack orientation="vertical" margin="3 0 0" flex={3} minWidth="60%">
@@ -194,7 +192,6 @@ export const Page: FC = () => {
           <Text variant="v3" margin="1 0">
             Similar Jobs
           </Text>
-          {/* Posts */}
           <Stack orientation="vertical" margin="0 0 3">
             {similarPosts === "ERROR" ? (
               <Stack orientation="horizontal" align="baseline">
@@ -222,13 +219,6 @@ export const Page: FC = () => {
           </Stack>
         </Stack>
       </Stack>
-      {/* Footer */}
-      <Text variant="v4" margin="2 1">
-        Source code is publicly available at&nbsp;
-        <Link to="https://github.com/algeriastartupjobs/algeriastartupjobs.com" variant="v4">
-          Github
-        </Link>
-      </Text>
     </Stack>
   );
 };

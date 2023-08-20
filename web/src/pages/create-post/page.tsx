@@ -155,7 +155,6 @@ export const Page: FC = () => {
 
   return (
     <Stack orientation="vertical" fullWidth align="start" maxWidth={600} margin="auto">
-      {/* Header */}
       <Stack
         orientation="horizontal"
         stretch={true}
@@ -170,7 +169,6 @@ export const Page: FC = () => {
           Import via URL <Icon variant="v4" name="import" />
         </Link>
       </Stack>
-      {/* Create Post */}
       <Stack orientation="vertical" align="start" stretch gap="1" padding="3 1" position="relative">
         {!isMediumScreen && (
           <div
@@ -313,12 +311,6 @@ export const Page: FC = () => {
           )}
         </Stack>
       </Stack>
-      <Text variant="v4" margin="0 1 1">
-        Source code is publicly available at&nbsp;
-        <Link to="https://github.com/algeriastartupjobs/algeriastartupjobs.com" variant="v4">
-          Github
-        </Link>
-      </Text>
     </Stack>
   );
 };

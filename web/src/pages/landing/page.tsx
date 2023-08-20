@@ -35,18 +35,16 @@ export const Page: FC = () => {
 
   return (
     <Stack orientation="vertical" fullWidth maxWidth={1600} margin="auto">
-      {/* Header */}
-      <Stack orientation="vertical" margin="1 0 0" stretch={true} align="center">
+      <Stack orientation="vertical" stretch={true} align="center" padding="1 1 0">
         <Stack orientation="vertical" stretch={true} align="end">
-          <Stack orientation="horizontal" align="center" margin="0 1">
+          <Stack orientation="horizontal" align="center" gap="1">
             <Link to={isAuthenticated ? ME_PAGE_URL : LOGIN_PAGE_URL} variant="v4" vtName="login">
               {isAuthenticated ? "My Account" : "Login"}
             </Link>
-            <Divider orientation="vertical" margin="0 1" />
+            <Divider orientation="vertical" />
             <Button
               variant="v3"
               paddingPreset="rectangle-end"
-              margin="0 1"
               onClick={() => navigate(CREATE_POST_PAGE_URL)}
               vtName="new-post"
             >
@@ -55,17 +53,8 @@ export const Page: FC = () => {
             </Button>
           </Stack>
         </Stack>
-        <Text variant="v1" margin="0 1">
-          Join a startup in Algeria
-        </Text>
-        <Text variant="v4" margin="1 1">
-          Source code is publicly available at&nbsp;
-          <Link to="https://github.com/algeriastartupjobs/algeriastartupjobs.com" variant="v4">
-            Github
-          </Link>
-        </Text>
+        <Text variant="v1">Join a startup in Algeria</Text>
       </Stack>
-      {/* Global Search */}
       <Stack orientation="vertical" margin="1 0 2" stretch={true} align="center">
         <GlobalSearch
           margin="0 1"
@@ -75,7 +64,6 @@ export const Page: FC = () => {
           onClick={fetchPostsForLandingPage}
         />
       </Stack>
-      {/* Posts */}
       <Stack orientation="vertical" margin="0 0 3" stretch={true} align="center">
         {posts === "ERROR" ? (
           <Stack orientation="horizontal" align="baseline" margin="0 1">
@@ -111,7 +99,6 @@ export const Page: FC = () => {
           </Stack>
         )}
       </Stack>
-      {/* Footer */}
     </Stack>
   );
 };

@@ -20,7 +20,6 @@ export const Page: FC = () => {
 
   return (
     <Stack orientation="vertical" fullWidth align="center" maxWidth={600} margin="auto">
-      {/* Header */}
       <Stack orientation="vertical" stretch={true} align="start" padding="1 1 0">
         <Link variant="v4" back={POST_PAGE_URL} to={"/"} vtName="login">
           <Icon variant="v4" name="back" /> Back
@@ -60,12 +59,6 @@ export const Page: FC = () => {
           )}
         </Stack>
       </Stack>
-      <Text variant="v4" margin="0 1 1">
-        Source code is publicly available at&nbsp;
-        <Link to="https://github.com/algeriastartupjobs/algeriastartupjobs.com" variant="v4">
-          Github
-        </Link>
-      </Text>
     </Stack>
   );
 };
