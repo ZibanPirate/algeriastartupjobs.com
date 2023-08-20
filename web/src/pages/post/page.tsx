@@ -53,8 +53,8 @@ export const Page: FC = () => {
   return (
     <Stack orientation="vertical" fullWidth align="center" maxWidth={1600} margin="auto">
       {/* Header */}
-      <Stack orientation="vertical" stretch={true} align="stretch">
-        <Stack orientation="horizontal" margin="1 1 0" gap="1" align="space-between">
+      <Stack orientation="vertical" stretch={true} align="stretch" padding="0 1">
+        <Stack orientation="horizontal" margin="1 0 0" gap="1" align="space-between">
           <Stack orientation="vertical" align="start">
             <Link variant="v4" back={POST_PAGE_URL} to={"/"} vtName="back">
               <Icon variant="v4" name="back" /> Back
@@ -84,10 +84,10 @@ export const Page: FC = () => {
         </Stack>
       </Stack>
       {/* Post */}
-      <Stack orientation="horizontal" align="start" stretch={true} gap="3">
+      <Stack orientation="horizontal" align="start" stretch={true} gap="3" padding="0 1">
         {post === "ERROR" ? (
           <Stack orientation="vertical" margin="3 0 0" flex={3} minWidth="60%">
-            <Stack orientation="horizontal" align="baseline" margin="0 1">
+            <Stack orientation="horizontal" align="baseline">
               <Text variant="v5" margin="0 0 1">
                 An error occurred while fetching post, please &nbsp;
               </Text>
@@ -97,7 +97,7 @@ export const Page: FC = () => {
             </Stack>
           </Stack>
         ) : (
-          <Stack orientation="vertical" margin="1 1 0" flex={3} minWidth="60%">
+          <Stack orientation="vertical" margin="1 0 0" flex={3} minWidth="60%">
             {loadedPost ? (
               <Text variant="v3" margin="0 0 1" vtName={`post-title-${loadedPost?.id}`}>
                 {loadedPost?.title}
@@ -190,14 +190,14 @@ export const Page: FC = () => {
             </Stack>
           </Stack>
         )}
-        <Stack orientation="vertical" margin="0 0 0" flex={2}>
-          <Text variant="v3" margin="1">
+        <Stack orientation="vertical" margin="0 0 0" flex={2} minWidth={300}>
+          <Text variant="v3" margin="1 0">
             Similar Jobs
           </Text>
           {/* Posts */}
           <Stack orientation="vertical" margin="0 0 3">
             {similarPosts === "ERROR" ? (
-              <Stack orientation="horizontal" align="baseline" margin="0 1">
+              <Stack orientation="horizontal" align="baseline">
                 <Text variant="v5" margin="0 0 1">
                   An error occurred while fetching similar posts, please &nbsp;
                 </Text>
@@ -206,11 +206,9 @@ export const Page: FC = () => {
                 </Button>
               </Stack>
             ) : similarPosts?.length === 0 ? (
-              <Text variant="v4" margin="0 1">
-                No similar posts found (Raha Nashfa)
-              </Text>
+              <Text variant="v4">No similar posts found (Raha Nashfa)</Text>
             ) : (
-              <Stack orientation="horizontal" gap="1" margin="0 1" align="stretch">
+              <Stack orientation="horizontal" gap="1" align="stretch">
                 {similarPosts
                   ? similarPosts.map((post) => <PostCard key={post.id} post={post} />)
                   : "|"

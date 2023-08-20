@@ -20,7 +20,7 @@ export const Page: FC = () => {
   return (
     <Stack orientation="vertical" fullWidth align="center" maxWidth={600} margin="auto">
       {/* Header */}
-      <Stack orientation="vertical" margin="1 0 0" stretch={true} align="start">
+      <Stack orientation="vertical" stretch={true} align="start" padding="1 1 0">
         <Link variant="v4" back={CREATE_POST_PAGE_URL} to={"/"} vtName="login">
           <Icon variant="v4" name="back" /> Back
         </Link>
@@ -33,7 +33,7 @@ export const Page: FC = () => {
           variant="v4"
           value={url}
           setValue={(value) => set({ url: value })}
-          placeholder="URL"
+          placeholder="URL from LinkedIn, Facebook etc."
           vtName="global-search"
           stretch={true}
         />

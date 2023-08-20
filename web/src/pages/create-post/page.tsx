@@ -158,16 +158,16 @@ export const Page: FC = () => {
       {/* Header */}
       <Stack
         orientation="horizontal"
-        margin="1 0 0"
         stretch={true}
         align="center"
         justifyContent="space-between"
+        padding="1 1 0"
       >
         <Link variant="v4" back={POST_PAGE_URL} to={"/"} vtName="back">
           <Icon variant="v4" name="back" /> Back
         </Link>
         <Link variant="v4" to={IMPORT_PAGE_URL} vtName="import">
-          <Icon variant="v4" name="import" /> Import via URL
+          Import via URL <Icon variant="v4" name="import" />
         </Link>
       </Stack>
       {/* Create Post */}

@@ -27,10 +27,10 @@ export const Page: FC = () => {
       {/* Header */}
       <Stack
         orientation="horizontal"
-        margin="1 0 0"
         stretch={true}
         justifyContent="space-between"
         align="center"
+        padding="1 1 0"
       >
         <Link variant="v4" back={POST_PAGE_URL} to={"/"} vtName="login">
           <Icon variant="v4" name="back" /> Back
