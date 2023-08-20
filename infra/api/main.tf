@@ -48,9 +48,9 @@ variable "do_droplet_password" {
 locals {
   app_port             = "9090"
   app_folder_name      = "asj"
-  app_folder           = "~/${local.app_folder_name}"
+  home                 = "/home/${var.do_droplet_user}"
+  app_folder           = "${local.home}/${local.app_folder_name}"
   certificate_folder   = "/etc/ssl/certs"
-  upload_tmp_name      = "~/upload_tmp"
   app_name             = "algeriastartupjobs-api"
   service_name         = "algeriastartupjobs-api"
   db_service_name      = "algeriastartupjobs-db"
@@ -71,7 +71,7 @@ provider "aws" {
 }
 
 resource "digitalocean_droplet" "api" {
-  image     = "debian-11-x64"
+  image     = "ubuntu-22-04-x64"
   name      = local.domain_name
   region    = "fra1"
   size      = "s-1vcpu-512mb-10gb"
@@ -141,7 +141,7 @@ resource "digitalocean_droplet" "api" {
                       return 301 https://www.${local.web_root_domain_name}\$request_uri;
                   }
                   if (\$host != ${local.domain_name}) {
-                      rewrite ^(.*)\$ /web/\$1 break;
+                      rewrite ^(.*)\$ /web\$1 break;
                   }
 
                   proxy_pass http://127.0.0.1:${local.app_port};
@@ -215,33 +215,14 @@ resource "aws_route53_record" "web-naked" {
   records = [digitalocean_droplet.api.ipv4_address]
 }
 
-
-resource "ssh_resource" "upload_dot_env_to_vps" {
-  triggers = {
-    always       = timestamp()
-    vps_id       = digitalocean_droplet.api.id
-    dot_env_hash = filesha256("${path.module}/../../api/${local.stage}.env")
-    app_hash     = filesha256("${path.module}/../../api/ubuntu-target/target/release/${local.app_name}")
-  }
-
-  host        = digitalocean_droplet.api.ipv4_address
-  user        = var.do_droplet_user
-  private_key = var.do_ssh_key
-  timeout     = "1m"
-
-  file {
-    source      = "${path.module}/../../api/${local.stage}.env"
-    destination = "${local.upload_tmp_name}.env"
-  }
+data "terraform_remote_state" "ructc" {
+  backend = "local"
+  config  = { path = "${path.module}/build-on-vps/terraform.tfstate" }
 }
 
-
-resource "ssh_resource" "upload_app_to_vps" {
+resource "ssh_resource" "upload_app_and_deps_to_vps" {
   triggers = {
-    always     = timestamp()
-    vps_id     = digitalocean_droplet.api.id
-    dot_env_id = ssh_resource.upload_dot_env_to_vps.id
-    app_hash   = filesha256("${path.module}/../../api/ubuntu-target/target/release/${local.app_name}")
+    vps_ip = data.terraform_remote_state.ructc.outputs.digitalocean_droplet_rustc_ipv4_address
   }
 
   host        = digitalocean_droplet.api.ipv4_address
@@ -249,24 +230,24 @@ resource "ssh_resource" "upload_app_to_vps" {
   private_key = var.do_ssh_key
   timeout     = "5m"
 
-  file {
-    source      = "${path.module}/../../api/ubuntu-target/target/release/${local.app_name}"
-    destination = local.upload_tmp_name
-  }
-
   commands = [
+    #
+    "sudo mkdir -p ${local.app_folder} || true",
+    #
+    "sudo touch ${local.app_folder}/.env",
+    "sudo sh -c \"echo '${filebase64("${path.module}/../../api/${local.stage}.env")}' > ${local.app_folder}/base64.env\"",
+    "sudo sh -c \"base64 -d ${local.app_folder}/base64.env > ${local.app_folder}/.env\"",
+    #
+    "sudo systemctl stop nginx || true",
     "sudo systemctl stop ${local.service_name} || true",
     "sudo systemctl stop ${local.db_service_name} || true",
-    "sudo mkdir -p ${local.app_folder} || true",
-    "sudo rm ${local.app_folder}/${local.app_name} || true",
-    "sudo mv ${local.upload_tmp_name} ${local.app_folder}/${local.app_name} || true",
-    "sudo rm ${local.app_folder}/.env || true",
-    "sudo mv ${local.upload_tmp_name}.env ${local.app_folder}/.env || true",
+    #
+    "sudo curl -o ${local.app_folder}/${local.app_name} http://${data.terraform_remote_state.ructc.outputs.digitalocean_droplet_rustc_ipv4_address}:8000/target/release/algeriastartupjobs-api",
     "sudo chmod +x ${local.app_folder}/${local.app_name} || true",
+    #
+    "sudo systemctl daemon-reload",
     "sudo systemctl start ${local.db_service_name} || true",
     "sudo systemctl start ${local.service_name} || true",
-    "sudo systemctl restart nginx",
+    "sudo systemctl start nginx",
   ]
-
-  depends_on = [ssh_resource.upload_dot_env_to_vps]
 }

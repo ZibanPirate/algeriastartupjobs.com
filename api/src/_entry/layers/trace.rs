@@ -6,6 +6,10 @@ use tower::{
   layer::util::{Identity, Stack},
   ServiceBuilder,
 };
+use tower_http::{
+  classify::{ServerErrorsAsFailures, SharedClassifier},
+  trace::TraceLayer,
+};
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
 use crate::config::service::ConfigService;
@@ -35,8 +39,9 @@ pub fn enable_tracing() -> sentry::ClientInitGuard {
 
   tracing_subscriber::registry()
     .with(
+      // @TODO-ZM: set debug level in .env
       tracing_subscriber::EnvFilter::try_from_default_env()
-        .unwrap_or_else(|_| "debug=info,tower_http=info,axum::rejection=trace".into()),
+        .unwrap_or_else(|_| "debug=info,tower_http=debug,axum::rejection=trace".into()),
     )
     .with(sentry_tracing::layer())
     .with(tracing_subscriber::fmt::layer())
@@ -47,9 +52,13 @@ pub fn enable_tracing() -> sentry::ClientInitGuard {
 }
 
 pub fn create_trace_layer() -> ServiceBuilder<
-  Stack<SentryLayer<NewFromTopProvider, Arc<Hub>, Request<Body>>, Stack<SentryHttpLayer, Identity>>,
+  Stack<
+    SentryLayer<NewFromTopProvider, Arc<Hub>, Request<Body>>,
+    Stack<SentryHttpLayer, Stack<TraceLayer<SharedClassifier<ServerErrorsAsFailures>>, Identity>>,
+  >,
 > {
   let layer = ServiceBuilder::new()
+    .layer(TraceLayer::new_for_http())
     // continue trace from incoming request
     .layer(SentryHttpLayer::with_transaction())
     // bind a new hub for each request
