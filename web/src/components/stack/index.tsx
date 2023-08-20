@@ -9,7 +9,10 @@ export interface StackProps
   extends PropsWithChildren,
     StyleProps,
     AnimationProps,
-    Pick<CSSProperties, "minWidth" | "maxWidth" | "flex" | "justifyContent" | "position"> {
+    Pick<
+      CSSProperties,
+      "minWidth" | "minHeight" | "maxWidth" | "flex" | "justifyContent" | "position"
+    > {
   orientation: "horizontal" | "vertical";
   align?: "start" | "center" | "end" | "baseline" | "stretch" | "space-between";
   gap?: CSSNumber;
@@ -30,6 +33,7 @@ export const Stack: FC<StackProps> = ({
   wrap = true,
   vtName,
   minWidth,
+  minHeight,
   maxWidth,
   flex,
   animation = false,
@@ -55,6 +59,7 @@ export const Stack: FC<StackProps> = ({
   if (vtName) style["viewTransitionName"] = vtName;
   if (maxWidth) style["maxWidth"] = maxWidth;
   if (minWidth) style["minWidth"] = minWidth;
+  if (minHeight) style["minHeight"] = minHeight;
   if (flex) style["flex"] = flex;
   if (justifyContent) style["justifyContent"] = justifyContent;
   if (position) style["position"] = position;

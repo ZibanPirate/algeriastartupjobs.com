@@ -27,6 +27,7 @@ import { useMediaQuery } from "src/utils/hooks/use-media-query";
 import { useIsAuthenticated } from "src/utils/hooks/is-authenticated";
 import { fetchAccountForMePage } from "../me/actions";
 import { Skeleton } from "src/components/skeleton";
+import { Footer } from "src/components/footer";
 
 export const Page: FC = () => {
   usePageTitle("Post a job ad for free");
@@ -154,163 +155,179 @@ export const Page: FC = () => {
   );
 
   return (
-    <Stack orientation="vertical" fullWidth align="start" maxWidth={600} margin="auto">
-      <Stack
-        orientation="horizontal"
-        stretch={true}
-        align="center"
-        justifyContent="space-between"
-        padding="1 1 0"
-      >
-        <Link variant="v4" back={POST_PAGE_URL} to={"/"} vtName="back">
-          <Icon variant="v4" name="back" /> Back
-        </Link>
-        <Link variant="v4" to={IMPORT_PAGE_URL} vtName="import">
-          Import via URL <Icon variant="v4" name="import" />
-        </Link>
-      </Stack>
-      <Stack orientation="vertical" align="start" stretch gap="1" padding="3 1" position="relative">
-        {!isMediumScreen && (
-          <div
-            style={{ position: "absolute", right: 0, transform: "translateX(100%)", width: 300 }}
-          >
-            <Stack orientation="vertical" gap="1">
-              {Tags}
-            </Stack>
-          </div>
-        )}
-        <Text variant="v4">Looking for</Text>
-        <DebouncedValueInput
-          vtName="global-search"
-          disabled={disabledInputs}
-          placeholder="Job title, eg: Sales Manager"
+    <Stack
+      orientation="vertical"
+      fullWidth
+      align="center"
+      minHeight="100vh"
+      justifyContent="space-between"
+    >
+      <Stack orientation="vertical" fullWidth align="start" maxWidth={600} margin="auto">
+        <Stack
+          orientation="horizontal"
           stretch={true}
-          value={title}
-          setValue={(value) => set({ title: value })}
-          variant="v4"
-        />
+          align="center"
+          justifyContent="space-between"
+          padding="1 1 0"
+        >
+          <Link variant="v4" back={POST_PAGE_URL} to={"/"} vtName="back">
+            <Icon variant="v4" name="back" /> Back
+          </Link>
+          <Link variant="v4" to={IMPORT_PAGE_URL} vtName="import">
+            Import via URL <Icon variant="v4" name="import" />
+          </Link>
+        </Stack>
+        <Stack
+          orientation="vertical"
+          align="start"
+          stretch
+          gap="1"
+          padding="3 1"
+          position="relative"
+        >
+          {!isMediumScreen && (
+            <div
+              style={{ position: "absolute", right: 0, transform: "translateX(100%)", width: 300 }}
+            >
+              <Stack orientation="vertical" gap="1">
+                {Tags}
+              </Stack>
+            </div>
+          )}
+          <Text variant="v4">Looking for</Text>
+          <DebouncedValueInput
+            vtName="global-search"
+            disabled={disabledInputs}
+            placeholder="Job title, eg: Sales Manager"
+            stretch={true}
+            value={title}
+            setValue={(value) => set({ title: value })}
+            variant="v4"
+          />
 
-        {!isAuthenticated && (
-          <>
-            <Text variant="v4">Candidate apply by sending email to</Text>
-            <DebouncedValueInput
-              disabled={disabledInputs}
-              placeholder="Contact email"
-              stretch={true}
-              value={poster_contact}
-              setValue={(value) => set({ poster_contact: value })}
-              variant="v4"
-              id="email"
-              inputMode="email"
-            />
-          </>
-        )}
-        {posterName || isAuthenticated ? (
-          posterName ? (
-            <Text variant="v4">{posterName}</Text>
-          ) : (
-            <Skeleton variant="v4" width={100} height={20} />
-          )
-        ) : (
-          <>
-            <Select<Account["type"]>
-              disabled={disabledInputs}
-              variant="v4"
-              padding="0"
-              value={poster_type}
-              setValue={(value) => set({ poster_type: value })}
-              options={[
-                { value: "Company", label: "At (Company)" },
-                { value: "Individual", label: "By (Individual)" },
-              ]}
-            />
-            {poster_type === "Company" ? (
-              <Input
+          {!isAuthenticated && (
+            <>
+              <Text variant="v4">Candidate apply by sending email to</Text>
+              <DebouncedValueInput
                 disabled={disabledInputs}
-                placeholder="Company name"
+                placeholder="Contact email"
                 stretch={true}
-                value={poster_name}
-                setValue={(value) => set({ poster_name: value })}
+                value={poster_contact}
+                setValue={(value) => set({ poster_contact: value })}
                 variant="v4"
+                id="email"
+                inputMode="email"
+              />
+            </>
+          )}
+          {posterName || isAuthenticated ? (
+            posterName ? (
+              <Text variant="v4">{posterName}</Text>
+            ) : (
+              <Skeleton variant="v4" width={100} height={20} />
+            )
+          ) : (
+            <>
+              <Select<Account["type"]>
+                disabled={disabledInputs}
+                variant="v4"
+                padding="0"
+                value={poster_type}
+                setValue={(value) => set({ poster_type: value })}
+                options={[
+                  { value: "Company", label: "At (Company)" },
+                  { value: "Individual", label: "By (Individual)" },
+                ]}
+              />
+              {poster_type === "Company" ? (
+                <Input
+                  disabled={disabledInputs}
+                  placeholder="Company name"
+                  stretch={true}
+                  value={poster_name}
+                  setValue={(value) => set({ poster_name: value })}
+                  variant="v4"
+                />
+              ) : (
+                <>
+                  <Text variant="v4">First name</Text>
+                  <Input
+                    disabled={disabledInputs}
+                    placeholder="First name"
+                    stretch={true}
+                    value={poster_first_name}
+                    setValue={(value) => set({ poster_first_name: value })}
+                    variant="v4"
+                    id="first-name"
+                  />
+                  <Text variant="v4">Last name</Text>
+                  <Input
+                    disabled={disabledInputs}
+                    placeholder="Last name"
+                    stretch={true}
+                    value={poster_last_name}
+                    setValue={(value) => set({ poster_last_name: value })}
+                    variant="v4"
+                    id="last-name"
+                  />
+                </>
+              )}
+            </>
+          )}
+          {compact ? null : (
+            <>
+              <Text variant="v4">More details about the job</Text>
+              <DebouncedValueRichInput
+                disabled={disabledInputs}
+                placeholder="What is the job about?"
+                stretch={true}
+                value={post_description}
+                setValue={(value) => set({ post_description: value })}
+                autoRows={true}
+                variant="v4"
+                id="description"
+                resize="vertical"
+              />
+              {isMediumScreen && Tags}
+            </>
+          )}
+          <Stack orientation="vertical" align="center" stretch>
+            {["CREATING", "CREATED"].includes(creation_status) ? (
+              <Icon
+                variant="v3"
+                name={creation_status === "CREATING" ? "loadingSpinner" : "success"}
+                animation={creation_status === "CREATING" ? "rotate" : undefined}
+                margin="3 0"
+                vtName="create-post-icon"
               />
             ) : (
               <>
-                <Text variant="v4">First name</Text>
-                <Input
-                  disabled={disabledInputs}
-                  placeholder="First name"
-                  stretch={true}
-                  value={poster_first_name}
-                  setValue={(value) => set({ poster_first_name: value })}
-                  variant="v4"
-                  id="first-name"
-                />
-                <Text variant="v4">Last name</Text>
-                <Input
-                  disabled={disabledInputs}
-                  placeholder="Last name"
-                  stretch={true}
-                  value={poster_last_name}
-                  setValue={(value) => set({ poster_last_name: value })}
-                  variant="v4"
-                  id="last-name"
-                />
+                <Text variant="v4" margin="1 0 2">
+                  {creation_status === "ERROR" ? "Something went wrong, please try again" : <br />}
+                </Text>
+                <Stack orientation="horizontal" align="center" gap="1">
+                  <Button
+                    variant="v3"
+                    onClick={() => (isAuthenticated ? createPost() : createPostViaEmail())}
+                    vtName="new-post"
+                  >
+                    Post now
+                  </Button>
+                  {(compact || canHideDetails) && (
+                    <>
+                      <Text variant="v4">or</Text>
+                      <Link to="#" variant="v4" onClick={() => set({ compact: !compact })}>
+                        {compact ? "Add more details" : "Hide details"}
+                      </Link>
+                    </>
+                  )}
+                </Stack>
               </>
             )}
-          </>
-        )}
-        {compact ? null : (
-          <>
-            <Text variant="v4">More details about the job</Text>
-            <DebouncedValueRichInput
-              disabled={disabledInputs}
-              placeholder="What is the job about?"
-              stretch={true}
-              value={post_description}
-              setValue={(value) => set({ post_description: value })}
-              autoRows={true}
-              variant="v4"
-              id="description"
-              resize="vertical"
-            />
-            {isMediumScreen && Tags}
-          </>
-        )}
-        <Stack orientation="vertical" align="center" stretch>
-          {["CREATING", "CREATED"].includes(creation_status) ? (
-            <Icon
-              variant="v3"
-              name={creation_status === "CREATING" ? "loadingSpinner" : "success"}
-              animation={creation_status === "CREATING" ? "rotate" : undefined}
-              margin="3 0"
-              vtName="create-post-icon"
-            />
-          ) : (
-            <>
-              <Text variant="v4" margin="1 0 2">
-                {creation_status === "ERROR" ? "Something went wrong, please try again" : <br />}
-              </Text>
-              <Stack orientation="horizontal" align="center" gap="1">
-                <Button
-                  variant="v3"
-                  onClick={() => (isAuthenticated ? createPost() : createPostViaEmail())}
-                  vtName="new-post"
-                >
-                  Post now
-                </Button>
-                {(compact || canHideDetails) && (
-                  <>
-                    <Text variant="v4">or</Text>
-                    <Link to="#" variant="v4" onClick={() => set({ compact: !compact })}>
-                      {compact ? "Add more details" : "Hide details"}
-                    </Link>
-                  </>
-                )}
-              </Stack>
-            </>
-          )}
+          </Stack>
         </Stack>
       </Stack>
+      <Footer />
     </Stack>
   );
 };

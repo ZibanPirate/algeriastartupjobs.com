@@ -20,6 +20,7 @@ import { GlobalSearch } from "src/components/search/global";
 import { Icon } from "src/components/icon";
 import { fetchPostCountForLandingPage, fetchPostsForLandingPage } from "src/pages/landing/actions";
 import { useMediaQuery } from "src/utils/hooks/use-media-query";
+import { Footer } from "src/components/footer";
 
 export const Page: FC = () => {
   const postSlug = useMatch(POST_PAGE_URL)?.params.postSlug;
@@ -51,174 +52,183 @@ export const Page: FC = () => {
   const isSmallScreen = useMediaQuery("(max-width: 700px)");
 
   return (
-    <Stack orientation="vertical" fullWidth align="center" maxWidth={1600} margin="auto">
-      <Stack orientation="vertical" stretch={true} align="stretch" padding="0 1">
-        <Stack orientation="horizontal" margin="1 0 0" gap="1" align="space-between">
-          <Stack orientation="vertical" align="start">
-            <Link variant="v4" back={POST_PAGE_URL} to={"/"} vtName="back">
-              <Icon variant="v4" name="back" /> Back
-            </Link>
-          </Stack>
-          <Stack orientation="vertical" align="center" flex={1}>
-            <GlobalSearch
-              total_post_count={total_post_count}
-              value={query}
-              setValue={(value) => set({ query: value })}
-              onClick={() => navigate("/")}
-            />
-          </Stack>
-          {!isSmallScreen && (
-            <Stack orientation="vertical" align="end">
-              <Button
-                variant="v3"
-                paddingPreset="rectangle-end"
-                onClick={() => navigate(CREATE_POST_PAGE_URL)}
-                vtName="new-post"
-              >
-                <Icon variant="v3" name="newPost" />
-                Free Post
-              </Button>
-            </Stack>
-          )}
-        </Stack>
-      </Stack>
-      <Stack orientation="horizontal" align="start" stretch={true} gap="3" padding="0 1">
-        {post === "ERROR" ? (
-          <Stack orientation="vertical" margin="3 0 0" flex={3} minWidth="60%">
-            <Stack orientation="horizontal" align="baseline">
-              <Text variant="v5" margin="0 0 1">
-                An error occurred while fetching post, please &nbsp;
-              </Text>
-              <Button variant="v5" onClick={() => fetchPostForPostPage(postId)}>
-                Try Again
-              </Button>
-            </Stack>
-          </Stack>
-        ) : (
-          <Stack orientation="vertical" margin="1 0 0" flex={3} minWidth="60%">
-            {loadedPost ? (
-              <Text variant="v3" margin="0 0 1" vtName={`post-title-${loadedPost?.id}`}>
-                {loadedPost?.title}
-              </Text>
-            ) : (
-              <Skeleton variant="v3" width="18rem" margin="0 0 1" />
-            )}
-            <Text variant="v4" vtName={`post-description-${loadedPost?.id}`}>
-              {loadedPost?.description !== undefined ? (
-                loadedPost.description ? (
-                  <pre className="fade-in-up" style={{ whiteSpace: "pre-line", maxWidth: 600 }}>
-                    {loadedPost.description}
-                  </pre>
-                ) : (
-                  <>
-                    No description provided, you can&nbsp;
-                    <Link
-                      variant="v4"
-                      to="#"
-                      onClick={() => alert("Stay updated at github.com/algeriastartupjobs")}
-                    >
-                      ask
-                    </Link>
-                    &nbsp;for more information from the poster
-                  </>
-                )
-              ) : (
-                <Stack orientation="vertical" gap="1">
-                  <Skeleton variant="v4" width="20rem" />
-                  <Skeleton variant="v4" width="20rem" />
-                  <Skeleton variant="v4" width="16rem" />
-                  <Skeleton variant="v4" width="20rem" />
-                  <Skeleton variant="v4" width="4rem" />
-                  <Skeleton variant="v4" width="20rem" />
-                  <Skeleton variant="v4" width="18rem" />
-                  <Skeleton variant="v4" width="16rem" />
-                  <Skeleton variant="v4" width="20rem" />
-                  <Skeleton variant="v4" width="4rem" />
-                </Stack>
-              )}
-            </Text>
-            {loadedPost?.tags && loadedPost?.tags.length > 0 && (
-              <Stack
-                orientation="horizontal"
-                margin="2 0 1"
-                gap="1"
-                stretch={true}
-                vtName={`post-tags-${loadedPost.id}`}
-              >
-                {loadedPost?.tags.map((tag) => (
-                  <Tag variant="v4" key={tag.id}>
-                    {tag.name}
-                  </Tag>
-                ))}
-              </Stack>
-            )}
-            <Stack orientation="vertical" margin="1 0 0" gap="1" stretch={true}>
-              {loadedPost?.poster ? (
-                <>
-                  <Text variant="v3" vtName={`post-poster-${loadedPost?.id}`}>
-                    {getAccountName(loadedPost.poster)}
-                  </Text>
-                  {loadedPost.poster?.email ? (
-                    <Text variant="v4">{loadedPost.poster?.email}</Text>
-                  ) : (
-                    <Skeleton variant="v4" width="10rem" />
-                  )}
-                </>
-              ) : (
-                <>
-                  <Skeleton variant="v3" width="10rem" vtName={`post-poster-${loadedPost?.id}`} />
-                </>
-              )}
-            </Stack>
-            <Stack orientation="horizontal" margin="3 0 0" align="center" gap="1">
-              <Button
-                variant="v3"
-                onClick={() => alert("Stay updated at github.com/algeriastartupjobs")}
-              >
-                Apply
-              </Button>
-              <Text variant="v4">or</Text>
-              <Link
-                to="#"
-                variant="v4"
-                onClick={() => alert("Stay updated at github.com/algeriastartupjobs")}
-              >
-                share this post
+    <Stack
+      orientation="vertical"
+      fullWidth
+      align="center"
+      minHeight="100vh"
+      justifyContent="space-between"
+    >
+      <Stack orientation="vertical" fullWidth align="center" maxWidth={1600} margin="auto">
+        <Stack orientation="vertical" stretch={true} align="stretch" padding="0 1">
+          <Stack orientation="horizontal" margin="1 0 0" gap="1" align="space-between">
+            <Stack orientation="vertical" align="start">
+              <Link variant="v4" back={POST_PAGE_URL} to={"/"} vtName="back">
+                <Icon variant="v4" name="back" /> Back
               </Link>
             </Stack>
+            <Stack orientation="vertical" align="center" flex={1}>
+              <GlobalSearch
+                total_post_count={total_post_count}
+                value={query}
+                setValue={(value) => set({ query: value })}
+                onClick={() => navigate("/")}
+              />
+            </Stack>
+            {!isSmallScreen && (
+              <Stack orientation="vertical" align="end">
+                <Button
+                  variant="v3"
+                  paddingPreset="rectangle-end"
+                  onClick={() => navigate(CREATE_POST_PAGE_URL)}
+                  vtName="new-post"
+                >
+                  <Icon variant="v3" name="newPost" />
+                  Free Post
+                </Button>
+              </Stack>
+            )}
           </Stack>
-        )}
-        <Stack orientation="vertical" margin="0 0 0" flex={2} minWidth={300}>
-          <Text variant="v3" margin="1 0">
-            Similar Jobs
-          </Text>
-          <Stack orientation="vertical" margin="0 0 3">
-            {similarPosts === "ERROR" ? (
+        </Stack>
+        <Stack orientation="horizontal" align="start" stretch={true} gap="3" padding="0 1">
+          {post === "ERROR" ? (
+            <Stack orientation="vertical" margin="3 0 0" flex={3} minWidth="60%">
               <Stack orientation="horizontal" align="baseline">
                 <Text variant="v5" margin="0 0 1">
-                  An error occurred while fetching similar posts, please &nbsp;
+                  An error occurred while fetching post, please &nbsp;
                 </Text>
-                <Button variant="v5" onClick={() => fetchSimilarPostsForPostPage(postId)}>
+                <Button variant="v5" onClick={() => fetchPostForPostPage(postId)}>
                   Try Again
                 </Button>
               </Stack>
-            ) : similarPosts?.length === 0 ? (
-              <Text variant="v4">No similar posts found (Raha Nashfa)</Text>
-            ) : (
-              <Stack orientation="horizontal" gap="1" align="stretch">
-                {similarPosts
-                  ? similarPosts.map((post) => <PostCard key={post.id} post={post} />)
-                  : "|"
-                      .repeat(4)
-                      .split("|")
-                      .map(() => (
-                        <Skeleton variant="v3" width="20rem" maxWidth="80vw" height="6rem" />
-                      ))}
+            </Stack>
+          ) : (
+            <Stack orientation="vertical" margin="1 0 0" flex={3} minWidth="60%">
+              {loadedPost ? (
+                <Text variant="v3" margin="0 0 1" vtName={`post-title-${loadedPost?.id}`}>
+                  {loadedPost?.title}
+                </Text>
+              ) : (
+                <Skeleton variant="v3" width="18rem" margin="0 0 1" />
+              )}
+              <Text variant="v4" vtName={`post-description-${loadedPost?.id}`}>
+                {loadedPost?.description !== undefined ? (
+                  loadedPost.description ? (
+                    <pre className="fade-in-up" style={{ whiteSpace: "pre-line", maxWidth: 600 }}>
+                      {loadedPost.description}
+                    </pre>
+                  ) : (
+                    <>
+                      No description provided, you can&nbsp;
+                      <Link
+                        variant="v4"
+                        to="#"
+                        onClick={() => alert("Stay updated at github.com/algeriastartupjobs")}
+                      >
+                        ask
+                      </Link>
+                      &nbsp;for more information from the poster
+                    </>
+                  )
+                ) : (
+                  <Stack orientation="vertical" gap="1">
+                    <Skeleton variant="v4" width="20rem" />
+                    <Skeleton variant="v4" width="20rem" />
+                    <Skeleton variant="v4" width="16rem" />
+                    <Skeleton variant="v4" width="20rem" />
+                    <Skeleton variant="v4" width="4rem" />
+                    <Skeleton variant="v4" width="20rem" />
+                    <Skeleton variant="v4" width="18rem" />
+                    <Skeleton variant="v4" width="16rem" />
+                    <Skeleton variant="v4" width="20rem" />
+                    <Skeleton variant="v4" width="4rem" />
+                  </Stack>
+                )}
+              </Text>
+              {loadedPost?.tags && loadedPost?.tags.length > 0 && (
+                <Stack
+                  orientation="horizontal"
+                  margin="2 0 1"
+                  gap="1"
+                  stretch={true}
+                  vtName={`post-tags-${loadedPost.id}`}
+                >
+                  {loadedPost?.tags.map((tag) => (
+                    <Tag variant="v4" key={tag.id}>
+                      {tag.name}
+                    </Tag>
+                  ))}
+                </Stack>
+              )}
+              <Stack orientation="vertical" margin="1 0 0" gap="1" stretch={true}>
+                {loadedPost?.poster ? (
+                  <>
+                    <Text variant="v3" vtName={`post-poster-${loadedPost?.id}`}>
+                      {getAccountName(loadedPost.poster)}
+                    </Text>
+                    {loadedPost.poster?.email ? (
+                      <Text variant="v4">{loadedPost.poster?.email}</Text>
+                    ) : (
+                      <Skeleton variant="v4" width="10rem" />
+                    )}
+                  </>
+                ) : (
+                  <>
+                    <Skeleton variant="v3" width="10rem" vtName={`post-poster-${loadedPost?.id}`} />
+                  </>
+                )}
               </Stack>
-            )}
+              <Stack orientation="horizontal" margin="3 0 0" align="center" gap="1">
+                <Button
+                  variant="v3"
+                  onClick={() => alert("Stay updated at github.com/algeriastartupjobs")}
+                >
+                  Apply
+                </Button>
+                <Text variant="v4">or</Text>
+                <Link
+                  to="#"
+                  variant="v4"
+                  onClick={() => alert("Stay updated at github.com/algeriastartupjobs")}
+                >
+                  share this post
+                </Link>
+              </Stack>
+            </Stack>
+          )}
+          <Stack orientation="vertical" margin="0 0 0" flex={2} minWidth={300}>
+            <Text variant="v3" margin="1 0">
+              Similar Jobs
+            </Text>
+            <Stack orientation="vertical" margin="0 0 3">
+              {similarPosts === "ERROR" ? (
+                <Stack orientation="horizontal" align="baseline">
+                  <Text variant="v5" margin="0 0 1">
+                    An error occurred while fetching similar posts, please &nbsp;
+                  </Text>
+                  <Button variant="v5" onClick={() => fetchSimilarPostsForPostPage(postId)}>
+                    Try Again
+                  </Button>
+                </Stack>
+              ) : similarPosts?.length === 0 ? (
+                <Text variant="v4">No similar posts found (Raha Nashfa)</Text>
+              ) : (
+                <Stack orientation="horizontal" gap="1" align="stretch">
+                  {similarPosts
+                    ? similarPosts.map((post) => <PostCard key={post.id} post={post} />)
+                    : "|"
+                        .repeat(4)
+                        .split("|")
+                        .map(() => (
+                          <Skeleton variant="v3" width="20rem" maxWidth="80vw" height="6rem" />
+                        ))}
+                </Stack>
+              )}
+            </Stack>
           </Stack>
         </Stack>
       </Stack>
+      <Footer />
     </Stack>
   );
 };
