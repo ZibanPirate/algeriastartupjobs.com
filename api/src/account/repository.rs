@@ -26,7 +26,9 @@ impl AccountRepository {
       r#"
       SELECT slug, type, first_name, last_name, company_name, id.id as id FROM account WHERE {} LIMIT {} START {}
       "#,
-      filter, limit, start
+      filter,
+      if limit > 0 { limit } else { 1 },
+      start
     );
 
     let query_result = self.main_db.query(&query).await;
@@ -69,7 +71,7 @@ impl AccountRepository {
             .collect::<Vec<String>>()
             .join(", "),
         ),
-        100,
+        ids.len() as u32,
         0,
       )
       .await

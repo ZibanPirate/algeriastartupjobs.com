@@ -102,7 +102,10 @@ async fn run_indexing_cron_job(app_state: AppState) {
     .index_posts(posts, tags, accounts)
     .await;
   if indexing_result.is_err() {
-    tracing::error!("Error while indexing posts");
+    tracing::error!(
+      "Error while indexing posts {:?}",
+      indexing_result.err().unwrap()
+    );
     return;
   }
 
@@ -124,17 +127,32 @@ async fn run_indexing_cron_job(app_state: AppState) {
     return;
   }
 
-  let task_id = app_state
+  let more_tasks = app_state
     .task_repository
-    .create_one_task(DBTask {
-      name: TaskName::RefreshingBKTree,
-      status: TaskStatus::Pending,
-      r#type: TaskType::Automated,
-    })
+    .get_many_compact_tasks_by_filter("name='Indexing' AND status='Pending'", 1, 0)
     .await;
 
-  if task_id.is_err() {
-    tracing::error!("Error while creating bk-tree refreshing task");
+  if more_tasks.is_err() {
+    tracing::error!("Error while getting more indexing tasks");
+    return;
+  }
+  let more_tasks = more_tasks.unwrap();
+
+  if more_tasks.is_empty() {
+    tracing::info!("No more indexing tasks found, creating bk-tree refreshing task");
+
+    let task_id = app_state
+      .task_repository
+      .create_one_task(DBTask {
+        name: TaskName::RefreshingBKTree,
+        status: TaskStatus::Pending,
+        r#type: TaskType::Automated,
+      })
+      .await;
+
+    if task_id.is_err() {
+      tracing::error!("Error while creating bk-tree refreshing task");
+    }
   }
 
   tracing::info!("✅ Indexing done");
@@ -170,7 +188,10 @@ async fn run_bk_tree_refresher_cron_job(app_state: AppState, has_job_ran_once: b
 
   let bk_tree_refreshing_result = app_state.search_service.refresh_bk_tree().await;
   if bk_tree_refreshing_result.is_err() {
-    tracing::error!("Error while indexing posts");
+    tracing::error!(
+      "Error while indexing posts {:?}",
+      bk_tree_refreshing_result.err().unwrap()
+    );
     return;
   }
 

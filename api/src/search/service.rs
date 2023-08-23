@@ -112,6 +112,7 @@ impl SearchService {
           .map(|tag| tag.clone());
 
         if tag.is_none() {
+          tracing::error!("Failed to find the tag by id {}", tag_id,);
           return Err(SearchError::InternalError);
         };
         let tag = tag.unwrap();
@@ -307,6 +308,8 @@ impl SearchService {
         let score = group.fold(0, |acc, record| acc + record.score);
         SearchRecord { id, score }
       })
+      .sorted_by_key(|record| record.score)
+      .rev()
       .collect::<Vec<_>>();
 
     Ok(search_records.iter().map(|r| r.id).collect())

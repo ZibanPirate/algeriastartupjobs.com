@@ -29,7 +29,9 @@ impl TagRepository {
       r#"
       SELECT slug, name, id.id as id FROM tag WHERE {} LIMIT {} START {}
       "#,
-      filter, limit, start
+      filter,
+      if limit > 0 { limit } else { 1 },
+      start
     );
 
     let query_result = self.main_db.query(&query).await;
@@ -79,7 +81,7 @@ impl TagRepository {
             .collect::<Vec<String>>()
             .join(", "),
         ),
-        100,
+        ids.len() as u32,
         0,
       )
       .await

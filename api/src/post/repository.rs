@@ -30,7 +30,10 @@ impl PostRepository {
       r#"
       SELECT slug, title, poster_id, short_description, tag_ids, published_at, id.id as id FROM post WHERE {} {} LIMIT {} START {}
       "#,
-      filter, order, limit, start
+      filter,
+      order,
+      if limit > 0 { limit } else { 1 },
+      start
     );
 
     let query_result = self.main_db.query(&query).await;
