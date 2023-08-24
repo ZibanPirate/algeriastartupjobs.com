@@ -92,6 +92,18 @@
       "options": { "cwd": "${workspaceFolder}/api" }
     },
     {
+      "label": "delete db",
+      "type": "shell",
+      "command": [
+        "rm -r -f ./sqlite_db_data",
+        "&& mkdir -p ./sqlite_db_data || true",
+        "&& DATABASE_URL=\"sqlite:sqlite_db_data/main.db\" sqlx database create",
+        "&& DATABASE_URL=\"sqlite:sqlite_db_data/search.db\" sqlx database create"
+      ],
+      "problemMatcher": [],
+      "options": { "cwd": "${workspaceFolder}/api" }
+    },
+    {
       "label": "logs db",
       "type": "shell",
       "command": ["docker logs --follow $(docker ps -aqf \"name=ajs-db-surrealdb\")"],

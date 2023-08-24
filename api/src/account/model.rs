@@ -47,6 +47,7 @@ impl AccountTrait for Account {
 
 pub trait AccountNameTrait {
   fn get_display_name(&self) -> String;
+  fn get_names(&self) -> (Option<&String>, Option<&String>, Option<&String>);
 }
 
 impl AccountNameTrait for Account {
@@ -61,6 +62,19 @@ impl AccountNameTrait for Account {
         last_name,
       } => format!("{} {}", first_name, last_name),
       AccountType::Company { company_name } => company_name.to_string(),
+    }
+  }
+  fn get_names(&self) -> (Option<&String>, Option<&String>, Option<&String>) {
+    match &self.r#type {
+      AccountType::Admin {
+        first_name,
+        last_name,
+      }
+      | AccountType::Individual {
+        first_name,
+        last_name,
+      } => (Some(first_name), Some(last_name), None),
+      AccountType::Company { company_name } => (None, None, Some(company_name)),
     }
   }
 }
@@ -79,6 +93,19 @@ impl AccountNameTrait for DBAccount {
       AccountType::Company { company_name } => company_name.to_string(),
     }
   }
+  fn get_names(&self) -> (Option<&String>, Option<&String>, Option<&String>) {
+    match &self.r#type {
+      AccountType::Admin {
+        first_name,
+        last_name,
+      }
+      | AccountType::Individual {
+        first_name,
+        last_name,
+      } => (Some(first_name), Some(last_name), None),
+      AccountType::Company { company_name } => (None, None, Some(company_name)),
+    }
+  }
 }
 
 impl AccountNameTrait for CompactAccount {
@@ -93,6 +120,19 @@ impl AccountNameTrait for CompactAccount {
         last_name,
       } => format!("{} {}", first_name, last_name),
       AccountType::Company { company_name } => company_name.to_string(),
+    }
+  }
+  fn get_names(&self) -> (Option<&String>, Option<&String>, Option<&String>) {
+    match &self.r#type {
+      AccountType::Admin {
+        first_name,
+        last_name,
+      }
+      | AccountType::Individual {
+        first_name,
+        last_name,
+      } => (Some(first_name), Some(last_name), None),
+      AccountType::Company { company_name } => (None, None, Some(company_name)),
     }
   }
 }

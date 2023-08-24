@@ -1,222 +1,214 @@
-use super::model::{Account, AccountType, CompactAccount, DBAccount};
-use crate::_utils::{
-  database::{db_thing_to_id, DBRecord},
-  error::DataAccessError,
-  string::escape_single_quote,
-};
+use super::model::{Account, AccountNameTrait, CompactAccount, DBAccount};
+use crate::_utils::error::DataAccessError;
+use serde_json::json;
+use sqlx::{Pool, Row, Sqlite};
 use std::sync::Arc;
-use surrealdb::{engine::remote::ws::Client, Surreal};
 
 pub struct AccountRepository {
-  main_db: Arc<Surreal<Client>>,
+  main_sql_db: Arc<Pool<Sqlite>>,
 }
 
 impl AccountRepository {
-  pub fn new(main_db: Arc<Surreal<Client>>) -> Self {
-    Self { main_db }
-  }
-
-  pub async fn get_many_compact_accounts_by_filter(
-    &self,
-    filter: &str,
-    limit: u32,
-    start: u32,
-  ) -> Result<Vec<CompactAccount>, DataAccessError> {
-    let query = format!(
-      r#"
-      SELECT slug, type, first_name, last_name, company_name, id.id as id FROM account WHERE {} LIMIT {} START {}
-      "#,
-      filter,
-      if limit > 0 { limit } else { 1 },
-      start
-    );
-
-    let query_result = self.main_db.query(&query).await;
-
-    match query_result {
-      Ok(mut query_result) => {
-        let query_result_string = format!("{:?}", query_result);
-        let accounts: Result<Vec<CompactAccount>, _> = query_result.take(0);
-        if accounts.as_ref().is_err() {
-          tracing::error!(
-            "Error while getting many accounts by filter, error: {:?} | query: {}",
-            accounts.as_ref(),
-            query_result_string
-          );
-          return Err(DataAccessError::InternalError);
-        }
-        if accounts.as_ref().unwrap().len() == 0 {
-          return Ok(vec![]);
-        }
-
-        let account = accounts.unwrap();
-
-        Ok(account)
-      }
-      Err(_) => Err(DataAccessError::InternalError),
-    }
+  pub fn new(main_sql_db: Arc<Pool<Sqlite>>) -> Self {
+    Self { main_sql_db }
   }
 
   pub async fn get_many_compact_accounts_by_ids(
     &self,
     ids: Vec<u32>,
   ) -> Result<Vec<CompactAccount>, DataAccessError> {
-    self
-      .get_many_compact_accounts_by_filter(
-        &format!(
-          "array::any([{}])",
-          ids
-            .iter()
-            .map(|id| format!("id.id={}", id))
-            .collect::<Vec<String>>()
-            .join(", "),
-        ),
-        ids.len() as u32,
-        0,
-      )
-      .await
+    let conn = self.main_sql_db.acquire().await;
+    if conn.is_err() {
+      tracing::error!("Error while getting sql connection: {:?}", conn);
+      return Err(DataAccessError::InternalError);
+    }
+    let mut conn = conn.unwrap();
+
+    // @TODO-ZM: use sqlx::query!
+    let result = sqlx::query(
+      r#"
+      SELECT id, slug, type, first_name, last_name, company_name
+      FROM account
+      WHERE id IN ($1)
+      "#,
+    )
+    .bind(
+      &ids
+        .iter()
+        .map(|id| id.to_string())
+        .collect::<Vec<String>>()
+        .join(","),
+    )
+    .fetch_all(&mut *conn)
+    .await;
+
+    if result.is_err() {
+      tracing::error!(
+        "Error while getting many compact accounts by ids: {:?}",
+        result.err()
+      );
+      return Err(DataAccessError::InternalError);
+    }
+    let result = result.unwrap();
+
+    let mut compact_accounts = vec![];
+
+    for row in result {
+      let json_account = json!({
+        "id": row.get::<u32, _>("id"),
+        "slug": row.get::<String, _>("slug"),
+        "type": row.get::<String, _>("type"),
+        "first_name": row.get::<String, _>("first_name"),
+        "last_name": row.get::<String, _>("last_name"),
+        "company_name": row.get::<String, _>("company_name"),
+      });
+
+      let compact_account = serde_json::from_value::<CompactAccount>(json_account);
+      if compact_account.is_err() {
+        tracing::error!(
+          "Error while getting many compact accounts by ids: {:?}",
+          compact_account.err()
+        );
+        return Err(DataAccessError::InternalError);
+      }
+      let compact_account = compact_account.unwrap();
+
+      compact_accounts.push(compact_account);
+    }
+
+    Ok(compact_accounts)
   }
 
   pub async fn get_one_account_by_id(&self, id: u32) -> Result<Account, DataAccessError> {
-    let query = format!(
-      r#"
-      SELECT *, id.id as id FROM account:{{ id: {} }}
-      "#,
-      id
-    );
-
-    let query_result = self.main_db.query(&query).await;
-
-    match query_result {
-      Ok(mut query_result) => {
-        let account: Result<Option<Account>, _> = query_result.take(0);
-        if account.as_ref().is_err() {
-          tracing::error!("Error while getting one account by id: {:?}", query_result);
-          return Err(DataAccessError::InternalError);
-        }
-        if account.as_ref().unwrap().is_none() {
-          // @TODO-ZM: stringify query_result before calling .take
-          tracing::info!("No account found with id: {} : {:?}", id, query_result);
-          return Err(DataAccessError::NotFound);
-        }
-
-        let account = account.unwrap().unwrap();
-
-        Ok(account)
-      }
-      Err(_) => Err(DataAccessError::InternalError),
+    let conn = self.main_sql_db.acquire().await;
+    if conn.is_err() {
+      tracing::error!("Error while getting sql connection: {:?}", conn);
+      return Err(DataAccessError::InternalError);
     }
+    let mut conn = conn.unwrap();
+
+    // @TODO-ZM: use sqlx::query!
+    let result = sqlx::query(
+      r#"
+      SELECT id, email, slug, type, first_name, last_name, company_name, created_at
+      FROM account
+      WHERE id = $1
+      "#,
+    )
+    .bind(&id)
+    .fetch_one(&mut *conn)
+    .await;
+
+    if result.is_err() {
+      tracing::error!("Error while getting one account by id: {:?}", result.err());
+      return Err(DataAccessError::InternalError);
+    }
+    let result = result.unwrap();
+
+    let json_account = json!({
+      "id": result.get::<u32, _>("id"),
+      "email": result.get::<String, _>("email"),
+      "slug": result.get::<String, _>("slug"),
+      "type": result.get::<String, _>("type"),
+      "first_name": result.get::<String, _>("first_name"),
+      "last_name": result.get::<String, _>("last_name"),
+      "company_name": result.get::<String, _>("company_name"),
+      "created_at": result.get::<String, _>("created_at"),
+    });
+
+    let account = serde_json::from_value::<Account>(json_account);
+    if account.is_err() {
+      tracing::error!("Error while getting one account by id: {:?}", account.err());
+      return Err(DataAccessError::InternalError);
+    }
+    let account = account.unwrap();
+
+    Ok(account)
   }
 
   pub async fn get_one_account_by_email(&self, email: &String) -> Result<Account, DataAccessError> {
-    let query = format!(
-      r#"
-      SELECT *, id.id as id FROM account WHERE email = '{}'
-      "#,
-      escape_single_quote(&email)
-    );
-
-    let query_result = self.main_db.query(&query).await;
-
-    tracing::info!("query_result: {:?}", query);
-
-    match query_result {
-      Ok(mut query_result) => {
-        let account: Result<Option<Account>, _> = query_result.take(0);
-        if account.as_ref().is_err() {
-          tracing::error!(
-            "Error while getting one account by email: {:?}",
-            query_result
-          );
-          return Err(DataAccessError::InternalError);
-        }
-        if account.as_ref().unwrap().is_none() {
-          tracing::info!(
-            "No account found with email: {} : {:?}",
-            email,
-            query_result
-          );
-          return Err(DataAccessError::NotFound);
-        }
-
-        let account = account.unwrap().unwrap();
-
-        Ok(account)
-      }
-      Err(_) => Err(DataAccessError::InternalError),
+    let conn = self.main_sql_db.acquire().await;
+    if conn.is_err() {
+      tracing::error!("Error while getting sql connection: {:?}", conn);
+      return Err(DataAccessError::InternalError);
     }
+    let mut conn = conn.unwrap();
+
+    // @TODO-ZM: use sqlx::query!
+    let result = sqlx::query(
+      r#"
+      SELECT id, email, slug, type, first_name, last_name, company_name, created_at
+      FROM account
+      WHERE email = $1
+      "#,
+    )
+    .bind(&email)
+    .fetch_one(&mut *conn)
+    .await;
+
+    if result.is_err() {
+      tracing::error!(
+        "Error while getting one account by email: {:?}",
+        result.err()
+      );
+      return Err(DataAccessError::InternalError);
+    }
+    let result = result.unwrap();
+
+    let json_account = json!({
+      "id": result.get::<u32, _>("id"),
+      "email": result.get::<String, _>("email"),
+      "slug": result.get::<String, _>("slug"),
+      "type": result.get::<String, _>("type"),
+      "first_name": result.get::<String, _>("first_name"),
+      "last_name": result.get::<String, _>("last_name"),
+      "company_name": result.get::<String, _>("company_name"),
+      "created_at": result.get::<String, _>("created_at"),
+    });
+
+    let account = serde_json::from_value::<Account>(json_account);
+    if account.is_err() {
+      tracing::error!(
+        "Error while getting one account by email: {:?}",
+        account.err()
+      );
+      return Err(DataAccessError::InternalError);
+    }
+    let account = account.unwrap();
+
+    Ok(account)
   }
 
   pub async fn create_one_account(&self, account: &DBAccount) -> Result<u32, DataAccessError> {
-    let query = format!(
-      r#"
-      BEGIN TRANSACTION;
-
-      LET $count = (SELECT count() FROM account GROUP BY count)[0].count || 0;
-
-      CREATE account:{{ id: $count }} CONTENT {{
-        email: '{}',
-        slug: '{}',
-        type: '{}',
-        {}
-      }};
-
-      COMMIT TRANSACTION;
-      "#,
-      escape_single_quote(&account.email),
-      escape_single_quote(&account.slug),
-      escape_single_quote(&account.r#type.to_string()),
-      match &account.r#type {
-        AccountType::Company { company_name } => format!("company_name: '{}'", company_name),
-        AccountType::Admin {
-          first_name,
-          last_name,
-        }
-        | AccountType::Individual {
-          first_name,
-          last_name,
-        } => {
-          format!(
-            "first_name: '{}', last_name: '{}'",
-            escape_single_quote(&first_name),
-            escape_single_quote(&last_name)
-          )
-        }
-      },
-    );
-
-    let query_result = self.main_db.query(&query).await;
-    match query_result {
-      Ok(mut query_result) => {
-        let record: Result<Option<DBRecord>, _> = query_result.take(1);
-
-        match record {
-          Ok(record) => match record {
-            Some(record) => {
-              let id = db_thing_to_id(&record.id);
-              match id {
-                Some(id) => return Ok(id),
-                None => {
-                  tracing::error!("failed to get created account id {:?}", record);
-                  return Err(DataAccessError::InternalError);
-                }
-              }
-            }
-            None => {
-              tracing::error!("failed to get created account record {:?}", record);
-              return Err(DataAccessError::InternalError);
-            }
-          },
-          Err(e) => {
-            tracing::error!("failed to get created account record {:?}", e);
-            return Err(DataAccessError::InternalError);
-          }
-        }
-      }
-      Err(e) => {
-        tracing::error!("failed to create account {:?}, query {:?}", e, &query);
-        return Err(DataAccessError::CreationError);
-      }
+    let conn = self.main_sql_db.acquire().await;
+    if conn.is_err() {
+      tracing::error!("Error while getting sql connection: {:?}", conn);
+      return Err(DataAccessError::InternalError);
     }
+    let mut conn = conn.unwrap();
+
+    let (first_name, last_name, company_name) = account.get_names();
+
+    let db_result = sqlx::query(
+      r#"
+      INSERT INTO account (email, slug, type, first_name, last_name, company_name)
+      VALUES ($1, $2, $3, $4, $5, $6)
+      "#,
+    )
+    .bind(&account.email)
+    .bind(&account.slug)
+    .bind(&account.r#type.to_string())
+    .bind(&first_name)
+    .bind(&last_name)
+    .bind(&company_name)
+    .execute(&mut *conn)
+    .await;
+    if db_result.is_err() {
+      tracing::error!("Error while creating one account: {:?}", db_result);
+      return Err(DataAccessError::InternalError);
+    }
+    let id = db_result.unwrap().last_insert_rowid() as u32;
+
+    Ok(id)
   }
 }

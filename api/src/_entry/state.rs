@@ -78,7 +78,7 @@ pub async fn create_app_state() -> Result<AppState, BootError> {
   let search_service = Arc::new(SearchService::new(Arc::clone(&search_db)));
   let post_repository = Arc::new(PostRepository::new(Arc::clone(&main_db)));
   let tag_repository = Arc::new(TagRepository::new(Arc::clone(&main_db)));
-  let account_repository = Arc::new(AccountRepository::new(Arc::clone(&main_db)));
+  let account_repository = Arc::new(AccountRepository::new(Arc::clone(&main_sql_db)));
   let task_repository = Arc::new(TaskRepository::new(Arc::clone(&main_db)));
   let email_service = Arc::new(EmailService::new(Arc::clone(&config_service)));
   let auth_service = Arc::new(AuthService::new(
