@@ -83,7 +83,10 @@
       "command": [
         "docker rm -f $(docker ps -aqf \"name=ajs-db-surrealdb\") || true",
         "&& docker build -t ajs-db-surrealdb -f surrealdb.Dockerfile .",
-        "&& docker run -d --name=ajs-db-surrealdb -p 7070:7070 -v ./surrealdb_data:/surrealdb_data ajs-db-surrealdb"
+        "&& docker run -d --name=ajs-db-surrealdb -p 7070:7070 -v ./surrealdb_data:/surrealdb_data ajs-db-surrealdb",
+        "&& mkdir -p ./sqlite_db_data || true",
+        "&& DATABASE_URL=\"sqlite:sqlite_db_data/main.db\" sqlx database create",
+        "&& DATABASE_URL=\"sqlite:sqlite_db_data/search.db\" sqlx database create"
       ],
       "problemMatcher": [],
       "options": { "cwd": "${workspaceFolder}/api" }

@@ -1,4 +1,4 @@
-use super::database::{create_db_client, create_kv_db};
+use super::database::{create_db_client, create_kv_db, create_sql_db};
 use crate::{
   _utils::error::BootError, account::repository::AccountRepository, ai::service::AIService,
   auth::service::AuthService, config::service::ConfigService, email::service::EmailService,
@@ -6,6 +6,7 @@ use crate::{
   security::service::SecurityService, tag::repository::TagRepository,
   task::repository::TaskRepository,
 };
+use sqlx::{Pool, Sqlite};
 use std::sync::Arc;
 use surrealdb::{engine::remote::ws::Client, Surreal};
 
@@ -13,6 +14,8 @@ use surrealdb::{engine::remote::ws::Client, Surreal};
 pub struct AppState {
   pub main_db: Arc<Surreal<Client>>,
   pub search_db: Arc<Surreal<Client>>,
+  pub main_sql_db: Arc<Pool<Sqlite>>,
+  pub search_sql_db: Arc<Pool<Sqlite>>,
   pub main_kv_db: Arc<sled::Db>,
   pub rate_limit_kv_db: Arc<sled::Db>,
   pub post_repository: Arc<PostRepository>,
@@ -29,6 +32,21 @@ pub struct AppState {
 
 pub async fn create_app_state() -> Result<AppState, BootError> {
   let config_service = Arc::new(ConfigService::new());
+
+  let main_sql_db = Arc::new(
+    create_sql_db(
+      super::database::SQLDBName::Main,
+      "sqlite:sqlite_db_data".to_string(),
+    )
+    .await?,
+  );
+  let search_sql_db = Arc::new(
+    create_sql_db(
+      super::database::SQLDBName::Search,
+      "sqlite:sqlite_db_data".to_string(),
+    )
+    .await?,
+  );
 
   let main_db = Arc::new(create_db_client("asj".to_string(), "main".to_string(), None).await?);
   let search_db = Arc::new(
@@ -73,6 +91,8 @@ pub async fn create_app_state() -> Result<AppState, BootError> {
   Ok(AppState {
     main_db: Arc::clone(&main_db),
     search_db: Arc::clone(&search_db),
+    main_sql_db: Arc::clone(&main_sql_db),
+    search_sql_db: Arc::clone(&search_sql_db),
     main_kv_db: Arc::clone(&main_kv_db),
     rate_limit_kv_db: Arc::clone(&rate_limit_kv_db),
     post_repository: Arc::clone(&post_repository),

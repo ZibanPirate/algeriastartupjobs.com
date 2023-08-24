@@ -2,6 +2,7 @@ target
 ubuntu-target
 surrealdb_data
 kv_db_data
+sqlite_db_data
 
 .env
 production.env
