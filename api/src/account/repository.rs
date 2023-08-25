@@ -147,11 +147,15 @@ impl AccountRepository {
     .await;
 
     if result.is_err() {
-      tracing::error!(
-        "Error while getting one account by email: {:?}",
-        result.err()
-      );
-      return Err(DataAccessError::InternalError);
+      match result.err().unwrap() {
+        sqlx::Error::RowNotFound => {
+          return Err(DataAccessError::NotFound);
+        }
+        err => {
+          tracing::error!("Error while getting one account by email: {:?}", err);
+          return Err(DataAccessError::InternalError);
+        }
+      }
     }
     let result = result.unwrap();
 

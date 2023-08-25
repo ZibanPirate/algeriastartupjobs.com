@@ -49,18 +49,7 @@ pub async fn get_many_suggested_tags_for_post(
 
   let existing_tags = app_state
     .tag_repository
-    .get_many_compact_tags_by_filter(
-      &format!(
-        "array::any([{}])",
-        keywords
-          .iter()
-          .map(|keyword| format!("name='{}'", escape_single_quote(keyword)))
-          .collect::<Vec<String>>()
-          .join(", "),
-      ),
-      10,
-      0,
-    )
+    .get_many_compact_tags_by_names(keywords.clone())
     .await;
 
   if !existing_tags.is_ok() {
