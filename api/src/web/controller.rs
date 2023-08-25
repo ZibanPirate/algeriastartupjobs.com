@@ -159,7 +159,12 @@ pub async fn sitemap(State(app_state): State<AppState>) -> impl IntoResponse {
   // @TODO-ZM: fetch only published posts
   let all_posts = app_state
     .post_repository
-    .get_many_compact_posts_by_filter("true", "", count, 0)
+    .get_many_published_compact_posts(
+      "published_at",
+      crate::post::repository::PostOrderDirection::DESC,
+      count,
+      0,
+    )
     .await;
   if all_posts.is_err() {
     // @TODO-ZM: log error

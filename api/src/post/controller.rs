@@ -1,5 +1,3 @@
-use std::net::SocketAddr;
-
 use axum::{
   extract::{ConnectInfo, Path, State},
   response::IntoResponse,
@@ -9,7 +7,9 @@ use hyper::StatusCode;
 use rand::{distributions::Alphanumeric, prelude::Distribution, thread_rng};
 use serde::Deserialize;
 use serde_json::json;
+use std::net::SocketAddr;
 
+use super::model::DBPost;
 use crate::{
   _entry::state::AppState,
   _utils::{
@@ -23,14 +23,12 @@ use crate::{
   task::model::{DBTask, TaskName, TaskStatus, TaskType},
 };
 
-use super::model::{DBPost, PartialPost};
-
 pub async fn get_all_posts_for_feed(State(app_state): State<AppState>) -> impl IntoResponse {
   let compact_posts = app_state
     .post_repository
-    .get_many_compact_posts_by_filter(
-      "is_confirmed=true",
-      "ORDER BY published_at NUMERIC DESC",
+    .get_many_published_compact_posts(
+      "published_at",
+      super::repository::PostOrderDirection::DESC,
       20,
       0,
     )
@@ -344,7 +342,7 @@ pub async fn create_one_post_with_poster(
     .create_one_post(&DBPost {
       poster_id,
       slug: slugify(&body.post.title),
-      is_confirmed: false,
+      is_published: false,
       // @TODO-ZM: summarize description using AI
       short_description: body
         .post
@@ -464,20 +462,7 @@ pub async fn confirm_post(
 
   let update_result = app_state
     .post_repository
-    .update_many_posts_by_ids(
-      [body.post_id].to_vec(),
-      PartialPost {
-        id: None,
-        slug: None,
-        title: None,
-        poster_id: None,
-        short_description: None,
-        description: None,
-        tag_ids: None,
-        is_confirmed: Some(true),
-        published_at: Some(chrono::Utc::now().to_rfc3339()),
-      },
-    )
+    .publish_one_post_by_id(body.post_id)
     .await;
   if !update_result.is_ok() {
     // @TODO-ZM: log error reason
@@ -616,7 +601,7 @@ pub async fn create_one_post(
     .create_one_post(&DBPost {
       poster_id: poster.id,
       slug: slugify(&body.post.title),
-      is_confirmed: true,
+      is_published: true,
       // @TODO-ZM: summarize description using AI
       short_description: body
         .post

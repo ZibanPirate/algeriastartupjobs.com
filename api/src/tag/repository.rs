@@ -124,8 +124,8 @@ impl TagRepository {
 
     let db_result = sqlx::query(
       r#"
-      INSERT INTO tag (name, slug)
-      VALUES ($1, $2)
+      INSERT INTO tag (name, slug, created_at)
+      VALUES ($1, $2, strftime('%Y-%m-%dT%H:%M:%S.%fZ', 'now'))
       "#,
     )
     .bind(&tag.name)

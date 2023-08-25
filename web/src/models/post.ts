@@ -6,7 +6,7 @@ export interface Post {
   short_description: string;
   description: string;
   tag_ids: number[];
-  is_confirmed: boolean;
+  is_published: boolean;
   published_at: string;
 }
 

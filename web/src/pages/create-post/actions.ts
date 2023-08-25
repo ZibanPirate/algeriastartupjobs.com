@@ -118,7 +118,7 @@ export const createPostViaEmail = async (): Promise<void> => {
         description: post_description,
         poster_id: 0,
         tag_ids: tags.map((tag) => tag.id),
-        is_confirmed: false,
+        is_published: false,
         published_at: "",
       } as Omit<Post, "id">,
     });
@@ -157,7 +157,7 @@ export const createPost = async (): Promise<void> => {
         description: post_description,
         poster_id: 0,
         tag_ids: tags.map((tag) => tag.id),
-        is_confirmed: false,
+        is_published: false,
         published_at: "",
       } as Omit<Post, "id">,
     });

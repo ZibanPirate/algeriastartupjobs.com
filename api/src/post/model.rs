@@ -13,8 +13,8 @@ pub struct Post {
   pub short_description: String,
   pub description: String,
   pub tag_ids: Vec<u32>,
-  pub is_confirmed: bool,
   pub published_at: String,
+  pub is_published: bool,
 }
 
 pub trait PostTrait {
@@ -55,7 +55,7 @@ impl PartialPostTrait for PartialPost {
         .clone()
         .unwrap_or(fallback_post.description),
       tag_ids: self.tag_ids.clone().unwrap_or(fallback_post.tag_ids),
-      is_confirmed: self.is_confirmed.unwrap_or(fallback_post.is_confirmed),
+      is_published: self.is_published.unwrap_or(fallback_post.is_published),
       published_at: self
         .published_at
         .clone()

@@ -173,7 +173,7 @@ impl AccountRepository {
     let account = serde_json::from_value::<Account>(json_account);
     if account.is_err() {
       tracing::error!(
-        "Error while getting one account by email: {:?}",
+        "Error while parsing one account by email: {:?}",
         account.err()
       );
       return Err(DataAccessError::InternalError);
@@ -195,8 +195,8 @@ impl AccountRepository {
 
     let db_result = sqlx::query(
       r#"
-      INSERT INTO account (email, slug, type, first_name, last_name, company_name)
-      VALUES ($1, $2, $3, $4, $5, $6)
+      INSERT INTO account (email, slug, type, first_name, last_name, company_name, created_at)
+      VALUES ($1, $2, $3, $4, $5, $6, strftime('%Y-%m-%dT%H:%M:%S.%fZ', 'now'))
       "#,
     )
     .bind(&account.email)

@@ -8,5 +8,5 @@ CREATE TABLE account (
   first_name TEXT,
   last_name TEXT,
   company_name TEXT,
-  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+  created_at TEXT NOT NULL
 );
