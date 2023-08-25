@@ -1,5 +1,4 @@
 -- SQLite
--- create account table
 CREATE TABLE account (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   email TEXT UNIQUE NOT NULL,

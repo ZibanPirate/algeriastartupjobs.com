@@ -1,258 +1,162 @@
+use serde_json::json;
+use sqlx::{Pool, Row, Sqlite};
 use std::sync::Arc;
 
-use surrealdb::{engine::remote::ws::Client, Surreal};
-
-use crate::_utils::{
-  database::{db_thing_to_id, DBRecord},
-  error::DataAccessError,
-  string::escape_single_quote,
+use super::model::{DBTask, DBTaskTrait};
+use crate::{
+  _utils::{database::DBOrderDirection, error::DataAccessError},
+  task::model::Task,
 };
 
-use super::model::{CompactTask, DBTask, PartialTask, TaskName, TaskStatus, TaskType};
-
 pub struct TaskRepository {
-  main_db: Arc<Surreal<Client>>,
+  main_sql_db: Arc<Pool<Sqlite>>,
 }
 
 impl TaskRepository {
-  pub fn new(main_db: Arc<Surreal<Client>>) -> Self {
-    Self { main_db }
+  pub fn new(main_sql_db: Arc<Pool<Sqlite>>) -> Self {
+    Self { main_sql_db }
   }
 
-  pub async fn get_many_compact_tasks_by_filter(
+  pub async fn get_many_pending_indexing_tasks(
     &self,
-    filter: &str,
+    task_name: &str,
+    order_by: &str,
+    order_direction: DBOrderDirection,
     limit: u32,
     start: u32,
-  ) -> Result<Vec<CompactTask>, DataAccessError> {
-    let query = format!(
-      r#"
-      SELECT name, model_name, model_id, status, failure_reason, id.id as id FROM task WHERE {} LIMIT {} START {}
-      "#,
-      filter, limit, start
-    );
-
-    let query_result = self.main_db.query(&query).await;
-
-    match query_result {
-      Ok(mut query_result) => {
-        let query_result_string = format!("{:?}", query_result);
-        let tasks: Result<Vec<CompactTask>, _> = query_result.take(0);
-        if tasks.as_ref().is_err() {
-          tracing::error!(
-            "Error while getting many tasks by filter, error: {:?} | query: {}",
-            tasks.as_ref(),
-            query_result_string
-          );
-          return Err(DataAccessError::InternalError);
-        }
-        if tasks.as_ref().unwrap().len() == 0 {
-          return Ok(vec![]);
-        }
-
-        let task = tasks.unwrap();
-
-        Ok(task)
-      }
-      Err(_) => Err(DataAccessError::InternalError),
+  ) -> Result<Vec<Task>, DataAccessError> {
+    let conn = self.main_sql_db.acquire().await;
+    if conn.is_err() {
+      tracing::error!("Error while getting sql connection: {:?}", conn);
+      return Err(DataAccessError::InternalError);
     }
+    let mut conn = conn.unwrap();
+
+    // @TODO-ZM: figure out how query $ replacement work, there is some unneeded "magic" here
+    let db_result = sqlx::query(
+      format!(
+        r#"
+      SELECT *
+      FROM task
+      WHERE status = 'Pending' AND name = $1
+      ORDER BY {} {}
+      LIMIT $2
+      OFFSET $3
+      "#,
+        order_by, order_direction,
+      )
+      .as_str(),
+    )
+    .bind(task_name)
+    .bind(limit)
+    .bind(start)
+    .fetch_all(&mut *conn)
+    .await;
+
+    if db_result.is_err() {
+      tracing::error!(
+        "Error while getting many published tasks: {:?}",
+        db_result.err()
+      );
+      return Err(DataAccessError::InternalError);
+    }
+    let db_result = db_result.unwrap();
+
+    let mut tasks = Vec::new();
+
+    for row in db_result {
+      let json_task = json!({
+        "id": row.get::<u32, _>("id"),
+        "name": row.get::<String, _>("name"),
+        "model_name": row.get::<String, _>("model_name"),
+        "model_id": row.get::<u32, _>("model_id"),
+        "type": row.get::<String, _>("type"),
+        "manual_task_owner": row.get::<Option<String>, _>("manual_task_owner"),
+        "status": row.get::<String, _>("status"),
+        "failure_reason": row.get::<Option<String>, _>("failure_reason"),
+        "created_at": row.get::<String, _>("created_at"),
+        "updated_at": row.get::<String, _>("updated_at"),
+      });
+
+      let task = serde_json::from_value::<Task>(json_task);
+      if task.is_err() {
+        tracing::error!("Error while deserializing task: {:?}", task);
+        return Err(DataAccessError::InternalError);
+      }
+      let task = task.unwrap();
+
+      tasks.push(task);
+    }
+
+    Ok(tasks)
   }
 
   pub async fn create_one_task(&self, task: DBTask) -> Result<u32, DataAccessError> {
-    let query = format!(
-      r#"
-      BEGIN TRANSACTION;
-
-      LET $count = (SELECT count() FROM task GROUP BY count)[0].count || 0;
-
-      CREATE task:{{ id: $count }} CONTENT {{
-        name: '{}',
-        {}
-        type: '{}',
-        {}
-        status: '{}',
-        {}
-      }};
-
-      COMMIT TRANSACTION;
-      "#,
-      escape_single_quote(&task.name.to_string()),
-      match &task.name {
-        TaskName::Indexing {
-          model_name,
-          model_id,
-        } => format!(
-          r#"
-          model_name: '{}',
-          model_id: {},
-          "#,
-          model_name.to_string(),
-          model_id
-        ),
-        _ => "".to_string(),
-      },
-      escape_single_quote(&task.r#type.to_string()),
-      match &task.r#type {
-        TaskType::Manual { manual_task_owner } => format!(
-          r#"
-          manual_task_owner: '{}',
-          "#,
-          manual_task_owner,
-        ),
-        TaskType::Automated {} => "".to_string(),
-      },
-      escape_single_quote(&task.status.to_string()),
-      match &task.status {
-        TaskStatus::Failed { failure_reason } => format!(
-          r#"
-          failure_reason: '{}',
-          "#,
-          escape_single_quote(failure_reason),
-        ),
-        _ => "".to_string(),
-      }
-    );
-
-    let query_result = self.main_db.query(&query).await;
-    match query_result {
-      Ok(mut query_result) => {
-        let record: Result<Option<DBRecord>, _> = query_result.take(1);
-
-        match record {
-          Ok(record) => match record {
-            Some(record) => {
-              let id = db_thing_to_id(&record.id);
-              match id {
-                Some(id) => return Ok(id),
-                None => {
-                  tracing::error!("failed to get created task id {:?}", record);
-                  return Err(DataAccessError::InternalError);
-                }
-              }
-            }
-            None => {
-              tracing::error!("failed to get created task record {:?}", record);
-              return Err(DataAccessError::InternalError);
-            }
-          },
-          Err(e) => {
-            tracing::error!("failed to get created task record {:?}", e);
-            return Err(DataAccessError::InternalError);
-          }
-        }
-      }
-      Err(e) => {
-        tracing::error!("failed to create task {:?}, query {:?}", e, &query);
-        return Err(DataAccessError::CreationError);
-      }
+    let conn = self.main_sql_db.acquire().await;
+    if conn.is_err() {
+      tracing::error!("Error while getting sql connection: {:?}", conn);
+      return Err(DataAccessError::InternalError);
     }
+    let mut conn = conn.unwrap();
+    let (model_name, model_id) = task.get_indexing_task_info();
+    let (manual_task_owner) = task.get_manual_task_info();
+    let (failure_reason) = task.get_failed_task_info();
+
+    let db_result = sqlx::query(
+      r#"
+      INSERT INTO task (name, model_name, model_id, type, manual_task_owner, status, failure_reason, created_at, updated_at)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, strftime('%Y-%m-%dT%H:%M:%S.%fZ', 'now'), '')
+      "#,
+    )
+    .bind(task.name.to_string())
+    .bind(model_name)
+    .bind(model_id)
+    .bind(task.r#type.to_string())
+    .bind(manual_task_owner)
+    .bind(task.status.to_string())
+    .bind(failure_reason)
+    .execute(&mut *conn)
+    .await;
+
+    if db_result.is_err() {
+      tracing::error!("Error while creating one task: {:?}", db_result);
+      return Err(DataAccessError::InternalError);
+    }
+    let id = db_result.unwrap().last_insert_rowid() as u32;
+
+    Ok(id)
   }
 
-  pub async fn update_many_tasks_by_filter(
-    &self,
-    filter: &str,
-    task: PartialTask,
-  ) -> Result<(), DataAccessError> {
-    let query = format!(
-      r#"
-      UPDATE task MERGE {{
-        {}
-        {}
-        {}
-      }} WHERE {} RETURN NONE;
-      "#,
-      match task.name {
-        Some(name) => match name.clone() {
-          TaskName::Indexing {
-            model_name,
-            model_id,
-          } => format!(
-            r#"
-            name: '{}',
-            model_name: '{}',
-            model_id: {},
-            "#,
-            escape_single_quote(&name.to_string()),
-            model_name,
-            model_id
-          ),
-          _ => format!(
-            r#"
-            name: '{}',
-            "#,
-            escape_single_quote(&name.to_string()),
-          ),
-        },
-        None => "".to_string(),
-      },
-      match task.r#type {
-        Some(r#type) => match r#type.clone() {
-          TaskType::Manual { manual_task_owner } => format!(
-            r#"
-            type: '{}',
-            manual_task_owner: '{}',
-            "#,
-            escape_single_quote(&r#type.to_string()),
-            manual_task_owner,
-          ),
-          TaskType::Automated {} => format!(
-            r#"
-            type: '{}',
-            "#,
-            escape_single_quote(&r#type.to_string()),
-          ),
-        },
-        None => "".to_string(),
-      },
-      match task.status {
-        Some(status) => match status.clone() {
-          TaskStatus::Failed { failure_reason } => format!(
-            r#"
-            status: '{}',
-            failure_reason: '{}',
-            "#,
-            escape_single_quote(&status.to_string()),
-            escape_single_quote(&failure_reason),
-          ),
-          TaskStatus::Completed | TaskStatus::InProgress | TaskStatus::Pending => format!(
-            r#"
-            status: '{}',
-            "#,
-            escape_single_quote(&status.to_string()),
-          ),
-        },
-        None => "".to_string(),
-      },
-      filter,
-    );
-
-    let query_result = self.main_db.query(&query).await;
-    match query_result {
-      Ok(_) => Ok(()),
-      Err(e) => {
-        tracing::error!("failed to update task {:?}, query {:?}", e, &query);
-        return Err(DataAccessError::UpdateError);
-      }
+  pub async fn complete_many_tasks_by_ids(&self, ids: Vec<u32>) -> Result<(), DataAccessError> {
+    let conn = self.main_sql_db.acquire().await;
+    if conn.is_err() {
+      tracing::error!("Error while getting sql connection: {:?}", conn);
+      return Err(DataAccessError::InternalError);
     }
-  }
+    let mut conn = conn.unwrap();
 
-  pub async fn update_many_tasks_by_ids(
-    &self,
-    ids: Vec<u32>,
-    partial_task: PartialTask,
-  ) -> Result<(), DataAccessError> {
-    self
-      .update_many_tasks_by_filter(
-        &format!(
-          "array::any([{}])",
-          ids
-            .iter()
-            .map(|id| format!("id.id={}", id))
-            .collect::<Vec<String>>()
-            .join(", "),
-        ),
-        partial_task,
-      )
-      .await
+    let db_result = sqlx::query(
+      r#"
+      UPDATE task
+      SET status = 'Completed', updated_at = strftime('%Y-%m-%dT%H:%M:%S.%fZ', 'now')
+      WHERE id IN ($1)
+      "#,
+    )
+    .bind(
+      ids
+        .iter()
+        .map(|id| id.to_string())
+        .collect::<Vec<String>>()
+        .join(","),
+    )
+    .execute(&mut *conn)
+    .await;
+
+    if db_result.is_err() {
+      tracing::error!("Error while completing many tasks: {:?}", db_result);
+      return Err(DataAccessError::InternalError);
+    }
+
+    Ok(())
   }
 }

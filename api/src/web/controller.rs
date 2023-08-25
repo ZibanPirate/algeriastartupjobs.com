@@ -1,6 +1,8 @@
 use crate::{
   _entry::state::AppState,
-  _utils::{post_long_title::get_post_long_title, post_url::get_post_url},
+  _utils::{
+    database::DBOrderDirection, post_long_title::get_post_long_title, post_url::get_post_url,
+  },
 };
 use axum::{
   extract::{Path, State},
@@ -159,12 +161,7 @@ pub async fn sitemap(State(app_state): State<AppState>) -> impl IntoResponse {
   // @TODO-ZM: fetch only published posts
   let all_posts = app_state
     .post_repository
-    .get_many_published_compact_posts(
-      "published_at",
-      crate::post::repository::PostOrderDirection::DESC,
-      count,
-      0,
-    )
+    .get_many_published_compact_posts("published_at", DBOrderDirection::DESC, count, 0)
     .await;
   if all_posts.is_err() {
     // @TODO-ZM: log error

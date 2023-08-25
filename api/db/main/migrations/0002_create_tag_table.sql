@@ -1,5 +1,4 @@
 -- SQLite
--- create account table
 CREATE TABLE tag (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   name TEXT NOT NULL,

@@ -25,10 +25,8 @@ pub enum TaskName {
   RefreshingBKTree,
 }
 
-#[pick(CompactTask, [id, name, status], [Debug, Serialize, Deserialize, Clone])]
-#[partial(PartialTask)]
 #[derive(Debug, Serialize, Deserialize, Clone)]
-#[omit(DBTask, [id])] // @TODO-ZM: move this down for the other models too
+#[omit(DBTask, [id, created_at, updated_at])]
 pub struct Task {
   pub id: u32,
   #[serde(flatten)]
@@ -37,33 +35,36 @@ pub struct Task {
   pub r#type: TaskType,
   #[serde(flatten)]
   pub status: TaskStatus,
+  pub created_at: String,
+  pub updated_at: String,
 }
 
-pub trait TaskTrait {
-  fn to_compact_task(&self) -> CompactTask;
+pub trait DBTaskTrait {
+  fn get_indexing_task_info(&self) -> (Option<String>, Option<u32>);
+  fn get_manual_task_info(&self) -> (Option<u32>);
+  fn get_failed_task_info(&self) -> (Option<String>);
 }
 
-impl TaskTrait for Task {
-  fn to_compact_task(&self) -> CompactTask {
-    CompactTask {
-      id: self.id,
-      name: self.name.clone(),
-      status: self.status.clone(),
+impl DBTaskTrait for DBTask {
+  fn get_indexing_task_info(&self) -> (Option<String>, Option<u32>) {
+    match &self.name {
+      TaskName::Indexing {
+        model_name,
+        model_id,
+      } => (Some(model_name.clone()), Some(*model_id)),
+      _ => (None, None),
     }
   }
-}
-
-pub trait PartialTaskTrait {
-  fn to_task(&self, fallback_task: Task) -> Task;
-}
-
-impl PartialTaskTrait for PartialTask {
-  fn to_task(&self, fallback_task: Task) -> Task {
-    Task {
-      id: self.id.unwrap_or(fallback_task.id),
-      name: self.name.clone().unwrap_or(fallback_task.name),
-      r#type: self.r#type.clone().unwrap_or(fallback_task.r#type),
-      status: self.status.clone().unwrap_or(fallback_task.status),
+  fn get_manual_task_info(&self) -> (Option<u32>) {
+    match &self.r#type {
+      TaskType::Manual { manual_task_owner } => (Some(*manual_task_owner)),
+      _ => (None),
+    }
+  }
+  fn get_failed_task_info(&self) -> (Option<String>) {
+    match &self.status {
+      TaskStatus::Failed { failure_reason } => (Some(failure_reason.clone())),
+      _ => (None),
     }
   }
 }

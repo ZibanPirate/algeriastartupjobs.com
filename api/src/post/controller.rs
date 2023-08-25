@@ -13,6 +13,7 @@ use super::model::DBPost;
 use crate::{
   _entry::state::AppState,
   _utils::{
+    database::DBOrderDirection,
     error::{DataAccessError, SecurityError},
     string::slugify,
     vec::sort_and_dedup_vec,
@@ -26,12 +27,7 @@ use crate::{
 pub async fn get_all_posts_for_feed(State(app_state): State<AppState>) -> impl IntoResponse {
   let compact_posts = app_state
     .post_repository
-    .get_many_published_compact_posts(
-      "published_at",
-      super::repository::PostOrderDirection::DESC,
-      20,
-      0,
-    )
+    .get_many_published_compact_posts("published_at", DBOrderDirection::DESC, 20, 0)
     .await;
   if !compact_posts.is_ok() {
     return StatusCode::INTERNAL_SERVER_ERROR.into_response();

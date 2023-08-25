@@ -1,5 +1,6 @@
 use regex::Regex;
 use serde::Deserialize;
+use strum_macros::Display;
 use surrealdb::sql::Thing;
 
 #[derive(Debug, Deserialize)]
@@ -29,4 +30,10 @@ pub fn db_thing_to_id(thing: &Thing) -> Option<u32> {
     }
     Err(_) => None,
   }
+}
+
+#[derive(Display)]
+pub enum DBOrderDirection {
+  ASC,
+  DESC,
 }

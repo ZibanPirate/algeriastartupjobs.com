@@ -12,7 +12,6 @@ use surrealdb::{engine::remote::ws::Client, Surreal};
 
 #[derive(Clone)]
 pub struct AppState {
-  pub main_db: Arc<Surreal<Client>>,
   pub search_db: Arc<Surreal<Client>>,
   pub main_sql_db: Arc<Pool<Sqlite>>,
   pub search_sql_db: Arc<Pool<Sqlite>>,
@@ -48,7 +47,6 @@ pub async fn create_app_state() -> Result<AppState, BootError> {
     .await?,
   );
 
-  let main_db = Arc::new(create_db_client("asj".to_string(), "main".to_string(), None).await?);
   let search_db = Arc::new(
     create_db_client(
       "asj".to_string(),
@@ -79,7 +77,7 @@ pub async fn create_app_state() -> Result<AppState, BootError> {
   let post_repository = Arc::new(PostRepository::new(Arc::clone(&main_sql_db)));
   let tag_repository = Arc::new(TagRepository::new(Arc::clone(&main_sql_db)));
   let account_repository = Arc::new(AccountRepository::new(Arc::clone(&main_sql_db)));
-  let task_repository = Arc::new(TaskRepository::new(Arc::clone(&main_db)));
+  let task_repository = Arc::new(TaskRepository::new(Arc::clone(&main_sql_db)));
   let email_service = Arc::new(EmailService::new(Arc::clone(&config_service)));
   let auth_service = Arc::new(AuthService::new(
     Arc::clone(&config_service),
@@ -89,7 +87,6 @@ pub async fn create_app_state() -> Result<AppState, BootError> {
   let ai_service = Arc::new(AIService::new(Arc::clone(&config_service)));
 
   Ok(AppState {
-    main_db: Arc::clone(&main_db),
     search_db: Arc::clone(&search_db),
     main_sql_db: Arc::clone(&main_sql_db),
     search_sql_db: Arc::clone(&search_sql_db),

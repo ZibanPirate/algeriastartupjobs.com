@@ -1,19 +1,12 @@
 use serde_json::json;
 use sqlx::{Pool, Row, Sqlite};
 use std::sync::Arc;
-use strum_macros::Display;
 
 use super::model::{CompactPost, DBPost, Post};
-use crate::_utils::error::DataAccessError;
+use crate::_utils::{database::DBOrderDirection, error::DataAccessError};
 
 pub struct PostRepository {
   main_sql_db: Arc<Pool<Sqlite>>,
-}
-
-#[derive(Display)]
-pub enum PostOrderDirection {
-  ASC,
-  DESC,
 }
 
 impl PostRepository {
@@ -24,7 +17,7 @@ impl PostRepository {
   pub async fn get_many_published_compact_posts(
     &self,
     order_by: &str,
-    order_direction: PostOrderDirection,
+    order_direction: DBOrderDirection,
     limit: u32,
     start: u32,
   ) -> Result<Vec<CompactPost>, DataAccessError> {
@@ -279,6 +272,7 @@ impl PostRepository {
     }
     let mut conn = conn.unwrap();
 
+    // @TODO-ZM: use * instead of listing all the fields?
     let db_result = sqlx::query(
       r#"
       SELECT id, slug, title, poster_id, short_description, description, tag_ids, published_at, is_published

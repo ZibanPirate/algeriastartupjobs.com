@@ -1,7 +1,7 @@
 use crate::{
   _entry::state::AppState,
-  _utils::error::BootError,
-  task::model::{DBTask, PartialTask, TaskName, TaskStatus, TaskType},
+  _utils::{database::DBOrderDirection, error::BootError},
+  task::model::{DBTask, TaskName, TaskStatus, TaskType},
 };
 use std::{
   sync::{
@@ -21,7 +21,7 @@ async fn run_indexing_cron_job(app_state: AppState) {
 
   let tasks = app_state
     .task_repository
-    .get_many_compact_tasks_by_filter("name='Indexing' AND status='Pending'", 10, 0)
+    .get_many_pending_indexing_tasks("Indexing", "created_at", DBOrderDirection::DESC, 10, 0)
     .await;
 
   if tasks.is_err() {
@@ -111,15 +111,7 @@ async fn run_indexing_cron_job(app_state: AppState) {
 
   let task_status_update_result = app_state
     .task_repository
-    .update_many_tasks_by_ids(
-      task_ids,
-      PartialTask {
-        id: None,
-        name: None,
-        r#type: None,
-        status: Some(TaskStatus::Completed),
-      },
-    )
+    .complete_many_tasks_by_ids(task_ids)
     .await;
 
   if task_status_update_result.is_err() {
@@ -129,7 +121,7 @@ async fn run_indexing_cron_job(app_state: AppState) {
 
   let more_tasks = app_state
     .task_repository
-    .get_many_compact_tasks_by_filter("name='Indexing' AND status='Pending'", 1, 0)
+    .get_many_pending_indexing_tasks("Indexing", "created_at", DBOrderDirection::DESC, 1, 0)
     .await;
 
   if more_tasks.is_err() {
@@ -163,7 +155,13 @@ async fn run_bk_tree_refresher_cron_job(app_state: AppState, has_job_ran_once: b
 
   let tasks = app_state
     .task_repository
-    .get_many_compact_tasks_by_filter("name='RefreshingBKTree' AND status='Pending'", 100, 0)
+    .get_many_pending_indexing_tasks(
+      "RefreshingBKTree",
+      "created_at",
+      DBOrderDirection::DESC,
+      1_000,
+      0,
+    )
     .await;
 
   if tasks.is_err() {
@@ -197,15 +195,7 @@ async fn run_bk_tree_refresher_cron_job(app_state: AppState, has_job_ran_once: b
 
   let task_status_update_result = app_state
     .task_repository
-    .update_many_tasks_by_ids(
-      task_ids,
-      PartialTask {
-        id: None,
-        name: None,
-        r#type: None,
-        status: Some(TaskStatus::Completed),
-      },
-    )
+    .complete_many_tasks_by_ids(task_ids)
     .await;
 
   if task_status_update_result.is_err() {
