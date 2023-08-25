@@ -9,14 +9,6 @@
 # @baseUrl = https://production.api.algeriastartupjobs.com
 
 ###
-POST {{baseUrl}}/test/seed
-x-admin-auth-code: password123
-
-###
-POST {{baseUrl}}/test/clean
-x-admin-auth-code: password123
-
-###
 GET {{dbBaseUrl}}/export
 Authorization: Basic root root
 NS: asj
@@ -61,6 +53,7 @@ DB: main
 DELETE account;
 DELETE post;
 DELETE tag;
+DELETE task;
 
 ###
 POST {{dbBaseUrl}}/sql

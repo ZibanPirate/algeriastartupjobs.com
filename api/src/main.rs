@@ -1,5 +1,4 @@
 mod _entry;
-mod _test;
 mod _utils;
 mod account;
 mod ai;

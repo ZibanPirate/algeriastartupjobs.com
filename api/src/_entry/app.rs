@@ -1,5 +1,4 @@
 use crate::{
-  _test::controller::create_test_router,
   _utils::error::BootError,
   account::controller::create_account_router,
   auth::controller::create_auth_router,
@@ -68,8 +67,6 @@ async fn create_app(app_state: AppState) -> Result<Router, BootError> {
     .nest("/auth", create_auth_router())
     .nest("/web/", create_web_router())
     .nest("/import", create_import_router())
-    // @TODO-ZM: route this only on development
-    .nest("/test", create_test_router())
     .route(
       "/",
       get(|| async {
