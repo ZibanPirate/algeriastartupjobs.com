@@ -136,18 +136,19 @@ impl TaskRepository {
     let mut conn = conn.unwrap();
 
     let db_result = sqlx::query(
-      r#"
+      format!(
+        r#"
       UPDATE task
       SET status = 'Completed', updated_at = strftime('%Y-%m-%dT%H:%M:%S.%fZ', 'now')
-      WHERE id IN ($1)
+      WHERE id IN ({})
       "#,
-    )
-    .bind(
-      ids
-        .iter()
-        .map(|id| id.to_string())
-        .collect::<Vec<String>>()
-        .join(","),
+        ids
+          .iter()
+          .map(|id| id.to_string())
+          .collect::<Vec<String>>()
+          .join(","),
+      )
+      .as_str(),
     )
     .execute(&mut *conn)
     .await;

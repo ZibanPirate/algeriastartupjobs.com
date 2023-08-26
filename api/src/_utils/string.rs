@@ -29,7 +29,10 @@ pub fn escape_new_line_with_br(s: &String) -> String {
 
 // @TODO-ZM: change this to get_searchable_words
 pub fn get_words<'a>(paragraph: &'a str) -> impl Iterator<Item = &'a str> {
-  paragraph.split(|c: char| !c.is_alphanumeric())
+  paragraph
+    .split(|c: char| !c.is_alphanumeric())
+    .into_iter()
+    .filter(|s| !s.is_empty())
 }
 
 // @TODO-ZM: filter out common words
@@ -38,5 +41,6 @@ pub fn get_searchable_words(paragraph: &String) -> Vec<String> {
     .split(|c: char| !c.is_alphanumeric())
     .into_iter()
     .map(|s| s.to_string())
+    .filter(|s| !s.is_empty())
     .collect()
 }

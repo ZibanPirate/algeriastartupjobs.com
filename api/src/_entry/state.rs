@@ -1,4 +1,4 @@
-use super::database::{create_db_client, create_kv_db, create_sql_db};
+use super::database::{create_kv_db, create_sql_db};
 use crate::{
   _utils::error::BootError, account::repository::AccountRepository, ai::service::AIService,
   auth::service::AuthService, config::service::ConfigService, email::service::EmailService,
@@ -6,17 +6,12 @@ use crate::{
   security::service::SecurityService, tag::repository::TagRepository,
   task::repository::TaskRepository,
 };
-use sqlx::{Pool, Sqlite};
 use std::sync::Arc;
-use surrealdb::{engine::remote::ws::Client, Surreal};
 
 #[derive(Clone)]
 pub struct AppState {
-  pub search_db: Arc<Surreal<Client>>,
-  pub main_sql_db: Arc<Pool<Sqlite>>,
-  pub search_sql_db: Arc<Pool<Sqlite>>,
+  // @TODO-ZM: remove this from app state
   pub main_kv_db: Arc<sled::Db>,
-  pub rate_limit_kv_db: Arc<sled::Db>,
   pub post_repository: Arc<PostRepository>,
   pub tag_repository: Arc<TagRepository>,
   pub account_repository: Arc<AccountRepository>,
@@ -47,24 +42,8 @@ pub async fn create_app_state() -> Result<AppState, BootError> {
     .await?,
   );
 
-  let search_db = Arc::new(
-    create_db_client(
-      "asj".to_string(),
-      "search".to_string(),
-      Some(
-        r#"
-        DEFINE INDEX word ON TABLE word FIELDS word;
-        DEFINE INDEX model_id ON TABLE word FIELDS model_id;
-        DEFINE INDEX appear_in ON TABLE word FIELDS appear_in;
-      "#
-        .to_string(),
-      ),
-    )
-    .await?,
-  );
   let main_kv_db =
     Arc::new(create_kv_db(format!("{}/main", config_service.get_config().kv_db_dir)).await?);
-
   let rate_limit_kv_db = Arc::new(
     create_kv_db(format!(
       "{}/rate_limit",
@@ -73,7 +52,7 @@ pub async fn create_app_state() -> Result<AppState, BootError> {
     .await?,
   );
 
-  let search_service = Arc::new(SearchService::new(Arc::clone(&search_db)));
+  let search_service = Arc::new(SearchService::new(Arc::clone(&search_sql_db)));
   let post_repository = Arc::new(PostRepository::new(Arc::clone(&main_sql_db)));
   let tag_repository = Arc::new(TagRepository::new(Arc::clone(&main_sql_db)));
   let account_repository = Arc::new(AccountRepository::new(Arc::clone(&main_sql_db)));
@@ -87,11 +66,7 @@ pub async fn create_app_state() -> Result<AppState, BootError> {
   let ai_service = Arc::new(AIService::new(Arc::clone(&config_service)));
 
   Ok(AppState {
-    search_db: Arc::clone(&search_db),
-    main_sql_db: Arc::clone(&main_sql_db),
-    search_sql_db: Arc::clone(&search_sql_db),
     main_kv_db: Arc::clone(&main_kv_db),
-    rate_limit_kv_db: Arc::clone(&rate_limit_kv_db),
     post_repository: Arc::clone(&post_repository),
     tag_repository: Arc::clone(&tag_repository),
     account_repository: Arc::clone(&account_repository),

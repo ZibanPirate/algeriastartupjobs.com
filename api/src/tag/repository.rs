@@ -27,13 +27,16 @@ impl TagRepository {
 
     // @TODO-ZM: use sqlx::query!
     let result = sqlx::query(
-      r#"
+      format!(
+        r#"
       SELECT id, name, slug
       FROM tag
-      WHERE name In ($1)
+      WHERE name IN ({})
       "#,
+        names.join(",")
+      )
+      .as_str(),
     )
-    .bind(names.join(","))
     .fetch_all(&mut *conn)
     .await;
 
@@ -74,18 +77,19 @@ impl TagRepository {
 
     // @TODO-ZM: use sqlx::query!
     let result = sqlx::query(
-      r#"
+      format!(
+        r#"
       SELECT id, name, slug
       FROM tag
-      WHERE id In ($1)
+      WHERE id IN ({})
       "#,
-    )
-    .bind(
-      ids
-        .iter()
-        .map(|id| id.to_string())
-        .collect::<Vec<String>>()
-        .join(","),
+        ids
+          .iter()
+          .map(|id| id.to_string())
+          .collect::<Vec<String>>()
+          .join(",")
+      )
+      .as_str(),
     )
     .fetch_all(&mut *conn)
     .await;

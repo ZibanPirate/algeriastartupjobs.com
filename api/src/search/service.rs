@@ -1,4 +1,9 @@
-use super::model::SearchRecord;
+use bk_tree::{metrics, BKTree};
+use itertools::Itertools;
+use serde::{Deserialize, Serialize};
+use sqlx::{Pool, QueryBuilder, Row, Sqlite};
+use std::sync::{Arc, Mutex};
+
 use crate::{
   _utils::{
     error::SearchError,
@@ -8,11 +13,7 @@ use crate::{
   post::model::Post,
   tag::model::CompactTag,
 };
-use bk_tree::{metrics, BKTree};
-use itertools::Itertools;
-use serde::{Deserialize, Serialize};
-use std::sync::{Arc, Mutex};
-use surrealdb::{engine::remote::ws::Client, Surreal};
+
 #[derive(Debug, Serialize, Deserialize)]
 struct WordIndex {
   word: String,
@@ -26,51 +27,62 @@ struct WordRecord {
 }
 
 pub struct SearchService {
-  search_db: Arc<Surreal<Client>>,
+  search_sql_db: Arc<Pool<Sqlite>>,
   bk_tree: Arc<Mutex<BKTree<String>>>,
 }
 
 impl SearchService {
-  pub fn new(search_db: Arc<Surreal<Client>>) -> Self {
+  pub fn new(search_sql_db: Arc<Pool<Sqlite>>) -> Self {
     Self {
-      search_db,
+      search_sql_db,
       bk_tree: Arc::new(Mutex::new(BKTree::new(metrics::Levenshtein))),
     }
   }
 
   pub async fn refresh_bk_tree(&self) -> Result<(), SearchError> {
-    let query = r#"
-      SELECT word from word WHERE appear_in IN ["post_title", "post_short_description"] GROUP BY word
-    "#.to_string();
+    let conn = self.search_sql_db.acquire().await;
+    if conn.is_err() {
+      tracing::error!(
+        "Error while getting sql connection to refresh bk tree: {:?}",
+        conn
+      );
+      return Err(SearchError::InternalError);
+    }
+    let mut conn = conn.unwrap();
 
-    let query_result = self.search_db.query(&query).await;
+    // @TODO-ZM: figure out how query $ replacement work, there is some unneeded "magic" here
+    let db_result = sqlx::query(
+      r#"
+        SELECT DISTINCT word
+        FROM word
+        WHERE appear_in IN ('post_title', 'post_short_description', 'post_tag_name', 'post_poster_display_name');
+      "#,
+    )
+    .fetch_all(&mut *conn)
+    .await;
 
-    match query_result {
-      Ok(mut query_result) => {
-        let records: Result<Vec<WordRecord>, _> = query_result.take(0);
+    if db_result.is_err() {
+      tracing::error!("Error while getting all words: {:?}", db_result.err());
+      return Err(SearchError::InternalError);
+    }
+    let db_result = db_result.unwrap();
 
-        match records {
-          Ok(records) => {
-            let words_count = records.len();
-            let mut bk_tree = self.bk_tree.lock().unwrap();
-            // @TODO-ZM: clean the tree before adding new words
+    let mut words = vec![];
 
-            for word_index in records {
-              bk_tree.add(word_index.word);
-            }
+    for row in db_result {
+      words.push(row.get::<String, _>("word"));
+    }
 
-            tracing::info!("BK-Tree refreshed with {} words", words_count);
-          }
-          Err(err) => {
-            tracing::error!("Failed to parse the query result, {}", err);
-            return Err(SearchError::InternalError);
-          }
-        }
-      }
-      Err(err) => {
-        tracing::error!("Failed to get words for bk-tree, {}", err);
-        return Err(SearchError::InternalError);
-      }
+    let bk_tree = self.bk_tree.lock();
+    if bk_tree.is_err() {
+      tracing::error!("Error while getting bk tree lock: {:?}", bk_tree.err());
+      return Err(SearchError::InternalError);
+    }
+    let mut bk_tree = bk_tree.unwrap();
+    // @TODO-ZM: clean the tree before adding new words
+
+    for word in words {
+      bk_tree.add(word);
     }
 
     Ok(())
@@ -146,23 +158,28 @@ impl SearchService {
       });
     }
 
-    let word_indexes_length = word_indexes.len();
-    for index in 0..word_indexes_length {
-      let word_index = &word_indexes[index];
+    let conn = self.search_sql_db.acquire().await;
+    if conn.is_err() {
+      tracing::error!("Error while getting sql connection to index: {:?}", conn);
+      return Err(SearchError::InternalError);
+    }
+    let mut conn = conn.unwrap();
 
-      let query = format!(
-        r#"CREATE word CONTENT {{
-          {}
-        }}"#,
-        serde_json::to_string(&word_index).unwrap()
-      );
+    let mut query_builder =
+      QueryBuilder::new("INSERT INTO word (word, model_type, model_id, appear_in) ");
 
-      let res = self.search_db.query(&query).await;
+    query_builder.push_values(word_indexes, |mut b, new_word_index| {
+      b.push_bind(new_word_index.word)
+        .push_bind("post")
+        .push_bind(new_word_index.model_id)
+        .push_bind(new_word_index.appear_in);
+    });
 
-      if res.is_err() {
-        tracing::error!("Failed to index the word: {}", res.err().unwrap());
-        return Err(SearchError::InternalError);
-      }
+    let db_result = query_builder.build().execute(&mut *conn).await;
+
+    if db_result.is_err() {
+      tracing::error!("Error while indexing posts: {:?}", db_result);
+      return Err(SearchError::InternalError);
     }
 
     Ok(())
@@ -227,91 +244,89 @@ impl SearchService {
     corrected_queries
   }
 
-  fn generate_search_query(&self, query: &String) -> String {
-    let search_query = format!(
-      r#"
-      SELECT math::sum(score) as score, model_id as id FROM (
-        SELECT model_id, ((
-            IF appear_in="post_title" THEN
-              100
-            ELSE IF appear_in="post_short_description" THEN
-              25
-            ELSE IF appear_in="post_tag_name" THEN
-              5
-            ELSE
-              1
-            END
-          ) * count) as score FROM (
-          SELECT count() as count, word, model_id, appear_in FROM word WHERE word IN [{}] GROUP BY word, model_id, appear_in
-        )
-      ) GROUP BY id ORDER BY score NUMERIC DESC LIMIT 10 START 0;
-      "#,
-      query
-        .split(" ")
-        .map(|word| format!(r#""{}""#, escape_double_quote(&word.to_lowercase())))
-        .collect::<Vec<String>>()
-        .join(", ")
-    );
-
-    search_query
-  }
-
   // @TODO-ZM: add pagination
   pub async fn search_posts(&self, query: &String) -> Result<Vec<u32>, SearchError> {
-    let corrected_queries = self.get_corrected_queries(query, 1);
+    let conn = self.search_sql_db.acquire().await;
+    if conn.is_err() {
+      tracing::error!("Error while getting sql connection to search: {:?}", conn);
+      return Err(SearchError::InternalError);
+    }
+    let mut conn = conn.unwrap();
 
-    let mut search_queries = corrected_queries
+    let mut search_queries = self.get_corrected_queries(query, 3);
+    search_queries.insert(0, query.clone());
+    let search_queries_count = search_queries.len();
+
+    let query = search_queries
       .iter()
-      .map(|corrected_query| self.generate_search_query(corrected_query))
-      .collect::<Vec<String>>();
+      .enumerate()
+      .map(|(index, search_query)| {
+        format!(
+          r#"
+          SELECT model_id, SUM(count * weight * {}) AS score
+          FROM (
+            SELECT id, word, model_type, model_id, appear_in, count(*) AS count,
+            CASE
+              WHEN appear_in = 'post_title' THEN 100
+              WHEN appear_in = 'post_poster_display_name' THEN 50
+              WHEN appear_in = 'post_short_description' THEN 25
+              WHEN appear_in = 'post_tag_name' THEN 5
+              ELSE 1
+            END AS weight
+            FROM word
+            WHERE word In ({})
+            GROUP BY word, model_type, model_id, appear_in
+          ) AS sub
+          GROUP BY model_id
+          ORDER BY score DESC;
+          "#,
+          search_queries_count - index,
+          // @TODO-ZM: Potential SQL injection vulnerability!
+          search_query
+            .split(" ")
+            .map(|word| format!("'{}'", word))
+            .join(", "),
+        )
+      })
+      .collect::<Vec<String>>()
+      .join("\n");
 
-    search_queries.insert(0, self.generate_search_query(query));
+    let db_results = sqlx::query(&query).fetch_all(&mut *conn).await;
 
-    let mut search_records: Vec<SearchRecord> = vec![];
+    if db_results.is_err() {
+      tracing::error!("Error while searching posts: {:?}", db_results.err());
+      return Err(SearchError::InternalError);
+    }
+    let db_results = db_results.unwrap();
 
-    let search_queries_len = search_queries.len();
-    for index in 0..search_queries_len {
-      let search_query = &search_queries[index];
+    let mut model_ids_with_scores = vec![];
 
-      let query_result = self.search_db.query(search_query).await;
-
-      match query_result {
-        Ok(mut query_result) => {
-          let found_search_records: Result<Vec<SearchRecord>, _> = query_result.take(0);
-
-          match found_search_records {
-            Ok(found_search_records) => {
-              search_records.extend(found_search_records.iter().map(|r| SearchRecord {
-                id: r.id,
-                score: r.score * (search_queries_len as u32 - index as u32),
-              }));
-            }
-            Err(err) => {
-              tracing::error!("Failed to parse the query result, {}", err);
-              return Err(SearchError::InternalError);
-            }
-          }
-        }
-        Err(err) => {
-          tracing::error!("Failed to search the query, {}", err);
-          return Err(SearchError::InternalError);
-        }
-      }
+    for row in db_results {
+      model_ids_with_scores.push((row.get::<u32, _>("model_id"), row.get::<i64, _>("score")));
     }
 
-    let search_records = search_records
+    // aggregate the scores for the same model_id
+    let mut model_ids_with_scores = model_ids_with_scores
       .into_iter()
-      .sorted_by_key(|record| record.id)
-      .group_by(|record| record.id)
+      .sorted_by_key(|(model_id, _)| *model_id)
+      .group_by(|(model_id, _)| *model_id)
       .into_iter()
-      .map(|(id, group)| {
-        let score = group.fold(0, |acc, record| acc + record.score);
-        SearchRecord { id, score }
+      .map(|(model_id, group)| {
+        let mut score = 0;
+        for (_, group_score) in group {
+          score += group_score;
+        }
+        (model_id, score)
       })
-      .sorted_by_key(|record| record.score)
-      .rev()
-      .collect::<Vec<_>>();
+      .collect::<Vec<(u32, i64)>>();
 
-    Ok(search_records.iter().map(|r| r.id).collect())
+    model_ids_with_scores.sort_by_key(|(_, score)| -score);
+
+    let model_ids_sorted = model_ids_with_scores
+      .iter()
+      .map(|(model_id, _)| *model_id)
+      .collect::<Vec<u32>>();
+
+    Ok(model_ids_sorted)
   }
 }

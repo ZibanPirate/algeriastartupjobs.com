@@ -53,7 +53,6 @@ locals {
   certificate_folder   = "/etc/ssl/certs"
   app_name             = "algeriastartupjobs-api"
   service_name         = "algeriastartupjobs-api"
-  db_service_name      = "algeriastartupjobs-db"
   stage                = terraform.workspace
   root_domain_name     = "api.algeriastartupjobs.com"
   web_root_domain_name = "algeriastartupjobs.com"
@@ -103,25 +102,10 @@ resource "digitalocean_droplet" "api" {
         [Install]
         WantedBy=multi-user.target
       path: /etc/systemd/system/${local.service_name}.service
-    - content: |
-        [Unit]
-        Description=Algeria Startup Jobs Database
-        After=network.target
-
-        [Service]
-        ExecStart=sudo surreal start --log trace --user root --pass root --bind 0.0.0.0:7070 file:/surrealdb_data
-        Restart=always
-        RestartSec=5
-        User=${var.do_droplet_user}
-
-        [Install]
-        WantedBy=multi-user.target
-      path: /etc/systemd/system/${local.db_service_name}.service
     runcmd:
       - sudo apt update
       - sudo apt install nginx -y
       - sudo ufw allow 'Nginx HTTP'
-      - curl -sSf https://install.surrealdb.com | sh
       - sudo sh -c "echo '
           server {
               listen 80;
@@ -156,7 +140,6 @@ resource "digitalocean_droplet" "api" {
       - sudo systemctl enable nginx
       - sudo systemctl start nginx
       - sudo systemctl daemon-reload
-      - sudo systemctl start ${local.db_service_name}
       - sudo systemctl start ${local.service_name}
     EOT
 }
@@ -240,13 +223,11 @@ resource "ssh_resource" "upload_app_and_deps_to_vps" {
     #
     "sudo systemctl stop nginx || true",
     "sudo systemctl stop ${local.service_name} || true",
-    "sudo systemctl stop ${local.db_service_name} || true",
     #
     "sudo curl -o ${local.app_folder}/${local.app_name} http://${data.terraform_remote_state.ructc.outputs.digitalocean_droplet_rustc_ipv4_address}:8000/target/release/algeriastartupjobs-api",
     "sudo chmod +x ${local.app_folder}/${local.app_name} || true",
     #
     "sudo systemctl daemon-reload",
-    "sudo systemctl start ${local.db_service_name} || true",
     "sudo systemctl start ${local.service_name} || true",
     "sudo systemctl start nginx",
   ]

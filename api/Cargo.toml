@@ -18,10 +18,8 @@ tracing-subscriber = { version = "0.3.16", features = ["env-filter"] }
 serde_json = "1"
 local-ip-address = "0.5.1"
 titlecase = "2.2.1"
-regex = "1.8.1"
 utility-types = "0.0.2"
 rust-fuzzy-search = "0.1.1"
-surrealdb = { git = "https://github.com/surrealdb/surrealdb.git", tag = "v1.0.0-beta.9" }
 rand = "0.8"
 strum_macros = "0.25.1"
 slug = "0.1.4"

@@ -114,18 +114,19 @@ impl PostRepository {
     let mut conn = conn.unwrap();
 
     let db_result = sqlx::query(
-      r#"
+      format!(
+        r#"
       SELECT id, slug, title, poster_id, short_description, tag_ids, published_at
       FROM post
-      WHERE id IN ($1)
+      WHERE id IN ({})
       "#,
-    )
-    .bind(
-      ids
-        .iter()
-        .map(|id| id.to_string())
-        .collect::<Vec<String>>()
-        .join(","),
+        ids
+          .iter()
+          .map(|id| id.to_string())
+          .collect::<Vec<String>>()
+          .join(",")
+      )
+      .as_str(),
     )
     .fetch_all(&mut *conn)
     .await;
@@ -197,13 +198,15 @@ impl PostRepository {
     let mut conn = conn.unwrap();
 
     let db_result = sqlx::query(
+      format!(
       r#"
       SELECT id, slug, title, poster_id, short_description, description, tag_ids, published_at, is_published
       FROM post
-      WHERE id IN ($1)
+      WHERE id IN ({})
       "#,
+      ids.iter().map(|id| id.to_string()).collect::<Vec<String>>().join(",")
+      ).as_str(),
     )
-    .bind(ids.iter().map(|id| id.to_string()).collect::<Vec<String>>().join(","))
     .fetch_all(&mut *conn)
     .await;
 

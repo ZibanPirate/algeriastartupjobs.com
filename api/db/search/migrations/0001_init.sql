@@ -1,1 +1,0 @@
--- create word table

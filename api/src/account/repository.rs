@@ -26,18 +26,19 @@ impl AccountRepository {
 
     // @TODO-ZM: use sqlx::query!
     let result = sqlx::query(
-      r#"
+      format!(
+        r#"
       SELECT id, slug, type, first_name, last_name, company_name
       FROM account
-      WHERE id IN ($1)
+      WHERE id IN ({})
       "#,
-    )
-    .bind(
-      &ids
-        .iter()
-        .map(|id| id.to_string())
-        .collect::<Vec<String>>()
-        .join(","),
+        &ids
+          .iter()
+          .map(|id| id.to_string())
+          .collect::<Vec<String>>()
+          .join(",")
+      )
+      .as_str(),
     )
     .fetch_all(&mut *conn)
     .await;
