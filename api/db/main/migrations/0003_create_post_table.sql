@@ -11,3 +11,6 @@ CREATE TABLE post (
   is_published BOOLEAN GENERATED ALWAYS AS (published_at <> '') STORED,
   created_at TEXT NOT NULL
 );
+CREATE INDEX idx_post_published_at ON post (published_at);
+CREATE INDEX idx_post_is_published ON post (is_published);
+CREATE INDEX idx_post_created_at ON post (created_at);

@@ -6,4 +6,7 @@ CREATE TABLE word (
   model_id INTEGER NOT NULL,
   appear_in TEXT NOT NULL
 );
--- @TODO-ZM: btw add indexes to other models, such as task.status, type ...etc.
+CREATE INDEX idx_word_word ON word (word);
+CREATE INDEX idx_word_model_type ON word (model_type);
+CREATE INDEX idx_word_model_id ON word (model_id);
+CREATE INDEX idx_word_appear_in ON word (appear_in);

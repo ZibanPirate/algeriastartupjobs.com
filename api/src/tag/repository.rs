@@ -33,7 +33,11 @@ impl TagRepository {
       FROM tag
       WHERE name IN ({})
       "#,
-        names.join(",")
+        names
+          .iter()
+          .map(|name| format!("'{}'", name))
+          .collect::<Vec<String>>()
+          .join(",")
       )
       .as_str(),
     )
@@ -42,7 +46,7 @@ impl TagRepository {
 
     if result.is_err() {
       tracing::error!(
-        "Error while getting many compact tags by filter: {:?}",
+        "Error while getting many compact tags by names: {:?}",
         result.err()
       );
       return Err(DataAccessError::InternalError);
