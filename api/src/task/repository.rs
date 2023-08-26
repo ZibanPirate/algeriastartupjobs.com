@@ -99,8 +99,8 @@ impl TaskRepository {
     }
     let mut conn = conn.unwrap();
     let (model_name, model_id) = task.get_indexing_task_info();
-    let (manual_task_owner) = task.get_manual_task_info();
-    let (failure_reason) = task.get_failed_task_info();
+    let manual_task_owner = task.get_manual_task_info();
+    let failure_reason = task.get_failed_task_info();
 
     let db_result = sqlx::query(
       r#"

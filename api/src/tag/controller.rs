@@ -1,16 +1,15 @@
-use std::net::SocketAddr;
-
 use crate::_entry::state::AppState;
 use crate::_utils::error::SecurityError;
-use crate::_utils::string::escape_single_quote;
 use crate::_utils::string::slugify;
 use crate::ai::service::PostToSuggestTagsFor;
 use crate::security::service::RateLimitConstraint;
 use crate::tag::model::{CompactTag, DBTag};
+
 use axum::extract::ConnectInfo;
 use axum::{extract::State, response::IntoResponse, Json, Router};
 use hyper::StatusCode;
 use serde_json::json;
+use std::net::SocketAddr;
 
 pub async fn get_many_suggested_tags_for_post(
   ConnectInfo(ip): ConnectInfo<SocketAddr>,

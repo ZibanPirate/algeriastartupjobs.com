@@ -1,8 +1,6 @@
 #[derive(Debug)]
 pub enum DataAccessError {
   NotFound,
-  CreationError,
-  UpdateError,
   InternalError,
 }
 
@@ -10,8 +8,6 @@ pub enum DataAccessError {
 pub enum BootError {
   DBSetupError,
   KVDBSetupError,
-  DBLoginError,
-  DBNamespaceError,
   CronJobSetupError,
 }
 

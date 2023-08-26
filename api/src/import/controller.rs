@@ -1,5 +1,4 @@
 use axum::{
-  extract::State,
   response::sse::{Event, Sse},
   Router,
 };
@@ -9,9 +8,7 @@ use tokio_stream::StreamExt as _;
 
 use crate::_entry::state::AppState;
 
-pub async fn import_status(
-  State(app_state): State<AppState>,
-) -> Sse<impl Stream<Item = Result<Event, Infallible>>> {
+pub async fn import_status() -> Sse<impl Stream<Item = Result<Event, Infallible>>> {
   // @TODO-ZM: trigger and import task, and sub into its updates and stream them here.
   // return a stream of status with "FETCHING", "PROCESSING" then "DONE" every second. and finishes immediately when status is "DONE"
   let stream = stream::iter(vec![

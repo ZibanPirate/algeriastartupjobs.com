@@ -8,6 +8,5 @@ pub struct DBCount {
 
 #[derive(Display)]
 pub enum DBOrderDirection {
-  ASC,
   DESC,
 }

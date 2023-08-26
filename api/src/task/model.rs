@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 use strum_macros::Display;
-use utility_types::{omit, partial, pick};
+use utility_types::omit;
 
 #[derive(Debug, Serialize, Deserialize, Display, Clone)]
 #[serde(tag = "status")] // to flatten the enum to the parent struct
@@ -41,8 +41,8 @@ pub struct Task {
 
 pub trait DBTaskTrait {
   fn get_indexing_task_info(&self) -> (Option<String>, Option<u32>);
-  fn get_manual_task_info(&self) -> (Option<u32>);
-  fn get_failed_task_info(&self) -> (Option<String>);
+  fn get_manual_task_info(&self) -> Option<u32>;
+  fn get_failed_task_info(&self) -> Option<String>;
 }
 
 impl DBTaskTrait for DBTask {
@@ -55,16 +55,16 @@ impl DBTaskTrait for DBTask {
       _ => (None, None),
     }
   }
-  fn get_manual_task_info(&self) -> (Option<u32>) {
+  fn get_manual_task_info(&self) -> Option<u32> {
     match &self.r#type {
-      TaskType::Manual { manual_task_owner } => (Some(*manual_task_owner)),
-      _ => (None),
+      TaskType::Manual { manual_task_owner } => Some(*manual_task_owner),
+      _ => None,
     }
   }
-  fn get_failed_task_info(&self) -> (Option<String>) {
+  fn get_failed_task_info(&self) -> Option<String> {
     match &self.status {
-      TaskStatus::Failed { failure_reason } => (Some(failure_reason.clone())),
-      _ => (None),
+      TaskStatus::Failed { failure_reason } => Some(failure_reason.clone()),
+      _ => None,
     }
   }
 }
