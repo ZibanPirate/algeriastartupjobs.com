@@ -83,6 +83,12 @@ data "archive_file" "src_zipped" {
   output_path = "${path.module}/src_zip.zip"
 }
 
+data "archive_file" "db_zipped" {
+  type        = "zip"
+  source_dir  = "${path.module}/../../../api/db"
+  output_path = "${path.module}/db_zip.zip"
+}
+
 resource "ssh_resource" "upload_code_to_vps" {
   triggers = {
     always = timestamp()
@@ -99,6 +105,7 @@ resource "ssh_resource" "upload_code_to_vps" {
 
   pre_commands = [
     "mkdir -p ${local.code_dir}/src",
+    "mkdir -p ${local.code_dir}/db",
   ]
 
   file {
@@ -116,9 +123,16 @@ resource "ssh_resource" "upload_code_to_vps" {
     destination = "${local.code_dir}/src.zip"
   }
 
+  file {
+    source      = "${path.module}/db_zip.zip"
+    destination = "${local.code_dir}/db.zip"
+  }
+
   commands = [
     "unzip -o ${local.code_dir}/src.zip -d ${local.code_dir}/src",
     "rm ${local.code_dir}/src.zip",
+    "unzip -o ${local.code_dir}/db.zip -d ${local.code_dir}/db",
+    "rm ${local.code_dir}/db.zip",
   ]
 }
 

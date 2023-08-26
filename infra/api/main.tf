@@ -216,6 +216,9 @@ resource "ssh_resource" "upload_app_and_deps_to_vps" {
   commands = [
     #
     "sudo mkdir -p ${local.app_folder} || true",
+    "sudo mkdir -p ${local.app_folder}/sqlite_db_data || true",
+    "sudo touch ${local.app_folder}/sqlite_db_data/main.db || true",
+    "sudo touch ${local.app_folder}/sqlite_db_data/search.db || true",
     #
     "sudo touch ${local.app_folder}/.env",
     "sudo sh -c \"echo '${filebase64("${path.module}/../../api/${local.stage}.env")}' > ${local.app_folder}/base64.env\"",
