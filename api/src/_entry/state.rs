@@ -30,14 +30,14 @@ pub async fn create_app_state() -> Result<AppState, BootError> {
   let main_sql_db = Arc::new(
     create_sql_db(
       super::database::SQLDBName::Main,
-      "sqlite:sqlite_db_data".to_string(),
+      config_service.get_config().sqlite_base_url,
     )
     .await?,
   );
   let search_sql_db = Arc::new(
     create_sql_db(
       super::database::SQLDBName::Search,
-      "sqlite:sqlite_db_data".to_string(),
+      config_service.get_config().sqlite_base_url,
     )
     .await?,
   );

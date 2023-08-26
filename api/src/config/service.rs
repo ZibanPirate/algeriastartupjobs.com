@@ -24,6 +24,7 @@ pub struct Config {
   pub ai_service_auth_token: String,
   pub jwt_secret: String,
   pub html_path: String,
+  pub sqlite_base_url: String,
 }
 
 pub struct ConfigService {}
@@ -64,6 +65,8 @@ impl ConfigService {
         .expect("AI_SERVICE_AUTH_TOKEN env variable is missing!"),
       jwt_secret: std::env::var("JWT_SECRET").expect("JWT_SECRET env variable is missing!"),
       html_path: std::env::var("HTML_PATH").expect("HTML_PATH env variable is missing!"),
+      sqlite_base_url: std::env::var("SQLITE_BASE_URL")
+        .expect("SQLITE_BASE_URL env variable is missing!"),
     }
   }
 }
