@@ -198,9 +198,15 @@ resource "aws_route53_record" "web-naked" {
   records = [digitalocean_droplet.api.ipv4_address]
 }
 
+variable "ignore_rustc" {
+  description = "whther to ignore rustc state or not"
+  type        = string
+  default     = false
+}
+
 data "terraform_remote_state" "ructc" {
   backend = "local"
-  config  = { path = "${path.module}/build-on-vps/terraform.tfstate" }
+  config  = { path = "${path.module}/build-on-vps/${var.ignore_rustc ? "blank-tfstate.json" : "terraform.tfstate"}" }
 }
 
 resource "ssh_resource" "upload_app_and_deps_to_vps" {

@@ -70,6 +70,13 @@
       "dependsOn": ["build api", "terraform shared"]
     },
     {
+      "label": "destroy api staging",
+      "type": "shell",
+      "command": "TF_WORKSPACE=staging terraform destroy -auto-approve -var-file=\"secret.tfvars\" -var=\"ignore_rustc=true\"",
+      "problemMatcher": [],
+      "options": { "cwd": "${workspaceFolder}/infra/api" }
+    },
+    {
       "label": "terraform api production",
       "type": "shell",
       "command": "TF_WORKSPACE=production terraform apply -auto-approve -var-file=\"secret.tfvars\"",

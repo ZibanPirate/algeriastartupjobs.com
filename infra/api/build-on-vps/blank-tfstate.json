@@ -1,0 +1,15 @@
+{
+  "version": 4,
+  "terraform_version": "1.4.5",
+  "serial": 135,
+  "lineage": "ac65b104-7674-2e5b-2cd8-928388e08d78",
+  "outputs": {
+    "digitalocean_droplet_rustc_ipv4_address": {
+      "value": "empty",
+      "type": "string",
+      "sensitive": true
+    }
+  },
+  "resources": [],
+  "check_results": null
+}
