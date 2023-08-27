@@ -78,6 +78,34 @@
       "dependsOn": ["build api", "terraform shared"]
     },
     {
+      "label": "download db backup staging",
+      "type": "shell",
+      "command": "TF_WORKSPACE=staging terraform apply -auto-approve -var-file=\"../secret.tfvars\"",
+      "problemMatcher": [],
+      "options": { "cwd": "${workspaceFolder}/infra/api/download-db-backup" }
+    },
+    {
+      "label": "download db backup production",
+      "type": "shell",
+      "command": "TF_WORKSPACE=production terraform apply -auto-approve -var-file=\"../secret.tfvars\"",
+      "problemMatcher": [],
+      "options": { "cwd": "${workspaceFolder}/infra/api/download-db-backup" }
+    },
+    {
+      "label": "upload db backup staging",
+      "type": "shell",
+      "command": "TF_WORKSPACE=staging terraform apply -auto-approve -var-file=\"../secret.tfvars\"",
+      "problemMatcher": [],
+      "options": { "cwd": "${workspaceFolder}/infra/api/upload-db-backup" }
+    },
+    {
+      "label": "upload db backup production",
+      "type": "shell",
+      "command": "TF_WORKSPACE=production terraform apply -auto-approve -var-file=\"../secret.tfvars\"",
+      "problemMatcher": [],
+      "options": { "cwd": "${workspaceFolder}/infra/api/upload-db-backup" }
+    },
+    {
       "label": "dev db",
       "type": "shell",
       "command": [

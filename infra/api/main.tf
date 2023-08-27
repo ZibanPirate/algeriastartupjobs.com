@@ -205,7 +205,7 @@ data "terraform_remote_state" "ructc" {
 
 resource "ssh_resource" "upload_app_and_deps_to_vps" {
   triggers = {
-    vps_ip = data.terraform_remote_state.ructc.outputs.digitalocean_droplet_rustc_ipv4_address
+    always = timestamp()
   }
 
   host        = digitalocean_droplet.api.ipv4_address
