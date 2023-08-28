@@ -46,7 +46,7 @@ resource "digitalocean_droplet" "rustc" {
   image    = "ubuntu-22-04-x64"
   name     = "build-rust-app-droplet"
   region   = "fra1"
-  size     = "s-4vcpu-8gb"
+  size     = "c-4-intel"
   ssh_keys = [data.terraform_remote_state.shared.outputs.digitalocean_ssh_key_fingerprint]
 }
 
