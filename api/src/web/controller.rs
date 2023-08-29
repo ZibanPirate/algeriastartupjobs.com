@@ -12,7 +12,7 @@ use axum::{
 };
 use hyper::StatusCode;
 use serde::Deserialize;
-use sitewriter::{UrlEntry, UrlEntryBuilder};
+use sitewriter::{ChangeFreq, UrlEntry, UrlEntryBuilder};
 use std::fs;
 
 #[derive(Deserialize)]
@@ -153,9 +153,13 @@ pub async fn sitemap(State(app_state): State<AppState>) -> impl IntoResponse {
   let mut url_string = vec![];
 
   url_string.extend(vec![
-    "/".to_string(),
-    "/post_a_job_ad_for_free".to_string(),
-    "/import".to_string(),
+    ("/".to_string(), 1.0, ChangeFreq::Always),
+    (
+      "/post_a_job_ad_for_free".to_string(),
+      1.0,
+      ChangeFreq::Weekly,
+    ),
+    ("/import".to_string(), 1.0, ChangeFreq::Weekly),
   ]);
 
   // @TODO-ZM: fetch only published posts
@@ -185,25 +189,31 @@ pub async fn sitemap(State(app_state): State<AppState>) -> impl IntoResponse {
   let posters = posters.unwrap();
 
   for post in all_posts {
-    url_string.push(get_post_url(
-      &post,
-      &posters
-        .iter()
-        .find(|poster| poster.id == post.poster_id)
-        .unwrap(),
+    url_string.push((
+      get_post_url(
+        &post,
+        &posters
+          .iter()
+          .find(|poster| poster.id == post.poster_id)
+          .unwrap(),
+      ),
+      // @TODO-ZM: change priority based on post date
+      0.8,
+      ChangeFreq::Daily,
     ));
   }
 
-  // @TODO-ZM: add other info to sitemap urls, like frequency, priority, etc.
   let urls = url_string
     .iter()
     .map(|url| {
       UrlEntryBuilder::default()
         .loc(
-          format!("https://www.algeriastartupjobs.com{}", url)
+          format!("https://www.algeriastartupjobs.com{}", url.0)
             .parse()
             .unwrap(),
         )
+        .priority(url.1)
+        .changefreq(url.2)
         .build()
         .unwrap()
     })
