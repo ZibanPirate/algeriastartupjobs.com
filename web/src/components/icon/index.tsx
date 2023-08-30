@@ -20,6 +20,7 @@ const _Icon: FC<IconProps> = ({ variant, margin, name, animation = "none", vtNam
     animation === "none" ? "" : `animate-${animation}`,
     `font-variant-${variant}`,
     ...marginToClasses(margin),
+    props.onClick ? "icon-clickable" : "",
   ];
 
   const maskImage = `url(${icons[name].default})`;

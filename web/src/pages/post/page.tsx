@@ -21,11 +21,15 @@ import { Icon } from "src/components/icon";
 import { fetchPostCountForLandingPage, fetchPostsForLandingPage } from "src/pages/landing/actions";
 import { useMediaQuery } from "src/utils/hooks/use-media-query";
 import { Footer } from "src/components/footer";
+import { Divider } from "src/components/divider";
+import { fetchAccountForMePage } from "../me/actions";
+import { useIsAuthenticated } from "src/utils/hooks/is-authenticated";
 
 export const Page: FC = () => {
   const postSlug = useMatch(POST_PAGE_URL)?.params.postSlug;
   const postId = useMemo(() => (/(.*)_(\d+)$/.exec(postSlug || "") || [])[2], [postSlug]);
   const { query, total_post_count } = useSliceSelector("landingPage");
+  const { account } = useSliceSelector("mePage");
   const navigate = useNavigate();
   const { set } = getStateActions().landingPage;
 
@@ -50,6 +54,20 @@ export const Page: FC = () => {
     enabled: !!loadedPost,
   });
   const isSmallScreen = useMediaQuery("(max-width: 700px)");
+
+  const { isAuthenticated } = useIsAuthenticated();
+  useEffect(() => {
+    if (isAuthenticated) fetchAccountForMePage();
+  }, [isAuthenticated]);
+
+  const isMyPost = useMemo(() => {
+    if (!loadedPost?.poster?.id) return false;
+
+    const loadedAccount = isLoaded(account);
+    if (!loadedAccount) return false;
+
+    return loadedPost.poster.id === loadedAccount.id;
+  }, [loadedPost, account]);
 
   return (
     <Stack
@@ -105,9 +123,29 @@ export const Page: FC = () => {
           ) : (
             <Stack orientation="vertical" margin="1 0 0" flex={3} minWidth="60%">
               {loadedPost ? (
-                <Text variant="v3" margin="0 0 1" vtName={`post-title-${loadedPost?.id}`}>
-                  {loadedPost?.title}
-                </Text>
+                <Stack
+                  orientation="horizontal"
+                  justifyContent="space-between"
+                  fullWidth
+                  gap="1"
+                  align="center"
+                  margin="0 0 1"
+                >
+                  <Text variant="v3" vtName={`post-title-${loadedPost?.id}`}>
+                    {loadedPost?.title}
+                  </Text>
+                  {isMyPost && (
+                    <Stack orientation="horizontal">
+                      <Icon variant="v3" name="deletePost" onClick={() => alert("delete")} />
+                      <Divider orientation="vertical" />
+                      <Icon
+                        variant="v3"
+                        name="editPost"
+                        onClick={() => alert("stay tuned at github.com/algeriastartupjobs")}
+                      />
+                    </Stack>
+                  )}
+                </Stack>
               ) : (
                 <Skeleton variant="v3" width="18rem" margin="0 0 1" />
               )}
