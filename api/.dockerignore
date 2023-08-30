@@ -1,6 +1,0 @@
-*
-!/src
-!Cargo.lock
-!Cargo.toml
-*.http
-*.html

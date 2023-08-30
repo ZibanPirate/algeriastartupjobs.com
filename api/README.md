@@ -16,21 +16,7 @@ rustup update
 cargo update
 ```
 
-### Fix Docker build issues
-
-Either delete the line with `credsStore` from `~/.docker/config.json`:
-
-```sh
-vim ~/.docker/config.json
-```
-
-Or simply delete the whole file and restart Docker:
-
-```sh
-rm ~/.docker/config.json
-```
-
-### Fix Docker build issues
+### Fix Rust Analyzer issues
 
 if VSCode's Rust Analyzer extension doesn't work:
 
