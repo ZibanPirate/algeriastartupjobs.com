@@ -14,6 +14,6 @@ export const usePageTitle = (
 ) => {
   useEffect(() => {
     if (!enabled) return;
-    document.title = `🇩🇿 ${title}${suffix}`;
+    document.title = `${title}${suffix}`;
   }, [title, enabled, suffix]);
 };

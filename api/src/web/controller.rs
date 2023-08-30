@@ -44,7 +44,7 @@ fn read_html(
   let file_content = file_content
     .replace(
       "{{HTML_TITLE}}",
-      format!("🇩🇿 {} | Algeria Startup Jobs", &title).as_str(),
+      format!("{} | Algeria Startup Jobs", &title).as_str(),
     )
     .replace("{{HTML_DESCRIPTION}}", &description)
     .replace("{{HTML_IMAGE}}", &image);
