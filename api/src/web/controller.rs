@@ -127,6 +127,36 @@ pub async fn jobs(
   .into_response()
 }
 
+pub async fn jobs_for_tag(
+  Path(tag_slug): Path<String>,
+  State(app_state): State<AppState>,
+) -> impl IntoResponse {
+  let tag = app_state
+    .tag_repository
+    .get_one_tag_by_slug(&tag_slug)
+    .await;
+  if tag.is_err() {
+    return return404(&app_state).into_response();
+  }
+  let tag = tag.unwrap();
+
+  tracing::info!("tag: {:?}", tag);
+
+  Html(read_html(ReadHtmlParam {
+    file_name: format!(
+      "{}/index.html",
+      app_state.config_service.get_config().html_path
+    ),
+    title: format!("Startup Jobs for {} in Algeria", tag.name),
+    description: format!("Find startup Jobs for {} in Algeria", tag.name),
+    image: format!(
+      "https://{}.assets.algeriastartupjobs.com/assets/apple-touch-startup-image-1136x640.png",
+      app_state.config_service.get_config().stage.as_str()
+    ),
+  }))
+  .into_response()
+}
+
 pub async fn fallback(State(app_state): State<AppState>) -> impl IntoResponse {
   return404(&app_state).into_response()
 }
@@ -243,6 +273,7 @@ pub async fn import(State(app_state): State<AppState>) -> impl IntoResponse {
 pub fn create_web_router() -> Router<AppState> {
   Router::new()
     .route("/", axum::routing::get(index))
+    .route("/jobs/for/:tag_slug", axum::routing::get(jobs_for_tag))
     .route("/jobs/*job_slug", axum::routing::get(jobs))
     .route("/post_a_job_ad_for_free", axum::routing::get(create))
     // @TODO-ZM: add robot.txt route
