@@ -10,6 +10,7 @@ import {
   CREATE_POST_PAGE_URL,
   IMPORT_PAGE_URL,
   IMPORT_STATUS_PAGE_URL,
+  JOBS_FOR_PAGE_URL,
   LOGIN_PAGE_URL,
   ME_PAGE_URL,
   POST_PAGE_URL,
@@ -62,6 +63,7 @@ export const App: FC = () => {
       <LoadingBar color="#41aa55" ref={loadingBarRef} height={4} />
       <SentryRoutes>
         <Route path="/" Component={pageToRenderSetter("landing")} />
+        <Route path={JOBS_FOR_PAGE_URL} Component={pageToRenderSetter("posts-for")} />
         <Route path={POST_PAGE_URL} Component={pageToRenderSetter("post")} />
         <Route path={CREATE_POST_PAGE_URL} Component={pageToRenderSetter("create-post")} />
         <Route path={CONFIRM_EMAIL_PAGE_URL} Component={pageToRenderSetter("confirm-email")} />

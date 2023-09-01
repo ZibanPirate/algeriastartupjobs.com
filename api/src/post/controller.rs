@@ -247,6 +247,79 @@ pub async fn get_post_count(State(app_state): State<AppState>) -> impl IntoRespo
   .into_response()
 }
 
+pub async fn get_many_compact_posts_for_tag(
+  State(app_state): State<AppState>,
+  Path(tag_slug): Path<String>,
+) -> impl IntoResponse {
+  let tag = app_state
+    .tag_repository
+    .get_one_tag_by_slug(&tag_slug)
+    .await;
+  if tag.is_err() {
+    // @TODO-ZM: log error reason
+    return StatusCode::NOT_FOUND.into_response();
+  }
+  let tag = tag.unwrap();
+
+  let post_ids = app_state.search_service.search_posts(&tag.name).await;
+
+  if !post_ids.is_ok() {
+    // @TODO-ZM: log error reason
+    return StatusCode::INTERNAL_SERVER_ERROR.into_response();
+  }
+  let post_ids = post_ids.unwrap();
+
+  let compact_posts = app_state
+    .post_repository
+    .get_many_compact_posts_by_ids(post_ids)
+    .await;
+
+  if !compact_posts.is_ok() {
+    // @TODO-ZM: log error reason
+    return StatusCode::INTERNAL_SERVER_ERROR.into_response();
+  }
+  let compact_posts = compact_posts.unwrap();
+
+  let mut unique_tag_ids: Vec<u32> = Vec::new();
+  let mut unique_poster_ids: Vec<u32> = Vec::new();
+
+  for post in compact_posts.iter() {
+    unique_tag_ids.append(&mut post.tag_ids.clone());
+    unique_poster_ids.push(post.poster_id);
+  }
+
+  sort_and_dedup_vec(&mut unique_tag_ids);
+  sort_and_dedup_vec(&mut unique_poster_ids);
+
+  let compact_tags = app_state
+    .tag_repository
+    .get_many_compact_tags_by_ids(&unique_tag_ids)
+    .await;
+  if !compact_tags.is_ok() {
+    // @TODO-ZM: log error reason
+    return StatusCode::INTERNAL_SERVER_ERROR.into_response();
+  }
+  let compact_tags = compact_tags.unwrap();
+
+  let compact_posters = app_state
+    .account_repository
+    .get_many_compact_accounts_by_ids(unique_poster_ids.clone())
+    .await;
+  if !compact_posters.is_ok() {
+    // @TODO-ZM: log error reason
+    return StatusCode::INTERNAL_SERVER_ERROR.into_response();
+  }
+  let compact_posters = compact_posters.unwrap();
+
+  Json(json!({
+      "tag": tag,
+      "posts": compact_posts,
+      "tags": compact_tags,
+      "posters": compact_posters,
+  }))
+  .into_response()
+}
+
 #[derive(Deserialize)]
 pub struct CreateOnePostWithPosterBody {
   poster: DBAccount,
@@ -672,6 +745,10 @@ pub fn create_post_router() -> Router<AppState> {
     .route(
       "/via_email",
       axum::routing::post(create_one_post_with_poster),
+    )
+    .route(
+      "/for_tag/:tag_slug",
+      axum::routing::get(get_many_compact_posts_for_tag),
     )
     .route("/", axum::routing::post(create_one_post))
 }

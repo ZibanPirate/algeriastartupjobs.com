@@ -8,7 +8,7 @@ import { usePageTitle } from "src/utils/hooks/page-title";
 
 import { isLoaded } from "src/utils/loadable";
 import { useMatch, useNavigate } from "react-router-dom";
-import { CREATE_POST_PAGE_URL, POST_PAGE_URL } from "src/utils/urls/common";
+import { CREATE_POST_PAGE_URL, JOBS_FOR_PAGE_URL, POST_PAGE_URL } from "src/utils/urls/common";
 import { getPostLongTitle } from "src/utils/urls/post-long-title";
 import { Button } from "src/components/button";
 import { Tag } from "src/components/tag";
@@ -31,7 +31,7 @@ export const Page: FC = () => {
   const { query, total_post_count } = useSliceSelector("landingPage");
   const { account } = useSliceSelector("mePage");
   const navigate = useNavigate();
-  const { set } = getStateActions().landingPage;
+  const { landingPage, postsForPage } = getStateActions();
 
   useEffect(() => {
     fetchPostsForLandingPage();
@@ -89,7 +89,7 @@ export const Page: FC = () => {
               <GlobalSearch
                 total_post_count={total_post_count}
                 value={query}
-                setValue={(value) => set({ query: value })}
+                setValue={(value) => landingPage.set({ query: value })}
                 onClick={() => navigate("/")}
               />
             </Stack>
@@ -192,7 +192,14 @@ export const Page: FC = () => {
                   vtName={`post-tags-${loadedPost.id}`}
                 >
                   {loadedPost?.tags.map((tag) => (
-                    <Tag variant="v4" key={tag.id}>
+                    <Tag
+                      variant="v4"
+                      key={tag.id}
+                      onClick={() => {
+                        postsForPage.set({ tag });
+                        navigate(JOBS_FOR_PAGE_URL.replace(":tagSlug", tag.slug));
+                      }}
+                    >
                       {tag.name}
                     </Tag>
                   ))}

@@ -7,3 +7,4 @@ export const ME_PAGE_URL = "/me" as const;
 export const IMPORT_PAGE_URL = "/import" as const;
 export const IMPORT_STATUS_PAGE_URL = "/import_status" as const;
 export const DRAFT_PAGE_URL = "/draft" as const;
+export const JOBS_FOR_PAGE_URL = "/jobs/for/:tagSlug" as const;

@@ -2,7 +2,7 @@ use serde_json::json;
 use sqlx::{Pool, Row, Sqlite};
 use std::sync::Arc;
 
-use super::model::{CompactTag, DBTag};
+use super::model::{CompactTag, DBTag, Tag};
 use crate::_utils::error::DataAccessError;
 
 pub struct TagRepository {
@@ -120,6 +120,40 @@ impl TagRepository {
     }
 
     Ok(compact_tags)
+  }
+
+  pub async fn get_one_tag_by_slug(&self, slug: &str) -> Result<Tag, DataAccessError> {
+    let conn = self.main_sql_db.acquire().await;
+    if conn.is_err() {
+      tracing::error!("Error while getting sql connection: {:?}", conn);
+      return Err(DataAccessError::InternalError);
+    }
+    let mut conn = conn.unwrap();
+
+    let db_result = sqlx::query(
+      r#"
+      SELECT id, name, slug, created_at
+      FROM tag
+      WHERE slug = $1
+      "#,
+    )
+    .bind(slug)
+    .fetch_one(&mut *conn)
+    .await;
+    if db_result.is_err() {
+      tracing::error!("Error while getting one tag by slug: {:?}", db_result.err());
+      return Err(DataAccessError::InternalError);
+    }
+    let db_result = db_result.unwrap();
+
+    let tag = Tag {
+      id: db_result.get::<u32, _>("id"),
+      name: db_result.get::<String, _>("name"),
+      slug: db_result.get::<String, _>("slug"),
+      created_at: db_result.get::<String, _>("created_at"),
+    };
+
+    Ok(tag)
   }
 
   pub async fn create_one_tag(&self, tag: DBTag) -> Result<u32, DataAccessError> {

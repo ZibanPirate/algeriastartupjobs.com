@@ -11,3 +11,4 @@ export { confirmLoginPage } from "src/pages/confirm-login/state";
 export { mePage } from "src/pages/me/state";
 export { importPage } from "src/pages/import/state";
 export { importStatusPage } from "src/pages/import-status/state";
+export { postsForPage } from "src/pages/posts-for/state";

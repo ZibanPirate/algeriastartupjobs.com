@@ -145,3 +145,7 @@ Content-Type: application/json
 GET {{base_url}}/accounts/me
 Content-Type: application/json
 Authorization: Bearer {{auth_token}}
+
+###
+GET {{base_url}}/posts/for_tag/engineer
+Content-Type: application/json

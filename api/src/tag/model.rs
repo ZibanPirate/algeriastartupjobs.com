@@ -1,7 +1,8 @@
 use serde::{Deserialize, Serialize};
 use utility_types::{omit, partial, pick};
 
-#[omit(DBTag, [id], [Debug, Serialize, Deserialize, Clone])]
+// @TODO-ZM: remove create_at from other models
+#[omit(DBTag, [id, created_at], [Debug, Serialize, Deserialize, Clone])]
 #[pick(CompactTag, [id, slug, name], [Debug, Serialize, Deserialize, Clone])]
 #[partial(PartialTag)]
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -9,6 +10,7 @@ pub struct Tag {
   pub id: u32,
   pub slug: String,
   pub name: String,
+  pub created_at: String,
 }
 
 pub trait TagTrait {
@@ -35,6 +37,7 @@ impl PartialTagTrait for PartialTag {
       id: self.id.unwrap_or(fallback_tag.id),
       slug: self.slug.clone().unwrap_or(fallback_tag.slug),
       name: self.name.clone().unwrap_or(fallback_tag.name),
+      created_at: self.created_at.clone().unwrap_or(fallback_tag.created_at),
     }
   }
 }
