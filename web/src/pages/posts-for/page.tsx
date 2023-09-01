@@ -38,7 +38,7 @@ export const Page: FC = () => {
 
   const loadedTag = isLoaded(tag);
 
-  usePageTitle(`Startup Jobs for ${loadedTag?.name} in Algeria`, { enabled: !!loadedTag });
+  usePageTitle(`Startup jobs for ${loadedTag?.name} in Algeria`, { enabled: !!loadedTag });
 
   return (
     <Stack

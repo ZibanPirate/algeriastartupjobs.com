@@ -147,7 +147,7 @@ pub async fn jobs_for_tag(
       "{}/index.html",
       app_state.config_service.get_config().html_path
     ),
-    title: format!("Startup Jobs for {} in Algeria", tag.name),
+    title: format!("Startup jobs for {} in Algeria", tag.name),
     description: format!("Find startup Jobs for {} in Algeria", tag.name),
     image: format!(
       "https://{}.assets.algeriastartupjobs.com/assets/apple-touch-startup-image-1136x640.png",
@@ -192,7 +192,6 @@ pub async fn sitemap(State(app_state): State<AppState>) -> impl IntoResponse {
     ("/import".to_string(), 1.0, ChangeFreq::Weekly),
   ]);
 
-  // @TODO-ZM: fetch only published posts
   let all_posts = app_state
     .post_repository
     .get_many_published_compact_posts("published_at", DBOrderDirection::DESC, count, 0)
@@ -231,6 +230,17 @@ pub async fn sitemap(State(app_state): State<AppState>) -> impl IntoResponse {
       0.8,
       ChangeFreq::Daily,
     ));
+  }
+
+  let all_tags = app_state.tag_repository.get_many_compact_tags().await;
+  if all_tags.is_err() {
+    // @TODO-ZM: log error
+    return StatusCode::INTERNAL_SERVER_ERROR.into_response();
+  }
+  let all_tags = all_tags.unwrap();
+
+  for tag in all_tags {
+    url_string.push((format!("/jobs/for/{}", tag.slug), 0.5, ChangeFreq::Daily));
   }
 
   let urls = url_string

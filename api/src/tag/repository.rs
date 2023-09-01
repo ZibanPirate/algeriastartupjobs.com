@@ -182,4 +182,44 @@ impl TagRepository {
 
     Ok(id)
   }
+
+  pub async fn get_many_compact_tags(&self) -> Result<Vec<Tag>, DataAccessError> {
+    let conn = self.main_sql_db.acquire().await;
+    if conn.is_err() {
+      tracing::error!("Error while getting sql connection: {:?}", conn);
+      return Err(DataAccessError::InternalError);
+    }
+    let mut conn = conn.unwrap();
+
+    let db_result = sqlx::query(
+      r#"
+      SELECT id, name, slug, created_at
+      FROM tag
+      "#,
+    )
+    .fetch_all(&mut *conn)
+    .await;
+    if db_result.is_err() {
+      tracing::error!(
+        "Error while getting many compact tags: {:?}",
+        db_result.err()
+      );
+      return Err(DataAccessError::InternalError);
+    }
+    let db_result = db_result.unwrap();
+
+    let mut tags = vec![];
+
+    for row in db_result {
+      let tag = Tag {
+        id: row.get::<u32, _>("id"),
+        name: row.get::<String, _>("name"),
+        slug: row.get::<String, _>("slug"),
+        created_at: row.get::<String, _>("created_at"),
+      };
+      tags.push(tag);
+    }
+
+    Ok(tags)
+  }
 }
