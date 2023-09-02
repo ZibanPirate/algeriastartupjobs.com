@@ -18,6 +18,7 @@ export interface StackProps
   gap?: CSSNumber;
   stretch?: boolean;
   fullWidth?: boolean;
+  fullHeight?: boolean;
   wrap?: boolean;
   animation?: boolean;
 }
@@ -38,14 +39,15 @@ export const Stack: FC<StackProps> = ({
   flex,
   animation = false,
   fullWidth = false,
+  fullHeight = true,
   justifyContent,
   position,
 }) => {
   const classes = [
     "stack",
     stretch ? "stretch" : "",
-    "height100",
     fullWidth ? "width100" : "",
+    fullHeight ? "height100" : "",
     "flex",
     `flex-${orientation}`,
     `flex-align-${align}`,

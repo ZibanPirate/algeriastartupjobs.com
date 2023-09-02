@@ -24,6 +24,7 @@ import { Footer } from "src/components/footer";
 import { Divider } from "src/components/divider";
 import { fetchAccountForMePage } from "../me/actions";
 import { useIsAuthenticated } from "src/utils/hooks/is-authenticated";
+import { Dialog, useDialogProps } from "src/components/dialog";
 
 export const Page: FC = () => {
   const postSlug = useMatch(POST_PAGE_URL)?.params.postSlug;
@@ -68,6 +69,9 @@ export const Page: FC = () => {
 
     return loadedPost.poster.id === loadedAccount.id;
   }, [loadedPost, account]);
+
+  const { propsForDeleteDialog } = useDialogProps("Delete");
+  const { toggleDeleteDialog } = propsForDeleteDialog;
 
   return (
     <Stack
@@ -136,7 +140,11 @@ export const Page: FC = () => {
                   </Text>
                   {isMyPost && (
                     <Stack orientation="horizontal">
-                      <Icon variant="v3" name="deletePost" onClick={() => alert("delete")} />
+                      <Icon
+                        variant="v3"
+                        name="deletePost"
+                        onClick={() => toggleDeleteDialog(true)}
+                      />
                       <Divider orientation="vertical" />
                       <Icon
                         variant="v3"
@@ -273,6 +281,22 @@ export const Page: FC = () => {
           </Stack>
         </Stack>
       </Stack>
+      <Dialog {...propsForDeleteDialog}>
+        <Stack orientation="vertical" gap="1" align="center" fullHeight={false}>
+          <Text variant="v3">Are you sure you want to delete this post?</Text>
+          <Stack orientation="horizontal" gap="1" fullHeight={false}>
+            <Button variant="v3" onClick={() => toggleDeleteDialog(false)}>
+              Cancel
+            </Button>
+            <Button
+              variant="v3"
+              onClick={() => alert("Stay updated at github.com/algeriastartupjobs")}
+            >
+              Delete
+            </Button>
+          </Stack>
+        </Stack>
+      </Dialog>
       <Footer />
     </Stack>
   );
