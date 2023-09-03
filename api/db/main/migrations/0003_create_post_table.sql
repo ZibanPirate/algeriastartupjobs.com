@@ -8,9 +8,9 @@ CREATE TABLE post (
   description TEXT NOT NULL,
   tag_ids TEXT NOT NULL,
   published_at TEXT NOT NULL DEFAULT '',
-  is_published BOOLEAN GENERATED ALWAYS AS (published_at <> '') STORED,
+  is_published BOOLEAN GENERATED ALWAYS AS (published_at <> '') VIRTUAL,
   deleted_at TEXT NOT NULL DEFAULT '',
-  is_deleted BOOLEAN GENERATED ALWAYS AS (deleted_at <> '') STORED,
+  is_deleted BOOLEAN GENERATED ALWAYS AS (deleted_at <> '') VIRTUAL,
   created_at TEXT NOT NULL
 );
 CREATE INDEX idx_post_published_at ON post (published_at);
