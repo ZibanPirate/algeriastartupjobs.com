@@ -34,7 +34,7 @@ impl PostRepository {
         r#"
       SELECT id, slug, title, poster_id, short_description, tag_ids, published_at
       FROM post
-      WHERE is_published = 1
+      WHERE is_published = 1 AND is_deleted = 0
       ORDER BY {} {}
       LIMIT $1
       OFFSET $2
@@ -118,7 +118,7 @@ impl PostRepository {
         r#"
       SELECT id, slug, title, poster_id, short_description, tag_ids, published_at
       FROM post
-      WHERE id IN ({})
+      WHERE id IN ({}) AND is_deleted = 0
       "#,
         ids
           .iter()
@@ -202,7 +202,7 @@ impl PostRepository {
       r#"
       SELECT id, slug, title, poster_id, short_description, description, tag_ids, published_at, is_published
       FROM post
-      WHERE id IN ({})
+      WHERE id IN ({}) AND is_deleted = 0
       "#,
       ids.iter().map(|id| id.to_string()).collect::<Vec<String>>().join(",")
       ).as_str(),
@@ -280,7 +280,7 @@ impl PostRepository {
       r#"
       SELECT id, slug, title, poster_id, short_description, description, tag_ids, published_at, is_published
       FROM post
-      WHERE id = $1
+      WHERE id = $1 AND is_deleted = 0
       "#,
     )
     .bind(id)
@@ -389,7 +389,7 @@ impl PostRepository {
       r#"
       SELECT COUNT(*) as count
       FROM post
-      WHERE is_published = 1
+      WHERE is_published = 1 AND is_deleted = 0
       "#,
     )
     .fetch_one(&mut *conn)
