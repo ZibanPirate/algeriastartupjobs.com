@@ -3,7 +3,7 @@ import { Link } from "src/components/link";
 import { Stack } from "src/components/stack";
 import { Text } from "src/components/text";
 import { useSliceSelector } from "src/utils/state/selector";
-import { fetchPostForPostPage, fetchSimilarPostsForPostPage } from "./actions";
+import { deletePost, fetchPostForPostPage, fetchSimilarPostsForPostPage } from "./actions";
 import { usePageTitle } from "src/utils/hooks/page-title";
 
 import { isLoaded } from "src/utils/loadable";
@@ -32,7 +32,7 @@ export const Page: FC = () => {
   const { query, total_post_count } = useSliceSelector("landingPage");
   const { account } = useSliceSelector("mePage");
   const navigate = useNavigate();
-  const { landingPage, postsForPage } = getStateActions();
+  const { landingPage, postsForPage, postPage } = getStateActions();
 
   useEffect(() => {
     fetchPostsForLandingPage();
@@ -49,7 +49,7 @@ export const Page: FC = () => {
     fetchSimilarPostsForPostPage(postId);
   }, [postId]);
 
-  const { post, similarPosts } = useSliceSelector("postPage");
+  const { post, similarPosts, deletion_status } = useSliceSelector("postPage");
   const loadedPost = isLoaded(post);
   usePageTitle(loadedPost ? getPostLongTitle(loadedPost, loadedPost.poster) : "Loading Job...", {
     enabled: !!loadedPost,
@@ -85,7 +85,12 @@ export const Page: FC = () => {
         <Stack orientation="vertical" stretch={true} align="stretch" padding="0 1">
           <Stack orientation="horizontal" margin="1 0 0" gap="1" align="space-between">
             <Stack orientation="vertical" align="start">
-              <Link variant="v4" back={POST_PAGE_URL} to={"/"} vtName="back">
+              <Link
+                variant="v4"
+                back={POST_PAGE_URL}
+                to={"/"}
+                vtName={deletion_status === "DELETED" ? "login" : "back"}
+              >
                 <Icon variant="v4" name="back" /> Back
               </Link>
             </Stack>
@@ -284,17 +289,36 @@ export const Page: FC = () => {
       <Dialog {...propsForDeleteDialog}>
         <Stack orientation="vertical" gap="1" align="center" fullHeight={false}>
           <Text variant="v3">Are you sure you want to delete this post?</Text>
-          <Stack orientation="horizontal" gap="1" fullHeight={false}>
-            <Button variant="v3" onClick={() => toggleDeleteDialog(false)}>
-              Cancel
-            </Button>
-            <Button
+          {["DELETING", "DELETED"].includes(deletion_status) ? (
+            <Icon
               variant="v3"
-              onClick={() => alert("Stay updated at github.com/algeriastartupjobs")}
-            >
-              Delete
-            </Button>
-          </Stack>
+              name={deletion_status === "DELETING" ? "loadingSpinner" : "success"}
+              animation={deletion_status === "DELETING" ? "rotate" : undefined}
+              margin="1"
+            />
+          ) : (
+            <>
+              {deletion_status === "ERROR" && (
+                <Text variant="v4" margin="1">
+                  Something went wrong, please try again
+                </Text>
+              )}
+              <Stack orientation="horizontal" gap="1" fullHeight={false}>
+                <Button
+                  variant="v3"
+                  onClick={() => {
+                    postPage.set({ deletion_status: "IDLE" });
+                    toggleDeleteDialog(false);
+                  }}
+                >
+                  Cancel
+                </Button>
+                <Button variant="v3" onClick={() => deletePost(postId)}>
+                  Delete
+                </Button>
+              </Stack>
+            </>
+          )}
         </Stack>
       </Dialog>
       <Footer />

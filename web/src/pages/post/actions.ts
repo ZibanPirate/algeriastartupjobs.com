@@ -7,6 +7,9 @@ import { isLoaded } from "src/utils/loadable";
 import { TagEntity } from "src/state/entities/tag";
 import { fetch } from "src/utils/fetch/fetch";
 import * as Sentry from "@sentry/react";
+import { getBrowserRouter } from "src/components/router-provider";
+import { viewTransitionSubscribeOnce } from "src/utils/animation/view-transition";
+import { ME_PAGE_URL } from "src/utils/urls/common";
 
 export const fetchPostForPostPage = async (postId: string): Promise<void> => {
   const { postPage, postEntities, tagEntities, accountEntities } = getStateActions();
@@ -100,6 +103,34 @@ export const fetchSimilarPostsForPostPage = async (postId: string): Promise<void
     postPage.set({ similarPosts: "ERROR" });
     // @TODO-ZM: use Logger abstraction instead of console.log
     console.log("Error fetching similar posts for post page", error);
+    Sentry.captureException(error, { tags: { type: "WEB_FETCH" } });
+  }
+};
+
+export const deletePost = async (postId: string): Promise<void> => {
+  const { postPage, postEntities } = getStateActions();
+
+  postPage.set({ deletion_status: "DELETING" });
+
+  try {
+    // @TODO-ZM: auto-generate types for API endpoints
+    await fetch.delete("/posts/" + postId);
+
+    postPage.set({ deletion_status: "DELETED" });
+
+    if (getState().postPage.postId === postId) {
+      viewTransitionSubscribeOnce(() => {
+        postPage.set({ post: null, deletion_status: "IDLE" });
+      });
+      getBrowserRouter().navigate(ME_PAGE_URL, { replace: true });
+    }
+
+    // update cache:
+    postEntities.remoteMany([postId]);
+  } catch (error) {
+    postPage.set({ deletion_status: "ERROR" });
+    // @TODO-ZM: use Logger abstraction instead of console.log
+    console.log("Error deleting post", error);
     Sentry.captureException(error, { tags: { type: "WEB_FETCH" } });
   }
 };

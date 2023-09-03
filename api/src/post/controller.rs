@@ -732,10 +732,67 @@ pub async fn create_one_post(
   .into_response()
 }
 
+pub async fn delete_one_post_by_id(
+  ConnectInfo(ip): ConnectInfo<SocketAddr>,
+  State(app_state): State<AppState>,
+  scoped_token: ScopedToken,
+  Path(id): Path<u32>,
+) -> impl IntoResponse {
+  let post = app_state.post_repository.get_one_post_by_id(id).await;
+  if !post.is_ok() {
+    match post {
+      Err(DataAccessError::NotFound) => {
+        return StatusCode::NOT_FOUND.into_response();
+      }
+      _ => {
+        // @TODO-ZM: log error reason
+        return StatusCode::INTERNAL_SERVER_ERROR.into_response();
+      }
+    }
+  }
+  let post = post.unwrap();
+
+  if post.poster_id != scoped_token.id {
+    return StatusCode::FORBIDDEN.into_response();
+  }
+
+  // @TODO-ZM: write a macro for this
+  match app_state.security_service.rate_limit(vec![
+    RateLimitConstraint {
+      id: format!("delete_one_post_by_id-1-{}", scoped_token.id),
+      max_requests: 1,
+      duration_ms: 2000,
+    },
+    RateLimitConstraint {
+      id: format!("delete_one_post_by_id-2-{}", ip.ip()),
+      max_requests: 60,
+      duration_ms: 60_000,
+    },
+  ]) {
+    Ok(_) => {}
+    Err(SecurityError::InternalError) => {
+      // @TODO-ZM: log error reason
+      return StatusCode::INTERNAL_SERVER_ERROR.into_response();
+    }
+    Err(SecurityError::RateLimitError) => {
+      return StatusCode::TOO_MANY_REQUESTS.into_response();
+    }
+  }
+
+  let delete_result = app_state.post_repository.delete_one_post_by_id(id).await;
+  if !delete_result.is_ok() {
+    // @TODO-ZM: log error reason
+    return StatusCode::INTERNAL_SERVER_ERROR.into_response();
+  }
+
+  StatusCode::NO_CONTENT.into_response()
+}
+
 pub fn create_post_router() -> Router<AppState> {
   Router::new()
     .route("/feed", axum::routing::get(get_all_posts_for_feed))
     .route("/:post_id", axum::routing::get(get_one_post_by_id))
+    .route("/:post_id", axum::routing::delete(delete_one_post_by_id))
     .route(
       "/:post_id/similar",
       axum::routing::get(get_many_similar_posts_by_id),

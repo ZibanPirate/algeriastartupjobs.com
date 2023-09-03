@@ -13,5 +13,6 @@ export const postEntities = createSlice({
   initialState: postEntitiesAdapter.getInitialState(),
   reducers: {
     upsertMany: postEntitiesAdapter.upsertMany,
+    remoteMany: postEntitiesAdapter.removeMany,
   },
 });

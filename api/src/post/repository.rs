@@ -409,6 +409,33 @@ impl PostRepository {
     Ok(count)
   }
 
+  pub async fn delete_one_post_by_id(&self, id: u32) -> Result<(), DataAccessError> {
+    let conn = self.main_sql_db.acquire().await;
+    if conn.is_err() {
+      tracing::error!("Error while getting sql connection: {:?}", conn);
+      return Err(DataAccessError::InternalError);
+    }
+    let mut conn = conn.unwrap();
+
+    let db_result = sqlx::query(
+      r#"
+      UPDATE post
+      SET deleted_at = strftime('%Y-%m-%dT%H:%M:%S.%fZ', 'now')
+      WHERE id = $1
+      "#,
+    )
+    .bind(id)
+    .execute(&mut *conn)
+    .await;
+
+    if db_result.is_err() {
+      tracing::error!("Error while deleting one post: {:?}", db_result);
+      return Err(DataAccessError::InternalError);
+    }
+
+    Ok(())
+  }
+
   pub async fn publish_one_post_by_id(&self, id: u32) -> Result<(), DataAccessError> {
     let conn = self.main_sql_db.acquire().await;
     if conn.is_err() {

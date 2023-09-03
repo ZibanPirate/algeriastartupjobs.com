@@ -24,11 +24,17 @@ export interface PostPageState {
     >
   >;
   similarPosts: LOADABLE<Array<PostCardProps["post"]>>;
+  deletion_status: "IDLE" | "DELETING" | "DELETED" | "ERROR";
 }
 
 export const postPage = createSlice({
   name: "postPage",
-  initialState: { postId: null, post: null, similarPosts: null } as PostPageState,
+  initialState: {
+    postId: null,
+    post: null,
+    similarPosts: null,
+    deletion_status: "IDLE",
+  } as PostPageState,
   reducers: {
     set: setterReducerFactory(),
     overwrite: overWriterReducerFactory(),
