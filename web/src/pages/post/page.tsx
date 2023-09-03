@@ -130,7 +130,7 @@ export const Page: FC = () => {
               </Stack>
             </Stack>
           ) : (
-            <Stack orientation="vertical" margin="1 0 0" flex={3} minWidth="60%">
+            <Stack orientation="vertical" margin="1 0 0" flex="auto" minWidth="60%">
               {loadedPost ? (
                 <Stack
                   orientation="horizontal"
@@ -254,7 +254,7 @@ export const Page: FC = () => {
               </Stack>
             </Stack>
           )}
-          <Stack orientation="vertical" margin="0 0 0" flex={2} minWidth={300}>
+          <Stack orientation="vertical" margin="0 0 0" flex={3} minWidth={300}>
             <Text variant="v3" margin="1 0">
               Similar Jobs
             </Text>
