@@ -785,6 +785,23 @@ pub async fn delete_one_post_by_id(
     return StatusCode::INTERNAL_SERVER_ERROR.into_response();
   }
 
+  let task_id = app_state
+    .task_repository
+    .create_one_task(DBTask {
+      name: TaskName::UndoIndexing {
+        model_name: "post".to_string(),
+        model_id: post.id,
+      },
+      status: TaskStatus::Pending,
+      r#type: TaskType::Automated,
+    })
+    .await;
+
+  if !task_id.is_ok() {
+    // @TODO-ZM: log error reason
+    return StatusCode::INTERNAL_SERVER_ERROR.into_response();
+  }
+
   StatusCode::NO_CONTENT.into_response()
 }
 

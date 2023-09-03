@@ -22,6 +22,7 @@ pub enum TaskType {
 #[serde(tag = "name")] // to flatten the enum to the parent struct
 pub enum TaskName {
   Indexing { model_name: String, model_id: u32 },
+  UndoIndexing { model_name: String, model_id: u32 },
   RefreshingBKTree,
 }
 
@@ -49,6 +50,10 @@ impl DBTaskTrait for DBTask {
   fn get_indexing_task_info(&self) -> (Option<String>, Option<u32>) {
     match &self.name {
       TaskName::Indexing {
+        model_name,
+        model_id,
+      }
+      | TaskName::UndoIndexing {
         model_name,
         model_id,
       } => (Some(model_name.clone()), Some(*model_id)),
