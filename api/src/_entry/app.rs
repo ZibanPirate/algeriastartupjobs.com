@@ -2,7 +2,7 @@ use crate::{
   _utils::error::BootError,
   account::controller::create_account_router,
   auth::controller::create_auth_router,
-  import::controller::create_import_router,
+  imported_content::controller::create_import_router,
   post::controller::create_post_router,
   search::{controller::create_search_router, cron_job::SearchCronJob},
   tag::controller::create_tag_router,
