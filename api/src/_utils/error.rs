@@ -37,3 +37,9 @@ pub enum AuthError {
   InvalidToken,
   InternalError,
 }
+
+#[derive(Debug)]
+pub enum ImportError {
+  InvalidUrl,
+  InternalError,
+}
