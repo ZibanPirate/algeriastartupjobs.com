@@ -19,7 +19,7 @@ export const Page: FC = () => {
 
   useEffect(() => {
     if (url) fetchImportStatusForURL(url);
-  }, []);
+  }, [url]);
 
   const statusText =
     status === "Pending"

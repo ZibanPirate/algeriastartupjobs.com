@@ -34,6 +34,8 @@ const _fetchImportStatusForURL = async (url: string): Promise<void> => {
       }
       importStatusPage.set({ status: response.status });
       if (response.status === "Completed") {
+        close();
+
         await sleep(STAY_AT_COMPLETED_STATUS_FOR_MS);
         const { title, description } = response;
         createPostPage.overwrite({

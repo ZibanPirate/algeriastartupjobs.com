@@ -19,6 +19,8 @@ export const createFetchStream = <R extends Record<string, unknown>>({
      * NOTE: this will not throw on network error, it will instead return null
      */
     listen: async (): Promise<R | null> => {
+      if (eventSource?.readyState === EventSource.CLOSED) return null;
+
       const promise = new Promise<R | null>((resolve, reject) => {
         onMessage = ({ response, error }) => {
           if (error) reject(error);
@@ -62,6 +64,7 @@ export const createFetchStream = <R extends Record<string, unknown>>({
     close: () => {
       eventSource?.close();
       eventSource = null;
+      onMessage({ response: null });
     },
   };
 };
