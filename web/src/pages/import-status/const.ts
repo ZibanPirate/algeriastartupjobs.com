@@ -1,0 +1,1 @@
+export const STAY_AT_COMPLETED_STATUS_FOR_MS = 500;

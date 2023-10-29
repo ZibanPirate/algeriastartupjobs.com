@@ -18,6 +18,12 @@ pub enum ImportedContentType {
   JobPost,
 }
 
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct JobJsonData {
+  pub title: String,
+  pub description: String,
+}
+
 #[partial(PartialImportedContent)]
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[omit(DBImportedContent, [id, created_at, updated_at], [Debug, Serialize, Deserialize, Clone])]

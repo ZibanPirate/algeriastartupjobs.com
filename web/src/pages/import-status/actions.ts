@@ -4,17 +4,20 @@ import { ImportStatus, initialStateForImportStatusPage } from "./state";
 import { createFetchStream } from "src/utils/fetch/create-fetch-stream";
 import { onceAtATime } from "src/utils/concurrency/once-at-a-time";
 import { getBrowserRouter } from "src/components/router-provider";
-import { DRAFT_PAGE_URL } from "src/utils/urls/common";
+import { CREATE_POST_PAGE_URL } from "src/utils/urls/common";
 import { viewTransitionSubscribeOnce } from "src/utils/animation/view-transition";
 import { ANIMATION_DURATION } from "src/utils/animation/duration";
 import { initialStateForImportPage } from "../import/state";
+import { sleep } from "src/utils/time/sleep";
+import { STAY_AT_COMPLETED_STATUS_FOR_MS } from "./const";
+import { initialStateForCreatePostPage } from "../create-post/state";
 
 type ImportStatusResponse =
-  | { status: Exclude<ImportStatus, "DONE">; draft_id?: never }
-  | { status: Extract<ImportStatus, "DONE">; draft_id: number };
+  | { status: Exclude<ImportStatus, "Completed">; title?: never; description?: never }
+  | { status: Extract<ImportStatus, "Completed">; title: string; description: string };
 
 const _fetchImportStatusForURL = async (url: string): Promise<void> => {
-  const { importStatusPage, importPage } = getStateActions();
+  const { importStatusPage, importPage, createPostPage } = getStateActions();
   const initialLocation = getBrowserRouter().state.location;
   try {
     const { listen, close } = createFetchStream<ImportStatusResponse>({
@@ -31,13 +34,21 @@ const _fetchImportStatusForURL = async (url: string): Promise<void> => {
       }
       importStatusPage.set({ status: response.status });
       if (response.status === "Completed") {
-        const draft_id = response.draft_id;
+        await sleep(STAY_AT_COMPLETED_STATUS_FOR_MS);
+        const { title, description } = response;
+        createPostPage.overwrite({
+          ...initialStateForCreatePostPage,
+          title,
+          compact: false,
+          post_description: description,
+        });
+
         setTimeout(() => {
           viewTransitionSubscribeOnce(() => {
             importStatusPage.overwrite(initialStateForImportStatusPage);
             importPage.overwrite(initialStateForImportPage);
           });
-          getBrowserRouter().navigate(`${DRAFT_PAGE_URL}/${draft_id}`);
+          getBrowserRouter().navigate(CREATE_POST_PAGE_URL);
         }, ANIMATION_DURATION);
       }
     }

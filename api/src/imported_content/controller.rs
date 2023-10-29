@@ -1,3 +1,5 @@
+use super::model::{ImportedContentStatus, JobJsonData};
+use crate::{_entry::state::AppState, _utils::query::ImportedContentStatusQuery};
 use async_stream::try_stream;
 use axum::{
   extract::{Query, State},
@@ -6,10 +8,6 @@ use axum::{
 };
 use futures_util::stream::Stream;
 use std::convert::Infallible;
-
-use crate::{_entry::state::AppState, _utils::query::ImportedContentStatusQuery};
-
-use super::model::ImportedContentStatus;
 
 pub async fn imported_content_status(
   State(app_state): State<AppState>,
@@ -38,9 +36,14 @@ pub async fn imported_content_status(
         yield Event::default().data(format!(r#"{{"status": "{}"}}"#, ImportedContentStatus::Failed{failure_reason:"".to_string()}.to_string()));
         break;
       }
-      let (is_final_status, status, draft_id) = import_status.unwrap();
+      let (is_final_status, status, json_data) = import_status.unwrap();
 
-      yield Event::default().data(format!(r#"{{"status": "{}", "draft_id": "{}"}}"#, status, draft_id));
+      let job_json_data = serde_json::from_str::<JobJsonData>(&json_data).unwrap_or(JobJsonData {
+        title: "".to_string(),
+        description: "".to_string(),
+      });
+
+      yield Event::default().data(format!(r#"{{"status": "{}", "title": "{}", "description": "{}"}}"#, status.to_string(), job_json_data.title, job_json_data.description));
 
       if is_final_status {
         break;

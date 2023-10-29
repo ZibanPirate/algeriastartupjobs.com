@@ -63,7 +63,7 @@ async fn run_importing_content_cron_job(app_state: AppState) {
     let mock_json_data = format!(
       r#"{{
       "title": "mock title for {}",
-      "description": "mock description for {}",
+      "description": "mock description for {}"
     }}"#,
       imported_content.source_url, imported_content.source_url,
     );
