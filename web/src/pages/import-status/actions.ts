@@ -18,7 +18,7 @@ const _fetchImportStatusForURL = async (url: string): Promise<void> => {
   const initialLocation = getBrowserRouter().state.location;
   try {
     const { listen, close } = createFetchStream<ImportStatusResponse>({
-      url: `/import/status?url=${url}`,
+      url: `/imported_content/status?url=${url}`,
     });
 
     let response: ImportStatusResponse | null = null;
@@ -30,7 +30,7 @@ const _fetchImportStatusForURL = async (url: string): Promise<void> => {
         return;
       }
       importStatusPage.set({ status: response.status });
-      if (response.status === "DONE") {
+      if (response.status === "Completed") {
         const draft_id = response.draft_id;
         setTimeout(() => {
           viewTransitionSubscribeOnce(() => {
@@ -42,7 +42,7 @@ const _fetchImportStatusForURL = async (url: string): Promise<void> => {
       }
     }
   } catch (error) {
-    importStatusPage.set({ status: "ERROR" });
+    importStatusPage.set({ status: "Failed" });
     // @TODO-ZM: use Logger abstraction instead of console.log
     console.log("Error fetching post count for landing page", error);
     Sentry.captureException(error, { tags: { type: "WEB_FETCH" } });

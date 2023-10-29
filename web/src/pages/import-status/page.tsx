@@ -22,13 +22,13 @@ export const Page: FC = () => {
   }, []);
 
   const statusText =
-    status === "FETCHING"
-      ? "Fetching ..."
-      : status === "PROCESSING"
+    status === "Pending"
+      ? "Queued ..."
+      : status === "InProgress"
       ? "Processing ..."
-      : status === "DONE"
+      : status === "Completed"
       ? "Imported successfully"
-      : status === "ERROR"
+      : status === "Failed"
       ? "Something went wrong"
       : "";
 
@@ -54,7 +54,11 @@ export const Page: FC = () => {
             variant="v1"
             // @TODO-ZM: use proper error icon
             name={
-              status === "DONE" ? "success" : status === "ERROR" ? "removeTag" : "loadingSpinner"
+              status === "Completed"
+                ? "success"
+                : status === "Failed"
+                ? "removeTag"
+                : "loadingSpinner"
             }
             vtName="login-icon"
             animation={["DONE", "ERROR"].includes(status) ? "none" : "rotate"}

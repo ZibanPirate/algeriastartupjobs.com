@@ -1,14 +1,14 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { overWriterReducerFactory, setterReducerFactory } from "src/utils/state/reducer";
 
-export type ImportStatus = "FETCHING" | "PROCESSING" | "DONE" | "ERROR";
+export type ImportStatus = "Pending" | "InProgress" | "Completed" | "Failed";
 
 export interface ImportStatusPageState {
   status: ImportStatus;
 }
 
 export const initialStateForImportStatusPage: ImportStatusPageState = {
-  status: "FETCHING",
+  status: "Pending",
 };
 
 export const importStatusPage = createSlice({
