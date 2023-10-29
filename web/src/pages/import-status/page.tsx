@@ -61,7 +61,7 @@ export const Page: FC = () => {
                 : "loadingSpinner"
             }
             vtName="login-icon"
-            animation={["DONE", "ERROR"].includes(status) ? "none" : "rotate"}
+            animation={["Completed", "Failed"].includes(status) ? "none" : "rotate"}
           />
         </Stack>
       </Stack>

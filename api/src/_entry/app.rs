@@ -2,7 +2,9 @@ use crate::{
   _utils::error::BootError,
   account::controller::create_account_router,
   auth::controller::create_auth_router,
-  imported_content::controller::create_imported_content_router,
+  imported_content::{
+    controller::create_imported_content_router, cron_job::ImportedContentCronJob,
+  },
   post::controller::create_post_router,
   search::{controller::create_search_router, cron_job::SearchCronJob},
   tag::controller::create_tag_router,
@@ -83,6 +85,7 @@ async fn create_app(app_state: AppState) -> Result<Router, BootError> {
   Ok(app)
 }
 
+// @TODO-ZM: use Arc instead of cloning app_state
 async fn create_cron_jobs(app_state: AppState) -> Result<JobScheduler, BootError> {
   let schedule = JobScheduler::new().await;
   if schedule.is_err() {
@@ -90,7 +93,12 @@ async fn create_cron_jobs(app_state: AppState) -> Result<JobScheduler, BootError
   }
   let schedule = schedule.unwrap();
 
-  let search_cron_job = Arc::new(SearchCronJob { app_state });
+  let search_cron_job = Arc::new(SearchCronJob {
+    app_state: app_state.clone(),
+  });
+  let imported_content = Arc::new(ImportedContentCronJob {
+    app_state: app_state.clone(),
+  });
 
   // @TODO-ZM: add un-indexing cron job
   let registration_result = schedule
@@ -110,6 +118,21 @@ async fn create_cron_jobs(app_state: AppState) -> Result<JobScheduler, BootError
   if registration_result.is_err() {
     tracing::error!(
       "Error while registering bk-tree refresher cron job: {:?}",
+      registration_result.err()
+    );
+    return Err(BootError::CronJobSetupError);
+  }
+
+  let registration_result = schedule
+    .add(
+      imported_content
+        .create_importing_content_cron_job()
+        .unwrap(),
+    )
+    .await;
+  if registration_result.is_err() {
+    tracing::error!(
+      "Error while registering imported content cron job: {:?}",
       registration_result.err()
     );
     return Err(BootError::CronJobSetupError);

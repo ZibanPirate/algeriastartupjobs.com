@@ -26,6 +26,7 @@ impl ImportedContentService {
     stop_on_statuses: &Vec<ImportedContentStatus>,
   ) -> Result<(bool, ImportedContentStatus, u32), ImportError> {
     // @TODO-ZM: clean the url
+    // @TODO-ZM: allow list
     let url = Url::parse(url);
     if url.is_err() {
       return Err(ImportError::InvalidUrl);

@@ -30,6 +30,7 @@ pub struct AppState {
   pub ai_service: Arc<AIService>,
   pub auth_service: Arc<AuthService>,
   pub imported_content_service: Arc<ImportedContentService>,
+  pub imported_content_repository: Arc<ImportedContentRepository>,
 }
 
 pub async fn create_app_state() -> Result<AppState, BootError> {
@@ -92,5 +93,6 @@ pub async fn create_app_state() -> Result<AppState, BootError> {
     ai_service: Arc::clone(&ai_service),
     auth_service: Arc::clone(&auth_service),
     imported_content_service: Arc::clone(&imported_content_service),
+    imported_content_repository: Arc::clone(&imported_content_repository),
   })
 }
