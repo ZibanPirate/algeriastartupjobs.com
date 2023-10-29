@@ -2,7 +2,7 @@ use crate::{
   _utils::error::BootError,
   account::controller::create_account_router,
   auth::controller::create_auth_router,
-  imported_content::controller::create_import_router,
+  imported_content::controller::create_imported_content_router,
   post::controller::create_post_router,
   search::{controller::create_search_router, cron_job::SearchCronJob},
   tag::controller::create_tag_router,
@@ -66,7 +66,7 @@ async fn create_app(app_state: AppState) -> Result<Router, BootError> {
     .nest("/tags", create_tag_router())
     .nest("/auth", create_auth_router())
     .nest("/web/", create_web_router())
-    .nest("/import", create_import_router())
+    .nest("/imported_content", create_imported_content_router())
     .route(
       "/",
       get(|| async {

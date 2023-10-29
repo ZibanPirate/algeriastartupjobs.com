@@ -28,3 +28,8 @@ impl PaginationQueryTrait for PaginationQuery {
     DBPaginationQuery { limit, start }
   }
 }
+
+#[derive(Deserialize)]
+pub struct ImportedContentStatusQuery {
+  pub url: String,
+}

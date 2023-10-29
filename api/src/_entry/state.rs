@@ -1,9 +1,16 @@
 use super::database::{create_kv_db, create_sql_db};
 use crate::{
-  _utils::error::BootError, account::repository::AccountRepository, ai::service::AIService,
-  auth::service::AuthService, config::service::ConfigService, email::service::EmailService,
-  post::repository::PostRepository, search::service::SearchService,
-  security::service::SecurityService, tag::repository::TagRepository,
+  _utils::error::BootError,
+  account::repository::AccountRepository,
+  ai::service::AIService,
+  auth::service::AuthService,
+  config::service::ConfigService,
+  email::service::EmailService,
+  imported_content::{repository::ImportedContentRepository, service::ImportedContentService},
+  post::repository::PostRepository,
+  search::service::SearchService,
+  security::service::SecurityService,
+  tag::repository::TagRepository,
   task::repository::TaskRepository,
 };
 use std::sync::Arc;
@@ -22,6 +29,7 @@ pub struct AppState {
   pub security_service: Arc<SecurityService>,
   pub ai_service: Arc<AIService>,
   pub auth_service: Arc<AuthService>,
+  pub imported_content_service: Arc<ImportedContentService>,
 }
 
 pub async fn create_app_state() -> Result<AppState, BootError> {
@@ -57,6 +65,9 @@ pub async fn create_app_state() -> Result<AppState, BootError> {
   let tag_repository = Arc::new(TagRepository::new(Arc::clone(&main_sql_db)));
   let account_repository = Arc::new(AccountRepository::new(Arc::clone(&main_sql_db)));
   let task_repository = Arc::new(TaskRepository::new(Arc::clone(&main_sql_db)));
+  let imported_content_repository =
+    Arc::new(ImportedContentRepository::new(Arc::clone(&main_sql_db)));
+
   let email_service = Arc::new(EmailService::new(Arc::clone(&config_service)));
   let auth_service = Arc::new(AuthService::new(
     Arc::clone(&config_service),
@@ -64,6 +75,9 @@ pub async fn create_app_state() -> Result<AppState, BootError> {
   ));
   let security_service = Arc::new(SecurityService::new(Arc::clone(&rate_limit_kv_db)));
   let ai_service = Arc::new(AIService::new(Arc::clone(&config_service)));
+  let imported_content_service = Arc::new(ImportedContentService::new(Arc::clone(
+    &imported_content_repository,
+  )));
 
   Ok(AppState {
     main_kv_db: Arc::clone(&main_kv_db),
@@ -77,5 +91,6 @@ pub async fn create_app_state() -> Result<AppState, BootError> {
     security_service: Arc::clone(&security_service),
     ai_service: Arc::clone(&ai_service),
     auth_service: Arc::clone(&auth_service),
+    imported_content_service: Arc::clone(&imported_content_service),
   })
 }

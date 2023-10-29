@@ -332,8 +332,6 @@ impl PostRepository {
       "is_published": db_result.get::<bool, _>("is_published"),
     });
 
-    tracing::info!("zako");
-
     let post = serde_json::from_value::<Post>(json_post);
     if post.is_err() {
       tracing::error!("Error while getting one post by id: {:?}", post.err());
