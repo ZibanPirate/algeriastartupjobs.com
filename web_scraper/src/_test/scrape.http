@@ -1,0 +1,6 @@
+@base_url = http://localhost:8383
+###
+GET {{base_url}}/scrape?url=https://www.linkedin.com/jobs/view/3755143465
+
+###
+GET {{base_url}}/scrape?url=https://www.linkedin.com/jobs/view/3710666700
