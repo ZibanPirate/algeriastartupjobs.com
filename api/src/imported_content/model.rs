@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 use strum_macros::Display;
-use utility_types::{omit, partial};
+use utility_types::omit;
 
 // @TODO: add DRY [model]Status
 #[derive(Debug, Serialize, Deserialize, Display, Clone, PartialEq)]
@@ -25,7 +25,6 @@ pub struct JobJsonData {
   pub poster: String,
 }
 
-#[partial(PartialImportedContent)]
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[omit(DBImportedContent, [id, created_at, updated_at], [Debug, Serialize, Deserialize, Clone])]
 pub struct ImportedContent {

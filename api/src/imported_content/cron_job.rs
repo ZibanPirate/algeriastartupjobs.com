@@ -1,7 +1,7 @@
 use crate::{
   _entry::state::AppState,
   _utils::{database::DBOrderDirection, error::BootError},
-  imported_content::model::{ImportedContentStatus, PartialImportedContent},
+  imported_content::model::ImportedContentStatus,
 };
 use std::{
   sync::{
