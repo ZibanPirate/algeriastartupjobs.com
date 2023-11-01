@@ -129,7 +129,7 @@ impl ImportedContentRepository {
         r#"
       SELECT *
       FROM imported_content
-      WHERE status != 'Completed'
+      WHERE status != 'Completed' AND status != 'Failed'
       ORDER BY {} {}
       LIMIT $1
       OFFSET $2
@@ -185,7 +185,7 @@ impl ImportedContentRepository {
 
   pub async fn update_status_of_many_imported_contents_by_ids(
     &self,
-    ids: &Vec<u32>,
+    ids: Vec<u32>,
     status: ImportedContentStatus,
   ) -> Result<(), DataAccessError> {
     let conn = self.main_sql_db.acquire().await;
