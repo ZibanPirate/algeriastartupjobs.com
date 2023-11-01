@@ -1,13 +1,10 @@
-use std::sync::Arc;
-
-use reqwest::Url;
-
-use crate::_utils::error::{DataAccessError, ImportError};
-
 use super::{
-  model::{DBImportedContent, ImportedContentStatus, ImportedContentType},
+  model::{DBImportedContent, ImportedContentStatus, ImportedContentType, JobJsonData},
   repository::ImportedContentRepository,
 };
+use crate::_utils::error::{DataAccessError, ImportError};
+use reqwest::Url;
+use std::sync::Arc;
 
 pub struct ImportedContentService {
   imported_content_repository: Arc<ImportedContentRepository>,
@@ -79,5 +76,39 @@ impl ImportedContentService {
 
       tokio::time::sleep(tokio::time::Duration::from_secs(1)).await;
     }
+  }
+
+  pub async fn fetch_job_post_from_url(&self, url: &str) -> Result<JobJsonData, ImportError> {
+    let url = Url::parse(url);
+    if url.is_err() {
+      return Err(ImportError::InvalidUrl);
+    }
+    let url = url.unwrap();
+
+    let scrape_url =
+    // @TODO-ZM: get url from config_service
+      Url::parse_with_params("http://localhost:8383/scrape", &[("url", url.to_string())]);
+    if scrape_url.is_err() {
+      return Err(ImportError::InternalError);
+    }
+    let scrape_url = scrape_url.unwrap();
+
+    let response = reqwest::get(scrape_url).await;
+    if response.is_err() {
+      return Err(ImportError::InternalError);
+    }
+    let response = response.unwrap();
+
+    if !response.status().is_success() {
+      return Err(ImportError::InternalError);
+    }
+
+    let json_data = response.json::<JobJsonData>().await;
+    if json_data.is_err() {
+      return Err(ImportError::InternalError);
+    }
+    let json_data = json_data.unwrap();
+
+    Ok(json_data)
   }
 }

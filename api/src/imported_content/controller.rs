@@ -7,6 +7,7 @@ use axum::{
   Router,
 };
 use futures_util::stream::Stream;
+use serde_json::json;
 use std::convert::Infallible;
 
 pub async fn imported_content_status(
@@ -41,9 +42,16 @@ pub async fn imported_content_status(
       let job_json_data = serde_json::from_str::<JobJsonData>(&json_data).unwrap_or(JobJsonData {
         title: "".to_string(),
         description: "".to_string(),
+        poster: "".to_string(),
       });
 
-      yield Event::default().data(format!(r#"{{"status": "{}", "title": "{}", "description": "{}"}}"#, status.to_string(), job_json_data.title, job_json_data.description));
+      yield Event::default().data(json!({
+        "status": status.to_string(),
+        "title": job_json_data.title,
+        "description": job_json_data.description,
+        "poster": job_json_data.poster,
+      }).to_string());
+
 
       if is_final_status {
         break;

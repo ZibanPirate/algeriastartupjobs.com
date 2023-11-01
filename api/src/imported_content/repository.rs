@@ -1,6 +1,5 @@
 use super::model::{
   DBImportedContent, DBImportedContentTrait, ImportedContent, ImportedContentStatus,
-  PartialImportedContent,
 };
 use crate::_utils::{database::DBOrderDirection, error::DataAccessError};
 use serde_json::json;
@@ -216,7 +215,7 @@ impl ImportedContentRepository {
 
     if db_result.is_err() {
       tracing::error!(
-        "Error while completing many imported_content by ids: {:?}",
+        "Error while updating status of many imported_content by ids: {:?}",
         db_result.err()
       );
       return Err(DataAccessError::InternalError);
@@ -225,10 +224,10 @@ impl ImportedContentRepository {
     Ok(())
   }
 
-  pub async fn update_one_imported_content_by_id(
+  pub async fn complete_one_imported_content_by_id(
     &self,
     id: u32,
-    imported_content: PartialImportedContent,
+    json_data: String,
   ) -> Result<(), DataAccessError> {
     let conn = self.main_sql_db.acquire().await;
     if conn.is_err() {
@@ -237,42 +236,22 @@ impl ImportedContentRepository {
     }
     let mut conn = conn.unwrap();
 
-    let mut update_fields: Vec<(String, String)> = vec![];
-    if imported_content.status.is_some() {
-      update_fields.push((
-        "status".to_string(),
-        imported_content.status.unwrap().to_string(),
-      ));
-    }
-    if imported_content.json_data.is_some() {
-      update_fields.push((
-        "json_data".to_string(),
-        imported_content.json_data.unwrap().to_string(),
-      ));
-    }
-
     let db_result = sqlx::query(
-      format!(
-        r#"
+      r#"
       UPDATE imported_content
-      SET {}
-      WHERE id = {}
+      SET status = $1, json_data = $2, updated_at = strftime('%Y-%m-%dT%H:%M:%S.%fZ', 'now')
+      WHERE id = $3
       "#,
-        update_fields
-          .iter()
-          .map(|(field, value)| format!("{} = '{}'", field, value))
-          .collect::<Vec<String>>()
-          .join(","),
-        id,
-      )
-      .as_str(),
     )
+    .bind(ImportedContentStatus::Completed.to_string())
+    .bind(json_data)
+    .bind(id)
     .execute(&mut *conn)
     .await;
 
     if db_result.is_err() {
       tracing::error!(
-        "Error while completing many imported_content by ids: {:?}",
+        "Error while updating status of many imported_content by ids: {:?}",
         db_result.err()
       );
       return Err(DataAccessError::InternalError);

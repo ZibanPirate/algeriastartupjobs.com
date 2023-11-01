@@ -57,7 +57,7 @@ const _fetchImportStatusForURL = async (url: string): Promise<void> => {
   } catch (error) {
     importStatusPage.set({ status: "Failed" });
     // @TODO-ZM: use Logger abstraction instead of console.log
-    console.log("Error fetching post count for landing page", error);
+    console.log("Error while fetching import status", error);
     Sentry.captureException(error, { tags: { type: "WEB_FETCH" } });
   }
 };

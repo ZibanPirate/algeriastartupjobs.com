@@ -10,7 +10,6 @@ use std::{
   },
   time::Duration,
 };
-use tokio::time::sleep;
 use tokio_cron_scheduler::Job;
 
 pub struct ImportedContentCronJob {
@@ -47,7 +46,7 @@ async fn run_importing_content_cron_job(app_state: AppState) {
   let imported_content_status_update_result = app_state
     .imported_content_repository
     .update_status_of_many_imported_contents_by_ids(
-      &imported_content_ids,
+      imported_content_ids,
       ImportedContentStatus::InProgress,
     )
     .await;
@@ -58,29 +57,35 @@ async fn run_importing_content_cron_job(app_state: AppState) {
   }
 
   for imported_content in imported_contents {
-    // @TODO-ZM: actually import content
-    sleep(Duration::from_secs(1)).await;
-    let mock_json_data = format!(
-      r#"{{
-      "title": "mock title for {}",
-      "description": "mock description for {}"
-    }}"#,
-      imported_content.source_url, imported_content.source_url,
-    );
+    let id = imported_content.id;
+    let job_json_data = app_state
+      .imported_content_service
+      .fetch_job_post_from_url(&imported_content.source_url)
+      .await;
+    if job_json_data.is_err() {
+      // @TODO-ZM: log error
+      let imported_content_update_result = app_state
+        .imported_content_repository
+        .update_status_of_many_imported_contents_by_ids(
+          vec![id],
+          ImportedContentStatus::Failed {
+            failure_reason: "Error while fetching job post".to_string(),
+          },
+        )
+        .await;
+      if imported_content_update_result.is_err() {
+        tracing::error!("Error while updating imported_content");
+        return;
+      }
+      break;
+    }
+    let job_json_data = job_json_data.unwrap();
 
     let imported_content_update_result = app_state
       .imported_content_repository
-      .update_one_imported_content_by_id(
+      .complete_one_imported_content_by_id(
         imported_content.id,
-        PartialImportedContent {
-          json_data: Some(mock_json_data),
-          status: Some(ImportedContentStatus::Completed),
-          id: None,
-          r#type: None,
-          source_url: None,
-          created_at: None,
-          updated_at: None,
-        },
+        serde_json::to_string(&job_json_data).unwrap_or("".to_string()),
       )
       .await;
 

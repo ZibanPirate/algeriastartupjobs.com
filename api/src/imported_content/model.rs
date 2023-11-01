@@ -22,6 +22,7 @@ pub enum ImportedContentType {
 pub struct JobJsonData {
   pub title: String,
   pub description: String,
+  pub poster: String,
 }
 
 #[partial(PartialImportedContent)]
