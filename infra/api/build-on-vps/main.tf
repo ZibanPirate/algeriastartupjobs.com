@@ -34,8 +34,10 @@ variable "do_ssh_key" {
 }
 
 locals {
-  user     = "root"
-  code_dir = "~/code"
+  user             = "root"
+  home             = "~"
+  code_dir         = "~/code"
+  scraper_code_dir = "~/scraper_code"
 }
 
 provider "digitalocean" {
@@ -73,7 +75,9 @@ resource "ssh_resource" "setup" {
 
   commands = [
     "sudo apt-get update -y && sudo apt-get install -y build-essential unzip pkg-config libssl-dev python3",
-    "curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal --default-toolchain nightly"
+    "curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal --default-toolchain nightly",
+    "sudo snap install node --classic",
+    "exec bash -l",
   ]
 }
 
@@ -87,6 +91,12 @@ data "archive_file" "db_zipped" {
   type        = "zip"
   source_dir  = "${path.module}/../../../api/db"
   output_path = "${path.module}/db_zip.zip"
+}
+
+data "archive_file" "src_zipped_scraper" {
+  type        = "zip"
+  source_dir  = "${path.module}/../../../web_scraper/src"
+  output_path = "${path.module}/src_zip_scraper.zip"
 }
 
 resource "ssh_resource" "upload_code_to_vps" {
@@ -106,6 +116,7 @@ resource "ssh_resource" "upload_code_to_vps" {
   pre_commands = [
     "mkdir -p ${local.code_dir}/src",
     "mkdir -p ${local.code_dir}/db",
+    "mkdir -p ${local.scraper_code_dir}/src",
   ]
 
   file {
@@ -128,11 +139,39 @@ resource "ssh_resource" "upload_code_to_vps" {
     destination = "${local.code_dir}/db.zip"
   }
 
+  file {
+    source      = "${path.module}/../../../web_scraper/.eslintrc.json"
+    destination = "${local.scraper_code_dir}/.eslintrc.json"
+  }
+  file {
+    source      = "${path.module}/../../../web_scraper/forge.config.ts"
+    destination = "${local.scraper_code_dir}/forge.config.ts"
+  }
+  file {
+    source      = "${path.module}/../../../web_scraper/package-lock.json"
+    destination = "${local.scraper_code_dir}/package-lock.json"
+  }
+  file {
+    source      = "${path.module}/../../../web_scraper/package.json"
+    destination = "${local.scraper_code_dir}/package.json"
+  }
+  file {
+    source      = "${path.module}/../../../web_scraper/tsconfig.json"
+    destination = "${local.scraper_code_dir}/tsconfig.json"
+  }
+
+  file {
+    source      = "${path.module}/src_zip_scraper.zip"
+    destination = "${local.scraper_code_dir}/src.zip"
+  }
+
   commands = [
     "unzip -o ${local.code_dir}/src.zip -d ${local.code_dir}/src",
     "rm ${local.code_dir}/src.zip",
     "unzip -o ${local.code_dir}/db.zip -d ${local.code_dir}/db",
     "rm ${local.code_dir}/db.zip",
+    "unzip -o ${local.scraper_code_dir}/src.zip -d ${local.scraper_code_dir}/src",
+    "rm ${local.scraper_code_dir}/src.zip",
   ]
 }
 
@@ -152,8 +191,9 @@ resource "ssh_resource" "release" {
 
   commands = [
     "killall python3 || true",
-    "screen -dm python3 -m http.server --directory ${local.code_dir}",
-    "cd ${local.code_dir} && $HOME/.cargo/bin/cargo build --release"
+    "screen -dm python3 -m http.server --directory ${local.home}",
+    "cd ${local.code_dir} && $HOME/.cargo/bin/cargo build --release",
+    "cd ${local.scraper_code_dir} && npm install && npm run make:linux",
   ]
 }
 

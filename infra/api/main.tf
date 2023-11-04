@@ -52,7 +52,9 @@ locals {
   app_folder           = "${local.home}/${local.app_folder_name}"
   certificate_folder   = "/etc/ssl/certs"
   app_name             = "algeriastartupjobs-api"
+  scraper_app_name     = "algeriastartupjobs"
   service_name         = "algeriastartupjobs-api"
+  scraper_service_name = "algeriastartupjobs-scraper"
   stage                = terraform.workspace
   root_domain_name     = "api.algeriastartupjobs.com"
   web_root_domain_name = "algeriastartupjobs.com"
@@ -102,9 +104,27 @@ resource "digitalocean_droplet" "api" {
         [Install]
         WantedBy=multi-user.target
       path: /etc/systemd/system/${local.service_name}.service
+
+    - content: |
+        [Unit]
+        Description=Algeria Startup Jobs Scraper
+        After=network.target
+
+        [Service]
+        ExecStart=xvfb-run ${local.scraper_app_name}
+        StandardOutput=syslog
+        SyslogIdentifier=${local.scraper_service_name}
+        WorkingDirectory=/home/${var.do_droplet_user}/${local.app_folder_name}
+        Restart=always
+        RestartSec=5
+        User=${var.do_droplet_user}
+
+        [Install]
+        WantedBy=multi-user.target
+      path: /etc/systemd/system/${local.scraper_service_name}.service
     runcmd:
       - sudo apt update
-      - sudo apt install nginx -y
+      - sudo apt install nginx xvfb libasound2 -y
       - sudo ufw allow 'Nginx HTTP'
       - sudo sh -c "echo '
           server {
@@ -232,11 +252,18 @@ resource "ssh_resource" "upload_app_and_deps_to_vps" {
     #
     "sudo systemctl stop nginx || true",
     "sudo systemctl stop ${local.service_name} || true",
+    "sudo systemctl stop ${local.scraper_service_name} || true",
     #
-    "sudo curl -o ${local.app_folder}/${local.app_name} http://${data.terraform_remote_state.ructc.outputs.digitalocean_droplet_rustc_ipv4_address}:8000/target/release/algeriastartupjobs-api",
+    "sudo curl -o ${local.app_folder}/${local.app_name} http://${data.terraform_remote_state.ructc.outputs.digitalocean_droplet_rustc_ipv4_address}:8000/code/target/release/algeriastartupjobs-api",
     "sudo chmod +x ${local.app_folder}/${local.app_name} || true",
     #
+    "sudo curl -o ${local.app_folder}/${local.scraper_app_name}.dep http://${data.terraform_remote_state.ructc.outputs.digitalocean_droplet_rustc_ipv4_address}:8000/scraper_code/out/make/deb/x64/algeriastartupjobs_0.0.0_amd64.deb", # @TODO-ZM: remove version from the file name
+    "sudo dpkg -i ${local.app_folder}/${local.scraper_app_name}.dep || true",
+    "sudo apt-get -y -f install",
+    "sudo dpkg -i ${local.app_folder}/${local.scraper_app_name}.dep || true",
+    #
     "sudo systemctl daemon-reload",
+    "sudo systemctl start ${local.scraper_service_name} || true",
     "sudo systemctl start ${local.service_name} || true",
     "sudo systemctl start nginx",
   ]
