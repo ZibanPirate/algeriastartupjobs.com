@@ -102,9 +102,9 @@ output "route53_zone_id" {
 
 resource "aws_acm_certificate" "website" {
   count                     = local.count
-  domain_name               = local.assets_root_domain_name
+  domain_name               = local.root_domain_name
   validation_method         = "DNS"
-  subject_alternative_names = ["*.${local.assets_root_domain_name}"]
+  subject_alternative_names = ["*.${local.root_domain_name}"]
   lifecycle {
     create_before_destroy = true
   }
@@ -178,11 +178,12 @@ resource "namecheap_domain_records" "domain" {
   nameservers = [for ns in local.dns_servers : ns]
 }
 
-# resource "aws_acm_certificate_validation" "website" {
-#   certificate_arn         = aws_acm_certificate.website[0].arn
-#   validation_record_fqdns = [for record in aws_route53_record.website : record.fqdn]
-#   provider                = aws.virginia
-# }
+resource "aws_acm_certificate_validation" "website" {
+  depends_on              = [namecheap_domain_records.domain[0]]
+  certificate_arn         = aws_acm_certificate.website[0].arn
+  validation_record_fqdns = [for record in aws_route53_record.website : record.fqdn]
+  provider                = aws.virginia
+}
 
 # resource "aws_route53_record" "email" {
 #   for_each = {
