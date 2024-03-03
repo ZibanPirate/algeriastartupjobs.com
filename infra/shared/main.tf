@@ -71,20 +71,20 @@ provider "namecheap" {
   use_sandbox = false
 }
 
-# provider "aws" {
-#   region = "eu-west-1"
-# }
+provider "aws" {
+  region = "eu-west-1"
+}
 
-# # Needed for creating CloudFront distributions
-# provider "aws" {
-#   alias  = "virginia"
-#   region = "us-east-1"
-# }
+# Needed for creating CloudFront distributions
+provider "aws" {
+  alias  = "virginia"
+  region = "us-east-1"
+}
 
-# provider "acme" {
-#   # server_url = "https://acme-staging-v02.api.letsencrypt.org/directory"
-#   server_url = "https://acme-v02.api.letsencrypt.org/directory"
-# }
+provider "acme" {
+  # server_url = "https://acme-staging-v02.api.letsencrypt.org/directory"
+  server_url = "https://acme-v02.api.letsencrypt.org/directory"
+}
 
 # # Shared Route53 zone configuration
 # resource "aws_route53_zone" "website" {
