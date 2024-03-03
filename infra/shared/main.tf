@@ -225,49 +225,49 @@ output "digitalocean_ssh_key_fingerprint" {
   value = local.is_shared_workspace ? digitalocean_ssh_key.api[0].fingerprint : null
 }
 
-# resource "digitalocean_project" "api" {
-#   count = local.count
-#   name  = "Algeria Startup Jobs"
-# }
+resource "digitalocean_project" "api" {
+  count = local.count
+  name  = "Algeria Startup Jobs"
+}
 
-# output "digitalocean_project_id" {
-#   value = local.is_shared_workspace ? digitalocean_project.api[0].id : null
-# }
+output "digitalocean_project_id" {
+  value = local.is_shared_workspace ? digitalocean_project.api[0].id : null
+}
 
-# resource "tls_private_key" "api" {
-#   count     = local.count
-#   algorithm = "RSA"
-# }
+resource "tls_private_key" "api" {
+  count     = local.count
+  algorithm = "RSA"
+}
 
-# resource "acme_registration" "api" {
-#   count           = local.count
-#   account_key_pem = tls_private_key.api[0].private_key_pem
-#   email_address   = local.contact_email_address
-# }
+resource "acme_registration" "api" {
+  count           = local.count
+  account_key_pem = tls_private_key.api[0].private_key_pem
+  email_address   = local.contact_email_address
+}
 
-# resource "acme_certificate" "api" {
-#   count                     = local.count
-#   account_key_pem           = acme_registration.api[0].account_key_pem
-#   common_name               = local.root_domain_name
-#   subject_alternative_names = ["*.${local.root_domain_name}", "*.${local.api_root_domain_name}"]
+resource "acme_certificate" "api" {
+  count                     = local.count
+  account_key_pem           = acme_registration.api[0].account_key_pem
+  common_name               = local.root_domain_name
+  subject_alternative_names = ["*.${local.root_domain_name}", "*.${local.api_root_domain_name}"]
 
-#   dns_challenge {
-#     provider = "route53"
+  dns_challenge {
+    provider = "route53"
 
-#     config = {
-#       AWS_HOSTED_ZONE_ID = aws_route53_zone.website[0].id
-#     }
-#   }
+    config = {
+      AWS_HOSTED_ZONE_ID = aws_route53_zone.website[0].id
+    }
+  }
 
-#   depends_on = [acme_registration.api[0]]
-# }
+  depends_on = [acme_registration.api[0]]
+}
 
-# output "acme_certificate_api_certificate_pem" {
-#   value     = local.is_shared_workspace ? acme_certificate.api[0].certificate_pem : null
-#   sensitive = true
-# }
+output "acme_certificate_api_certificate_pem" {
+  value     = local.is_shared_workspace ? acme_certificate.api[0].certificate_pem : null
+  sensitive = true
+}
 
-# output "acme_certificate_api_private_key_pem" {
-#   value     = local.is_shared_workspace ? acme_certificate.api[0].private_key_pem : null
-#   sensitive = true
-# }
+output "acme_certificate_api_private_key_pem" {
+  value     = local.is_shared_workspace ? acme_certificate.api[0].private_key_pem : null
+  sensitive = true
+}
