@@ -2,3 +2,4 @@
 *.tfstate*
 *.zip
 sqlite_db_data
+dns_servers.json*

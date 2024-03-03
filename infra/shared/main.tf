@@ -134,6 +134,42 @@ resource "aws_route53_record" "website" {
   zone_id         = aws_route53_zone.website[0].id
 }
 
+resource "null_resource" "dns_servers_fetch" {
+  count = local.count
+  triggers = {
+    always_run = timestamp()
+  }
+  provisioner "local-exec" {
+    command = "aws route53 list-resource-record-sets --hosted-zone-id ${aws_route53_zone.website[0].zone_id} --output json > dns_servers.json"
+  }
+}
+
+resource "null_resource" "dns_servers_prepare" {
+  count = local.count
+  triggers = {
+    always_run = timestamp()
+  }
+  depends_on = [null_resource.dns_servers_fetch[0]]
+  provisioner "local-exec" {
+    command = "echo '['$(grep -o '\"ns-[^\"]*\\.\"' dns_servers.json | sed 's/$/,/; $s/,$//')']' > dns_servers.json"
+  }
+}
+
+resource "null_resource" "dns_servers_clean" {
+  count = local.count
+  triggers = {
+    always_run = timestamp()
+  }
+  depends_on = [null_resource.dns_servers_prepare[0]]
+  provisioner "local-exec" {
+    command = "sed -i -e 's/\\.\"/\"/g' dns_servers.json"
+  }
+}
+
+locals {
+  dns_servers = jsondecode(file("${path.module}/dns_servers.json"))
+}
+
 # resource "aws_acm_certificate_validation" "website" {
 #   certificate_arn         = aws_acm_certificate.website[0].arn
 #   validation_record_fqdns = [for record in aws_route53_record.website : record.fqdn]
