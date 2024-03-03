@@ -170,6 +170,14 @@ locals {
   dns_servers = jsondecode(file("${path.module}/dns_servers.json"))
 }
 
+resource "namecheap_domain_records" "domain" {
+  count  = local.count
+  domain = local.root_domain_name
+  mode   = "OVERWRITE"
+
+  nameservers = [for ns in local.dns_servers : ns]
+}
+
 # resource "aws_acm_certificate_validation" "website" {
 #   certificate_arn         = aws_acm_certificate.website[0].arn
 #   validation_record_fqdns = [for record in aws_route53_record.website : record.fqdn]
