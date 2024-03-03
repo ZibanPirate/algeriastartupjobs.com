@@ -185,31 +185,31 @@ resource "aws_acm_certificate_validation" "website" {
   provider                = aws.virginia
 }
 
-# resource "aws_route53_record" "email" {
-#   for_each = {
-#     for record in local.email_dns_records : index(local.email_dns_records, record) => {
-#       name    = record.name
-#       records = record.value
-#       type    = record.type
-#     }
-#   }
+resource "aws_route53_record" "email" {
+  for_each = {
+    for record in local.email_dns_records : index(local.email_dns_records, record) => {
+      name    = record.name
+      records = record.value
+      type    = record.type
+    }
+  }
 
-#   allow_overwrite = true
-#   ttl             = 60
-#   name            = each.value.name
-#   type            = each.value.type
-#   zone_id         = aws_route53_zone.website[0].id
-#   records         = each.value.records
-# }
+  allow_overwrite = true
+  ttl             = 60
+  name            = each.value.name
+  type            = each.value.type
+  zone_id         = aws_route53_zone.website[0].id
+  records         = each.value.records
+}
 
-# resource "aws_route53_record" "github" {
-#   allow_overwrite = true
-#   ttl             = 60
-#   name            = "_github-challenge-algeriastartupjobs-org.algeriastartupjobs.com"
-#   type            = "TXT"
-#   zone_id         = aws_route53_zone.website[0].id
-#   records         = ["029060ef0f"]
-# }
+resource "aws_route53_record" "github" {
+  allow_overwrite = true
+  ttl             = 60
+  name            = "_github-challenge-algeriastartupjobs-org.algeriastartupjobs.com"
+  type            = "TXT"
+  zone_id         = aws_route53_zone.website[0].id
+  records         = ["029060ef0f"]
+}
 
 # provider "digitalocean" {
 #   token = var.do_api_key
