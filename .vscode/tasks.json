@@ -20,6 +20,18 @@
         "cwd": "${workspaceFolder}/infra/shared"
       }
     },
+    {
+      "label": "terraform destroy shared",
+      "type": "shell",
+      "command": "TF_WORKSPACE=shared terraform destroy -auto-approve -var-file=\"../secret.tfvars\"",
+      "problemMatcher": [],
+      "options": {
+        "cwd": "${workspaceFolder}/infra/shared"
+      },
+      "dependsOn": [
+        // "terraform destroy web"
+      ]
+    },
     // build:
     // dev:
     // {
