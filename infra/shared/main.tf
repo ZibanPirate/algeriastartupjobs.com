@@ -100,21 +100,22 @@ output "route53_zone_id" {
   value = local.is_shared_workspace ? aws_route53_zone.website[0].id : null
 }
 
-# resource "aws_acm_certificate" "website" {
-#   count                     = local.count
-#   domain_name               = local.assets_root_domain_name
-#   validation_method         = "DNS"
-#   subject_alternative_names = ["*.${local.assets_root_domain_name}"]
-#   lifecycle {
-#     create_before_destroy = true
-#   }
-#   provider = aws.virginia
-# }
+resource "aws_acm_certificate" "website" {
+  count                     = local.count
+  domain_name               = local.assets_root_domain_name
+  validation_method         = "DNS"
+  subject_alternative_names = ["*.${local.assets_root_domain_name}"]
+  lifecycle {
+    create_before_destroy = true
+  }
+  provider = aws.virginia
+  tags     = local.tags
+}
 
-# # Output the certificate ARN
-# output "certificate_arn" {
-#   value = local.is_shared_workspace ? aws_acm_certificate.website[0].arn : null
-# }
+# Output the certificate ARN
+output "certificate_arn" {
+  value = local.is_shared_workspace ? aws_acm_certificate.website[0].arn : null
+}
 
 # resource "aws_route53_record" "website" {
 #   for_each = {
