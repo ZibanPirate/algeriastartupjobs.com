@@ -6,8 +6,18 @@
       "label": "terraform init",
       "type": "shell",
       "command": "cd shared && terraform init && cd ../web && terraform init && cd ../api && terraform init",
+      "problemMatcher": [],
       "options": {
         "cwd": "${workspaceFolder}/infra"
+      }
+    },
+    {
+      "label": "terraform shared",
+      "type": "shell",
+      "command": "TF_WORKSPACE=shared terraform apply -auto-approve -var-file=\"../secret.tfvars\"",
+      "problemMatcher": [],
+      "options": {
+        "cwd": "${workspaceFolder}/infra/shared"
       }
     },
     // build:
@@ -48,13 +58,6 @@
     //   "problemMatcher": [],
     //   "options": { "cwd": "${workspaceFolder}/infra/api/build-on-vps" },
     //   "dependsOn": [".env api"]
-    // },
-    // {
-    //   "label": "terraform shared",
-    //   "type": "shell",
-    //   "command": "TF_WORKSPACE=shared terraform apply -auto-approve -var-file=\"secret.tfvars\"",
-    //   "problemMatcher": [],
-    //   "options": { "cwd": "${workspaceFolder}/infra/shared" }
     // },
     // {
     //   "label": "terraform web staging",
