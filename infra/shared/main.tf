@@ -211,19 +211,19 @@ resource "aws_route53_record" "github" {
   records         = ["029060ef0f"]
 }
 
-# provider "digitalocean" {
-#   token = var.do_api_key
-# }
+provider "digitalocean" {
+  token = var.do_api_key
+}
 
-# resource "digitalocean_ssh_key" "api" {
-#   count      = local.count
-#   name       = "Algeria Startup Jobs Terraform Key"
-#   public_key = var.do_ssh_pub_key
-# }
+resource "digitalocean_ssh_key" "api" {
+  count      = local.count
+  name       = "Algeria Startup Jobs Terraform Key"
+  public_key = var.do_ssh_pub_key
+}
 
-# output "digitalocean_ssh_key_fingerprint" {
-#   value = local.is_shared_workspace ? digitalocean_ssh_key.api[0].fingerprint : null
-# }
+output "digitalocean_ssh_key_fingerprint" {
+  value = local.is_shared_workspace ? digitalocean_ssh_key.api[0].fingerprint : null
+}
 
 # resource "digitalocean_project" "api" {
 #   count = local.count
