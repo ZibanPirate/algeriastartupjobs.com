@@ -1,3 +1,21 @@
+variable "namecheap_api_user" {
+  description = "The API user for Namecheap"
+  type        = string
+  sensitive   = true
+}
+
+variable "namecheap_api_key" {
+  description = "The API key for Namecheap"
+  type        = string
+  sensitive   = true
+}
+
+variable "namecheap_client_ip" {
+  description = "The client IP for Namecheap"
+  type        = string
+  sensitive   = true
+}
+
 terraform {
   required_providers {
     digitalocean = {
@@ -8,7 +26,20 @@ terraform {
       source  = "vancluever/acme"
       version = "~> 2.5.3"
     }
+    namecheap = {
+      source  = "namecheap/namecheap"
+      version = ">= 2.0.0"
+    }
   }
+}
+
+# Namecheap API credentials
+provider "namecheap" {
+  user_name   = var.namecheap_api_user
+  api_user    = var.namecheap_api_user
+  api_key     = var.namecheap_api_key
+  client_ip   = var.namecheap_client_ip
+  use_sandbox = false
 }
 
 locals {

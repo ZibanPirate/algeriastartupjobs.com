@@ -1,165 +1,176 @@
 {
   "version": "2.0.0",
   "tasks": [
+    // terraform:
     {
-      "label": "build web staging",
+      "label": "terraform init",
       "type": "shell",
-      "command": "npm run clean && npm run build -- --mode staging",
-      "problemMatcher": [],
-      "options": { "cwd": "${workspaceFolder}/web" }
+      "command": "cd shared && terraform init && cd ../web && terraform init && cd ../api && terraform init",
+      "options": {
+        "cwd": "${workspaceFolder}/infra"
+      }
     },
-    {
-      "label": "build web production",
-      "type": "shell",
-      "command": "npm run clean && npm run build -- --mode production",
-      "problemMatcher": [],
-      "options": { "cwd": "${workspaceFolder}/web" }
-    },
-    {
-      "label": ".env api",
-      "type": "shell",
-      "command": "test -f .env || cp development.env .env",
-      "problemMatcher": [],
-      "options": { "cwd": "${workspaceFolder}/api" }
-    },
-    {
-      "label": "build api",
-      "type": "shell",
-      "command": "terraform apply -auto-approve -var-file=\"../secret.tfvars\"",
-      "problemMatcher": [],
-      "options": { "cwd": "${workspaceFolder}/infra/api/build-on-vps" },
-      "dependsOn": [".env api"]
-    },
-    {
-      "label": "clean api",
-      "type": "shell",
-      "command": "terraform destroy -auto-approve -var-file=\"../secret.tfvars\"",
-      "problemMatcher": [],
-      "options": { "cwd": "${workspaceFolder}/infra/api/build-on-vps" },
-      "dependsOn": [".env api"]
-    },
-    {
-      "label": "terraform shared",
-      "type": "shell",
-      "command": "TF_WORKSPACE=shared terraform apply -auto-approve -var-file=\"secret.tfvars\"",
-      "problemMatcher": [],
-      "options": { "cwd": "${workspaceFolder}/infra/shared" }
-    },
-    {
-      "label": "terraform web staging",
-      "type": "shell",
-      "command": "TF_WORKSPACE=staging terraform apply -auto-approve -var-file=\"secret.tfvars\"",
-      "problemMatcher": [],
-      "options": { "cwd": "${workspaceFolder}/infra/web" },
-      "dependsOn": ["build web staging", "terraform shared"]
-    },
-    {
-      "label": "terraform web production",
-      "type": "shell",
-      "command": "TF_WORKSPACE=production terraform apply -auto-approve -var-file=\"secret.tfvars\"",
-      "problemMatcher": [],
-      "options": { "cwd": "${workspaceFolder}/infra/web" },
-      "dependsOn": ["build web production", "terraform shared"]
-    },
-    {
-      "label": "terraform api staging",
-      "type": "shell",
-      "command": "TF_WORKSPACE=staging terraform apply -auto-approve -var-file=\"secret.tfvars\"",
-      "problemMatcher": [],
-      "options": { "cwd": "${workspaceFolder}/infra/api" },
-      "dependsOn": ["build api", "terraform shared"]
-    },
-    {
-      "label": "destroy api staging",
-      "type": "shell",
-      "command": "TF_WORKSPACE=staging terraform destroy -auto-approve -var-file=\"secret.tfvars\" -var=\"ignore_rustc=true\"",
-      "problemMatcher": [],
-      "options": { "cwd": "${workspaceFolder}/infra/api" }
-    },
-    {
-      "label": "terraform api production",
-      "type": "shell",
-      "command": "TF_WORKSPACE=production terraform apply -auto-approve -var-file=\"secret.tfvars\"",
-      "problemMatcher": [],
-      "options": { "cwd": "${workspaceFolder}/infra/api" },
-      "dependsOn": ["build api", "terraform shared"]
-    },
-    {
-      "label": "download db backup staging",
-      "type": "shell",
-      "command": "TF_WORKSPACE=staging terraform apply -auto-approve -var-file=\"../secret.tfvars\"",
-      "problemMatcher": [],
-      "options": { "cwd": "${workspaceFolder}/infra/api/download-db-backup" }
-    },
-    {
-      "label": "download db backup production",
-      "type": "shell",
-      "command": "TF_WORKSPACE=production terraform apply -auto-approve -var-file=\"../secret.tfvars\"",
-      "problemMatcher": [],
-      "options": { "cwd": "${workspaceFolder}/infra/api/download-db-backup" }
-    },
-    {
-      "label": "upload db backup staging",
-      "type": "shell",
-      "command": "TF_WORKSPACE=staging terraform apply -auto-approve -var-file=\"../secret.tfvars\"",
-      "problemMatcher": [],
-      "options": { "cwd": "${workspaceFolder}/infra/api/upload-db-backup" }
-    },
-    {
-      "label": "upload db backup production",
-      "type": "shell",
-      "command": "TF_WORKSPACE=production terraform apply -auto-approve -var-file=\"../secret.tfvars\"",
-      "problemMatcher": [],
-      "options": { "cwd": "${workspaceFolder}/infra/api/upload-db-backup" }
-    },
-    {
-      "label": "dev db",
-      "type": "shell",
-      "command": [
-        "mkdir -p ./sqlite_db_data || true",
-        "&& DATABASE_URL=\"sqlite:sqlite_db_data/main.db\" sqlx database create",
-        "&& DATABASE_URL=\"sqlite:sqlite_db_data/search.db\" sqlx database create"
-      ],
-      "problemMatcher": [],
-      "options": { "cwd": "${workspaceFolder}/api" }
-    },
-    {
-      "label": "delete db",
-      "type": "shell",
-      "command": [
-        "rm -r -f ./sqlite_db_data",
-        "&& mkdir -p ./sqlite_db_data || true",
-        "&& DATABASE_URL=\"sqlite:sqlite_db_data/main.db\" sqlx database create",
-        "&& DATABASE_URL=\"sqlite:sqlite_db_data/search.db\" sqlx database create"
-      ],
-      "problemMatcher": [],
-      "options": { "cwd": "${workspaceFolder}/api" }
-    },
-    {
-      "label": "dev api",
-      "type": "shell",
-      "command": "cargo watch -x run",
-      "problemMatcher": [],
-      "options": { "cwd": "${workspaceFolder}/api" },
-      "isBackground": true,
-      "presentation": { "group": "dev" },
-      "dependsOn": ["dev db"]
-    },
-    {
-      "label": "dev web",
-      "type": "shell",
-      "command": "npm install && npm run dev",
-      "problemMatcher": [],
-      "options": { "cwd": "${workspaceFolder}/web" },
-      "isBackground": true,
-      "presentation": { "group": "dev" }
-    },
-    {
-      "label": "dev",
-      "dependsOn": ["dev web", "dev api"],
-      "dependsOrder": "parallel",
-      "problemMatcher": [],
-      "group": "build"
-    }
+    // build:
+    // dev:
+    // {
+    //   "label": "build web staging",
+    //   "type": "shell",
+    //   "command": "npm run clean && npm run build -- --mode staging",
+    //   "problemMatcher": [],
+    //   "options": { "cwd": "${workspaceFolder}/web" }
+    // },
+    // {
+    //   "label": "build web production",
+    //   "type": "shell",
+    //   "command": "npm run clean && npm run build -- --mode production",
+    //   "problemMatcher": [],
+    //   "options": { "cwd": "${workspaceFolder}/web" }
+    // },
+    // {
+    //   "label": ".env api",
+    //   "type": "shell",
+    //   "command": "test -f .env || cp development.env .env",
+    //   "problemMatcher": [],
+    //   "options": { "cwd": "${workspaceFolder}/api" }
+    // },
+    // {
+    //   "label": "build api",
+    //   "type": "shell",
+    //   "command": "terraform apply -auto-approve -var-file=\"../secret.tfvars\"",
+    //   "problemMatcher": [],
+    //   "options": { "cwd": "${workspaceFolder}/infra/api/build-on-vps" },
+    //   "dependsOn": [".env api"]
+    // },
+    // {
+    //   "label": "clean api",
+    //   "type": "shell",
+    //   "command": "terraform destroy -auto-approve -var-file=\"../secret.tfvars\"",
+    //   "problemMatcher": [],
+    //   "options": { "cwd": "${workspaceFolder}/infra/api/build-on-vps" },
+    //   "dependsOn": [".env api"]
+    // },
+    // {
+    //   "label": "terraform shared",
+    //   "type": "shell",
+    //   "command": "TF_WORKSPACE=shared terraform apply -auto-approve -var-file=\"secret.tfvars\"",
+    //   "problemMatcher": [],
+    //   "options": { "cwd": "${workspaceFolder}/infra/shared" }
+    // },
+    // {
+    //   "label": "terraform web staging",
+    //   "type": "shell",
+    //   "command": "TF_WORKSPACE=staging terraform apply -auto-approve -var-file=\"secret.tfvars\"",
+    //   "problemMatcher": [],
+    //   "options": { "cwd": "${workspaceFolder}/infra/web" },
+    //   "dependsOn": ["build web staging", "terraform shared"]
+    // },
+    // {
+    //   "label": "terraform web production",
+    //   "type": "shell",
+    //   "command": "TF_WORKSPACE=production terraform apply -auto-approve -var-file=\"secret.tfvars\"",
+    //   "problemMatcher": [],
+    //   "options": { "cwd": "${workspaceFolder}/infra/web" },
+    //   "dependsOn": ["build web production", "terraform shared"]
+    // },
+    // {
+    //   "label": "terraform api staging",
+    //   "type": "shell",
+    //   "command": "TF_WORKSPACE=staging terraform apply -auto-approve -var-file=\"secret.tfvars\"",
+    //   "problemMatcher": [],
+    //   "options": { "cwd": "${workspaceFolder}/infra/api" },
+    //   "dependsOn": ["build api", "terraform shared"]
+    // },
+    // {
+    //   "label": "destroy api staging",
+    //   "type": "shell",
+    //   "command": "TF_WORKSPACE=staging terraform destroy -auto-approve -var-file=\"secret.tfvars\" -var=\"ignore_rustc=true\"",
+    //   "problemMatcher": [],
+    //   "options": { "cwd": "${workspaceFolder}/infra/api" }
+    // },
+    // {
+    //   "label": "terraform api production",
+    //   "type": "shell",
+    //   "command": "TF_WORKSPACE=production terraform apply -auto-approve -var-file=\"secret.tfvars\"",
+    //   "problemMatcher": [],
+    //   "options": { "cwd": "${workspaceFolder}/infra/api" },
+    //   "dependsOn": ["build api", "terraform shared"]
+    // },
+    // {
+    //   "label": "download db backup staging",
+    //   "type": "shell",
+    //   "command": "TF_WORKSPACE=staging terraform apply -auto-approve -var-file=\"../secret.tfvars\"",
+    //   "problemMatcher": [],
+    //   "options": { "cwd": "${workspaceFolder}/infra/api/download-db-backup" }
+    // },
+    // {
+    //   "label": "download db backup production",
+    //   "type": "shell",
+    //   "command": "TF_WORKSPACE=production terraform apply -auto-approve -var-file=\"../secret.tfvars\"",
+    //   "problemMatcher": [],
+    //   "options": { "cwd": "${workspaceFolder}/infra/api/download-db-backup" }
+    // },
+    // {
+    //   "label": "upload db backup staging",
+    //   "type": "shell",
+    //   "command": "TF_WORKSPACE=staging terraform apply -auto-approve -var-file=\"../secret.tfvars\"",
+    //   "problemMatcher": [],
+    //   "options": { "cwd": "${workspaceFolder}/infra/api/upload-db-backup" }
+    // },
+    // {
+    //   "label": "upload db backup production",
+    //   "type": "shell",
+    //   "command": "TF_WORKSPACE=production terraform apply -auto-approve -var-file=\"../secret.tfvars\"",
+    //   "problemMatcher": [],
+    //   "options": { "cwd": "${workspaceFolder}/infra/api/upload-db-backup" }
+    // },
+    // {
+    //   "label": "dev db",
+    //   "type": "shell",
+    //   "command": [
+    //     "mkdir -p ./sqlite_db_data || true",
+    //     "&& DATABASE_URL=\"sqlite:sqlite_db_data/main.db\" sqlx database create",
+    //     "&& DATABASE_URL=\"sqlite:sqlite_db_data/search.db\" sqlx database create"
+    //   ],
+    //   "problemMatcher": [],
+    //   "options": { "cwd": "${workspaceFolder}/api" }
+    // },
+    // {
+    //   "label": "delete db",
+    //   "type": "shell",
+    //   "command": [
+    //     "rm -r -f ./sqlite_db_data",
+    //     "&& mkdir -p ./sqlite_db_data || true",
+    //     "&& DATABASE_URL=\"sqlite:sqlite_db_data/main.db\" sqlx database create",
+    //     "&& DATABASE_URL=\"sqlite:sqlite_db_data/search.db\" sqlx database create"
+    //   ],
+    //   "problemMatcher": [],
+    //   "options": { "cwd": "${workspaceFolder}/api" }
+    // },
+    // {
+    //   "label": "dev api",
+    //   "type": "shell",
+    //   "command": "cargo watch -x run",
+    //   "problemMatcher": [],
+    //   "options": { "cwd": "${workspaceFolder}/api" },
+    //   "isBackground": true,
+    //   "presentation": { "group": "dev" },
+    //   "dependsOn": ["dev db"]
+    // },
+    // {
+    //   "label": "dev web",
+    //   "type": "shell",
+    //   "command": "npm install && npm run dev",
+    //   "problemMatcher": [],
+    //   "options": { "cwd": "${workspaceFolder}/web" },
+    //   "isBackground": true,
+    //   "presentation": { "group": "dev" }
+    // },
+    // {
+    //   "label": "dev",
+    //   "dependsOn": ["dev web", "dev api"],
+    //   "dependsOrder": "parallel",
+    //   "problemMatcher": [],
+    //   "group": "build"
+    // }
   ]
 }
