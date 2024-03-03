@@ -35,6 +35,7 @@ locals {
   contact_email_address   = "contact@algeriastartupjobs.com"
   api_root_domain_name    = "api.algeriastartupjobs.com"
   assets_root_domain_name = "assets.algeriastartupjobs.com"
+  tags                    = { Project = "algeria-startup-jobs", Environment = terraform.workspace }
   # @TODO-ZM: make this more generic
   email_dns_records = [
     { type : "MX", name : "", value : ["10 mx.zoho.com", "20 mx2.zoho.com", "50 mx3.zoho.com"] },
@@ -86,18 +87,18 @@ provider "acme" {
   server_url = "https://acme-v02.api.letsencrypt.org/directory"
 }
 
-# # Shared Route53 zone configuration
-# resource "aws_route53_zone" "website" {
-#   count         = local.count
-#   name          = local.root_domain_name
-#   force_destroy = true
-# }
+# Shared Route53 zone configuration
+resource "aws_route53_zone" "website" {
+  count         = local.count
+  name          = local.root_domain_name
+  force_destroy = true
+  tags          = local.tags
+}
 
-# # Output the zone ID
-# output "route53_zone_id" {
-#   value = local.is_shared_workspace ? aws_route53_zone.website[0].id : null
-# }
-
+# Output the zone ID
+output "route53_zone_id" {
+  value = local.is_shared_workspace ? aws_route53_zone.website[0].id : null
+}
 
 # resource "aws_acm_certificate" "website" {
 #   count                     = local.count
