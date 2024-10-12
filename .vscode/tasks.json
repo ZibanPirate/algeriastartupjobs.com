@@ -5,11 +5,30 @@
     {
       "label": "terraform init",
       "type": "shell",
-      "command": "cd shared && terraform init && cd ../web && terraform init && cd ../api && terraform init",
+      "command": "cd shared && terraform init && cd ../web && terraform init && cd ../api && terraform init && cd ../shared-route53 && terraform init",
       "problemMatcher": [],
       "options": {
         "cwd": "${workspaceFolder}/infra"
       }
+    },
+    {
+      "label": "terraform shared:route53",
+      "type": "shell",
+      "command": "TF_WORKSPACE=shared terraform apply -auto-approve -var-file=\"../secret.tfvars\"",
+      "problemMatcher": [],
+      "options": {
+        "cwd": "${workspaceFolder}/infra/shared-route53"
+      }
+    },
+    {
+      "label": "terraform destroy shared:route53",
+      "type": "shell",
+      "command": "TF_WORKSPACE=shared terraform destroy -auto-approve -var-file=\"../secret.tfvars\"",
+      "problemMatcher": [],
+      "options": {
+        "cwd": "${workspaceFolder}/infra/shared-route53"
+      },
+      "dependsOn": ["terraform destroy shared"]
     },
     {
       "label": "terraform shared",
@@ -18,7 +37,8 @@
       "problemMatcher": [],
       "options": {
         "cwd": "${workspaceFolder}/infra/shared"
-      }
+      },
+      "dependsOn": ["terraform shared:route53"]
     },
     {
       "label": "terraform destroy shared",
