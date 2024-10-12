@@ -1,3 +1,8 @@
+data "terraform_remote_state" "shared-route53" {
+  backend = "local"
+  config  = { path = "${path.module}/../shared-route53/terraform.tfstate.d/shared/terraform.tfstate" }
+}
+
 variable "namecheap_api_user" {
   description = "The API user for Namecheap"
   type        = string
@@ -87,87 +92,18 @@ provider "acme" {
   server_url = "https://acme-v02.api.letsencrypt.org/directory"
 }
 
-# Shared Route53 zone configuration
-resource "aws_route53_zone" "website" {
-  count         = local.count
-  name          = local.root_domain_name
-  force_destroy = true
-  tags          = local.tags
-}
-
 # Output the zone ID
 output "route53_zone_id" {
-  value = local.is_shared_workspace ? aws_route53_zone.website[0].id : null
-}
-
-resource "aws_acm_certificate" "website" {
-  count                     = local.count
-  domain_name               = local.root_domain_name
-  validation_method         = "DNS"
-  subject_alternative_names = ["*.${local.root_domain_name}"]
-  lifecycle {
-    create_before_destroy = true
-  }
-  provider = aws.virginia
-  tags     = local.tags
+  value = local.is_shared_workspace ? data.terraform_remote_state.shared-route53.outputs.route53_zone_id : null
 }
 
 # Output the certificate ARN
 output "certificate_arn" {
-  value = local.is_shared_workspace ? aws_acm_certificate.website[0].arn : null
-}
-
-resource "aws_route53_record" "website" {
-  for_each = {
-    for dvo in aws_acm_certificate.website[0].domain_validation_options : dvo.domain_name => {
-      name   = dvo.resource_record_name
-      record = dvo.resource_record_value
-      type   = dvo.resource_record_type
-    }
-  }
-
-  allow_overwrite = true
-  name            = each.value.name
-  records         = [each.value.record]
-  ttl             = 60
-  type            = each.value.type
-  zone_id         = aws_route53_zone.website[0].id
-}
-
-resource "null_resource" "dns_servers_fetch" {
-  count = local.count
-  triggers = {
-    always_run = timestamp()
-  }
-  provisioner "local-exec" {
-    command = "aws route53 list-resource-record-sets --hosted-zone-id ${aws_route53_zone.website[0].zone_id} --output json > dns_servers.json"
-  }
-}
-
-resource "null_resource" "dns_servers_prepare" {
-  count = local.count
-  triggers = {
-    always_run = timestamp()
-  }
-  depends_on = [null_resource.dns_servers_fetch[0]]
-  provisioner "local-exec" {
-    command = "echo '['$(grep -o '\"ns-[^\"]*\\.\"' dns_servers.json | sed 's/$/,/; $s/,$//')']' > dns_servers.json"
-  }
-}
-
-resource "null_resource" "dns_servers_clean" {
-  count = local.count
-  triggers = {
-    always_run = timestamp()
-  }
-  depends_on = [null_resource.dns_servers_prepare[0]]
-  provisioner "local-exec" {
-    command = "sed -i -e 's/\\.\"/\"/g' dns_servers.json"
-  }
+  value = local.is_shared_workspace ? data.terraform_remote_state.shared-route53.outputs.certificate_arn : null
 }
 
 locals {
-  dns_servers = jsondecode(file("${path.module}/dns_servers.json"))
+  dns_servers = jsondecode(file("${path.module}/../shared-route53/dns_servers.json"))
 }
 
 resource "namecheap_domain_records" "domain" {
@@ -176,13 +112,19 @@ resource "namecheap_domain_records" "domain" {
   mode   = "OVERWRITE"
 
   nameservers = [for ns in local.dns_servers : ns]
+
+  depends_on = []
 }
 
 resource "aws_acm_certificate_validation" "website" {
-  depends_on              = [namecheap_domain_records.domain[0]]
-  certificate_arn         = aws_acm_certificate.website[0].arn
-  validation_record_fqdns = [for record in aws_route53_record.website : record.fqdn]
+  certificate_arn         = data.terraform_remote_state.shared-route53.outputs.certificate_arn
+  validation_record_fqdns = [for record in data.terraform_remote_state.shared-route53.outputs.dns_records : record.fqdn]
   provider                = aws.virginia
+
+  depends_on = [namecheap_domain_records.domain[0]]
+  timeouts {
+    create = "1m"
+  }
 }
 
 resource "aws_route53_record" "email" {
@@ -198,17 +140,8 @@ resource "aws_route53_record" "email" {
   ttl             = 60
   name            = each.value.name
   type            = each.value.type
-  zone_id         = aws_route53_zone.website[0].id
+  zone_id         = data.terraform_remote_state.shared-route53.outputs.route53_zone_id
   records         = each.value.records
-}
-
-resource "aws_route53_record" "github" {
-  allow_overwrite = true
-  ttl             = 60
-  name            = "_github-challenge-algeriastartupjobs-org.algeriastartupjobs.com"
-  type            = "TXT"
-  zone_id         = aws_route53_zone.website[0].id
-  records         = ["029060ef0f"]
 }
 
 provider "digitalocean" {
@@ -255,7 +188,7 @@ resource "acme_certificate" "api" {
     provider = "route53"
 
     config = {
-      AWS_HOSTED_ZONE_ID = aws_route53_zone.website[0].id
+      AWS_HOSTED_ZONE_ID = data.terraform_remote_state.shared-route53.outputs.route53_zone_id
     }
   }
 
@@ -265,9 +198,13 @@ resource "acme_certificate" "api" {
 output "acme_certificate_api_certificate_pem" {
   value     = local.is_shared_workspace ? acme_certificate.api[0].certificate_pem : null
   sensitive = true
+
+  depends_on = [ acme_certificate.api[0] ]
 }
 
 output "acme_certificate_api_private_key_pem" {
   value     = local.is_shared_workspace ? acme_certificate.api[0].private_key_pem : null
   sensitive = true
+
+  depends_on = [ acme_certificate.api[0] ]
 }

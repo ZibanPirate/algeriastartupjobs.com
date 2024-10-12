@@ -145,6 +145,11 @@ resource "aws_route53_record" "website" {
   depends_on = [aws_acm_certificate.website[0]]
 }
 
+# Outut put records
+output "dns_records" {
+  value = aws_route53_record.website
+}
+
 resource "null_resource" "dns_servers_fetch" {
   count = local.count
   triggers = {
