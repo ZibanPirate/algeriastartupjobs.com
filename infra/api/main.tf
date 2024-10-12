@@ -56,8 +56,8 @@ locals {
   service_name         = "algeriastartupjobs-api"
   scraper_service_name = "algeriastartupjobs-scraper"
   stage                = terraform.workspace
-  root_domain_name     = "api.algeriastartupjobs.com"
-  web_root_domain_name = "algeriastartupjobs.com"
+  root_domain_name     = "api.magiframe.com"
+  web_root_domain_name = "magiframe.com"
   sub_domain_name      = local.stage
   domain_name          = "${local.sub_domain_name}.${local.root_domain_name}"
   web_domain_name      = "${local.stage == "production" ? "www" : "staging"}.${local.web_root_domain_name}"

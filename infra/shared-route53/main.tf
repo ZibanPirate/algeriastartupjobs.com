@@ -30,12 +30,12 @@ variable "do_ssh_pub_key" {
 
 locals {
   timeout                 = 60 # smallest timeout, induvidual resources may multiply this
-  root_domain_name        = "algeriastartupjobs.com"
+  root_domain_name        = "magiframe.com"
   is_shared_workspace     = terraform.workspace == "shared"
   count                   = local.is_shared_workspace ? 1 : 0
-  contact_email_address   = "contact@algeriastartupjobs.com"
-  api_root_domain_name    = "api.algeriastartupjobs.com"
-  assets_root_domain_name = "assets.algeriastartupjobs.com"
+  contact_email_address   = "contact@magiframe.com"
+  api_root_domain_name    = "api.magiframe.com"
+  assets_root_domain_name = "assets.magiframe.com"
   tags                    = { Project = "algeria-startup-jobs", Environment = terraform.workspace }
   # @TODO-ZM: make this more generic
   email_dns_records = [

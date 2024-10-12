@@ -5,8 +5,8 @@ data "terraform_remote_state" "shared" {
 
 locals {
   stage                   = terraform.workspace
-  root_domain_name        = "algeriastartupjobs.com"
-  assets_root_domain_name = "assets.algeriastartupjobs.com"
+  root_domain_name        = "magiframe.com"
+  assets_root_domain_name = "assets.magiframe.com"
   sub_domain_name         = local.stage
   domainName              = "${local.sub_domain_name}.${local.assets_root_domain_name}"
   bucketName              = "${local.sub_domain_name}.${local.assets_root_domain_name}"
