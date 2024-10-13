@@ -99,7 +99,7 @@ pub async fn login(
     &account.email,
     &"Confirm your login".to_string(),
     &format!(
-      r#"Your email is used to login to algeriastartupjobs.com at {} (Algiers timezone).
+      r#"Your email is used to login to magiframe.com at {} (Algiers timezone).
 
 Please confirm your login by copying the code below into the confirmation page:
 
@@ -110,8 +110,8 @@ Please confirm your login by copying the code below into the confirmation page:
 Thank you for using our service!
 
 ASJ Team
-contact@algeriastartupjobs.com
-https://www.algeriastartupjobs.com
+contact@magiframe.com
+https://www.magiframe.com
 "#,
       // format to friendly date: 12:00 AM, 1 January 2021 (UTC+01:00)
       chrono::Utc::now().add(chrono::Duration::hours(1)).format("%-I:%M %p, %-d %B %Y"),

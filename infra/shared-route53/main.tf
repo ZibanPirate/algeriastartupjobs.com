@@ -107,9 +107,9 @@ output "route53_zone_id" {
 
 resource "aws_acm_certificate" "website" {
   count                     = local.count
-  domain_name               = local.root_domain_name
+  domain_name               = local.assets_root_domain_name
   validation_method         = "DNS"
-  subject_alternative_names = ["*.${local.root_domain_name}"]
+  subject_alternative_names = ["*.${local.assets_root_domain_name}"]
   lifecycle {
     create_before_destroy = true
   }

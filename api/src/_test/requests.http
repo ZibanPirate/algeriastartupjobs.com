@@ -1,9 +1,9 @@
 # local:
 @base_url = http://localhost:9090
 # staging:
-# @base_url = https://staging.api.algeriastartupjobs.com
+# @base_url = https://staging.api.magiframe.com
 # production:
-# @base_url = https://production.api.algeriastartupjobs.com
+# @base_url = https://production.api.magiframe.com
 @auth_token = {{confirmLogin.response.body.auth_token}}
 
 ###
@@ -31,10 +31,10 @@ GET {{base_url}}/search/posts?query=softare+developer&per_page=10&page=0
 GET {{base_url}}/posts/count
 
 ###
-GET {{base_url}}/accounts/by_email?email=test%2Bdeckow-inc.0@algeriastartupjobs.com
+GET {{base_url}}/accounts/by_email?email=test%2Bdeckow-inc.0@magiframe.com
 
 ### Non-existing account
-GET {{base_url}}/accounts/by_email?email=test@0@algeriastartupjobs.com
+GET {{base_url}}/accounts/by_email?email=test@0@magiframe.com
 
 ###
 POST {{base_url}}/posts

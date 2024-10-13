@@ -13,7 +13,7 @@ export const fetch = axios.create({
 const AUTH_TOKEN_EXPIRATION_MINUTES = 5;
 const REFRESH_AUTH_TOKEN_INTERVAL = (AUTH_TOKEN_EXPIRATION_MINUTES - 1) * 60 * 1000;
 
-let refreshIntervalId: NodeJS.Timeout;
+let refreshIntervalId: number;
 
 const setupAuth = () => {
   clearInterval(refreshIntervalId);

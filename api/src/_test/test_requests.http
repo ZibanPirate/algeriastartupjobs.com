@@ -4,9 +4,9 @@
 # local:
 @baseUrl = http://localhost:9090
 # staging:
-# @baseUrl = https://staging.api.algeriastartupjobs.com
+# @baseUrl = https://staging.api.magiframe.com
 # production:
-# @baseUrl = https://production.api.algeriastartupjobs.com
+# @baseUrl = https://production.api.magiframe.com
 
 ###
 GET {{dbBaseUrl}}/export
@@ -199,6 +199,6 @@ Authorization: Basic root root
 NS: asj
 DB: main
 
-SELECT *, id.id as id FROM account WHERE email = 'test+deckow-inc.0@algeriastartupjobs.com'
+SELECT *, id.id as id FROM account WHERE email = 'test+deckow-inc.0@magiframe.com'
 
 ###

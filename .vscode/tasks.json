@@ -5,7 +5,7 @@
     {
       "label": "terraform init",
       "type": "shell",
-      "command": "cd shared && terraform init && cd ../web && terraform init && cd ../api && terraform init && cd ../shared-route53 && terraform init",
+      "command": "cd shared && terraform init && cd ../web && terraform init && cd ../api && terraform init && cd ../shared-route53 && terraform init && cd ../api/build-on-vps && terraform init",
       "problemMatcher": [],
       "options": {
         "cwd": "${workspaceFolder}/infra"
@@ -48,9 +48,46 @@
       "options": {
         "cwd": "${workspaceFolder}/infra/shared"
       },
-      "dependsOn": [
-        // "terraform destroy web"
-      ]
+      "dependsOn": ["terraform destroy web production", "terraform destroy api production"]
+    },
+    {
+      "label": "terraform api production",
+      "type": "shell",
+      "command": "TF_WORKSPACE=production terraform apply -auto-approve -var-file=\"../secret.tfvars\"",
+      "problemMatcher": [],
+      "options": { "cwd": "${workspaceFolder}/infra/api" },
+      "dependsOn": ["build api", "terraform shared"]
+    },
+    {
+      "label": "terraform destroy api production",
+      "type": "shell",
+      "command": "TF_WORKSPACE=production terraform destroy -auto-approve -var-file=\"../secret.tfvars\"",
+      "problemMatcher": [],
+      "options": { "cwd": "${workspaceFolder}/infra/api" },
+      "dependsOn": []
+    },
+    {
+      "label": "terraform web production",
+      "type": "shell",
+      "command": "TF_WORKSPACE=production terraform apply -auto-approve -var-file=\"../secret.tfvars\"",
+      "problemMatcher": [],
+      "options": { "cwd": "${workspaceFolder}/infra/web" },
+      "dependsOn": ["build web production", "terraform shared"]
+    },
+    {
+      "label": "terraform destroy web production",
+      "type": "shell",
+      "command": "TF_WORKSPACE=production terraform destroy -auto-approve -var-file=\"../secret.tfvars\"",
+      "problemMatcher": [],
+      "options": { "cwd": "${workspaceFolder}/infra/web" },
+      "dependsOn": []
+    },
+    {
+      "label": "upload db backup production",
+      "type": "shell",
+      "command": "TF_WORKSPACE=production terraform apply -auto-approve -var-file=\"../../secret.tfvars\"",
+      "problemMatcher": [],
+      "options": { "cwd": "${workspaceFolder}/infra/api/upload-db-backup" }
     },
     // build:
     {
@@ -83,7 +120,7 @@
     {
       "label": "build api",
       "type": "shell",
-      "command": "terraform apply -auto-approve -var-file=\"../secret.tfvars\"",
+      "command": "terraform apply -auto-approve -var-file=\"../../secret.tfvars\"",
       "problemMatcher": [],
       "options": {
         "cwd": "${workspaceFolder}/infra/api/build-on-vps"
@@ -93,7 +130,7 @@
     {
       "label": "clean api",
       "type": "shell",
-      "command": "terraform destroy -auto-approve -var-file=\"../secret.tfvars\"",
+      "command": "terraform destroy -auto-approve -var-file=\"../../secret.tfvars\"",
       "problemMatcher": [],
       "options": {
         "cwd": "${workspaceFolder}/infra/api/build-on-vps"
@@ -166,23 +203,6 @@
         "kind": "build"
       }
     }
-    //
-    // {
-    //   "label": "terraform web staging",
-    //   "type": "shell",
-    //   "command": "TF_WORKSPACE=staging terraform apply -auto-approve -var-file=\"secret.tfvars\"",
-    //   "problemMatcher": [],
-    //   "options": { "cwd": "${workspaceFolder}/infra/web" },
-    //   "dependsOn": ["build web staging", "terraform shared"]
-    // },
-    // {
-    //   "label": "terraform web production",
-    //   "type": "shell",
-    //   "command": "TF_WORKSPACE=production terraform apply -auto-approve -var-file=\"secret.tfvars\"",
-    //   "problemMatcher": [],
-    //   "options": { "cwd": "${workspaceFolder}/infra/web" },
-    //   "dependsOn": ["build web production", "terraform shared"]
-    // },
     // {
     //   "label": "terraform api staging",
     //   "type": "shell",
@@ -224,13 +244,6 @@
     //   "label": "upload db backup staging",
     //   "type": "shell",
     //   "command": "TF_WORKSPACE=staging terraform apply -auto-approve -var-file=\"../secret.tfvars\"",
-    //   "problemMatcher": [],
-    //   "options": { "cwd": "${workspaceFolder}/infra/api/upload-db-backup" }
-    // },
-    // {
-    //   "label": "upload db backup production",
-    //   "type": "shell",
-    //   "command": "TF_WORKSPACE=production terraform apply -auto-approve -var-file=\"../secret.tfvars\"",
     //   "problemMatcher": [],
     //   "options": { "cwd": "${workspaceFolder}/infra/api/upload-db-backup" }
     // },

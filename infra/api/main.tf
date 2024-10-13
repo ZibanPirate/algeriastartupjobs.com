@@ -257,13 +257,13 @@ resource "ssh_resource" "upload_app_and_deps_to_vps" {
     "sudo curl -o ${local.app_folder}/${local.app_name} http://${data.terraform_remote_state.ructc.outputs.digitalocean_droplet_rustc_ipv4_address}:8000/code/target/release/algeriastartupjobs-api",
     "sudo chmod +x ${local.app_folder}/${local.app_name} || true",
     #
-    "sudo curl -o ${local.app_folder}/${local.scraper_app_name}.dep http://${data.terraform_remote_state.ructc.outputs.digitalocean_droplet_rustc_ipv4_address}:8000/scraper_code/out/make/deb/x64/algeriastartupjobs_0.0.0_amd64.deb", # @TODO-ZM: remove version from the file name
-    "sudo dpkg -i ${local.app_folder}/${local.scraper_app_name}.dep || true",
-    "sudo apt-get -y -f install",
-    "sudo dpkg -i ${local.app_folder}/${local.scraper_app_name}.dep || true",
+    # "sudo curl -o ${local.app_folder}/${local.scraper_app_name}.dep http://${data.terraform_remote_state.ructc.outputs.digitalocean_droplet_rustc_ipv4_address}:8000/scraper_code/out/make/deb/x64/algeriastartupjobs_0.0.0_amd64.deb", # @TODO-ZM: remove version from the file name
+    # "sudo dpkg -i ${local.app_folder}/${local.scraper_app_name}.dep || true",
+    # "sudo apt-get -y -f install",
+    # "sudo dpkg -i ${local.app_folder}/${local.scraper_app_name}.dep || true",
     #
     "sudo systemctl daemon-reload",
-    "sudo systemctl start ${local.scraper_service_name} || true",
+    # "sudo systemctl start ${local.scraper_service_name} || true",
     "sudo systemctl start ${local.service_name} || true",
     "sudo systemctl start nginx",
   ]

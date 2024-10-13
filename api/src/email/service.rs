@@ -49,8 +49,8 @@ impl EmailService {
       )
       .body(format!(
         r#"{{
-          "bounce_address": "bounce@mail.algeriastartupjobs.com",
-          "from": {{ "address": "noreply@algeriastartupjobs.com", "name": "Algeria Startup Jobs" }},
+          "bounce_address": "bounce@mail.magiframe.com",
+          "from": {{ "address": "noreply@magiframe.com", "name": "Algeria Startup Jobs" }},
           "to": [{{ "email_address": {{ "address": "{}" }} }}],
           "subject": "{}",
           "htmlbody": "{}"

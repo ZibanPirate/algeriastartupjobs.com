@@ -193,7 +193,8 @@ resource "ssh_resource" "release" {
     "killall python3 || true",
     "screen -dm python3 -m http.server --directory ${local.home}",
     "cd ${local.code_dir} && $HOME/.cargo/bin/cargo build --release",
-    "cd ${local.scraper_code_dir} && npm install && npm run make:linux",
+    # @TODO-ZM: Uncomment this line when the scraper is ready
+    # "cd ${local.scraper_code_dir} && npm install && npm run make:linux",
   ]
 }
 

@@ -76,7 +76,7 @@ pub async fn index(State(app_state): State<AppState>) -> impl IntoResponse {
     title: "Join a startup in Algeria".to_string(),
     description: "Algeria Startup Jobs is a job board for startups in Algeria".to_string(),
     image: format!(
-      "https://{}.assets.algeriastartupjobs.com/assets/apple-touch-startup-image-1136x640.png",
+      "https://{}.assets.magiframe.com/assets/apple-touch-startup-image-1136x640.png",
       app_state.config_service.get_config().stage.as_str()
     ),
   }))
@@ -120,7 +120,7 @@ pub async fn jobs(
     title: get_post_long_title(&post, &poster),
     description: post.short_description,
     image: format!(
-      "https://{}.assets.algeriastartupjobs.com/assets/apple-touch-startup-image-1136x640.png",
+      "https://{}.assets.magiframe.com/assets/apple-touch-startup-image-1136x640.png",
       app_state.config_service.get_config().stage.as_str()
     ),
   }))
@@ -150,7 +150,7 @@ pub async fn jobs_for_tag(
     title: format!("Startup jobs for {} in Algeria", tag.name),
     description: format!("Find startup Jobs for {} in Algeria", tag.name),
     image: format!(
-      "https://{}.assets.algeriastartupjobs.com/assets/apple-touch-startup-image-1136x640.png",
+      "https://{}.assets.magiframe.com/assets/apple-touch-startup-image-1136x640.png",
       app_state.config_service.get_config().stage.as_str()
     ),
   }))
@@ -170,7 +170,7 @@ pub async fn create(State(app_state): State<AppState>) -> impl IntoResponse {
     title: "Post a job ad for free".to_string(),
     description: "Free job board for startups in Algeria".to_string(),
     image: format!(
-      "https://{}.assets.algeriastartupjobs.com/assets/apple-touch-startup-image-1136x640.png",
+      "https://{}.assets.magiframe.com/assets/apple-touch-startup-image-1136x640.png",
       app_state.config_service.get_config().stage.as_str()
     ),
   }))
@@ -248,7 +248,7 @@ pub async fn sitemap(State(app_state): State<AppState>) -> impl IntoResponse {
     .map(|url| {
       UrlEntryBuilder::default()
         .loc(
-          format!("https://www.algeriastartupjobs.com{}", url.0)
+          format!("https://www.magiframe.com{}", url.0)
             .parse()
             .unwrap(),
         )
@@ -273,7 +273,7 @@ pub async fn import(State(app_state): State<AppState>) -> impl IntoResponse {
     title: "Import your job post from other platforms".to_string(),
     description: "Free job board for startups in Algeria".to_string(),
     image: format!(
-      "https://{}.assets.algeriastartupjobs.com/assets/apple-touch-startup-image-1136x640.png",
+      "https://{}.assets.magiframe.com/assets/apple-touch-startup-image-1136x640.png",
       app_state.config_service.get_config().stage.as_str()
     ),
   }))

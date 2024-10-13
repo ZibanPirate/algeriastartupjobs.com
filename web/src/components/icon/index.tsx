@@ -23,7 +23,7 @@ const _Icon: FC<IconProps> = ({ variant, margin, name, animation = "none", vtNam
     props.onClick ? "icon-clickable" : "",
   ];
 
-  const maskImage = `url(${icons[name].default})`;
+  const maskImage = `url("${icons[name].default}"`;
 
   const style: React.CSSProperties = {
     maskImage,
