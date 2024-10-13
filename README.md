@@ -1,12 +1,12 @@
-# algeriastartupjobs.com
+# dzjob.com
 
-The entire code for algeriastartupjobs.com
+The entire code for dzjob.com
 
-| **Folder**         |                                                                         **Production** |                                                                      **Staging** |
-| :----------------- | -------------------------------------------------------------------------------------: | -------------------------------------------------------------------------------: |
-| [./web](./web)     |                               [algeriastartupjobs.com](https://algeriastartupjobs.com) |         [staging.algeriastartupjobs.com](https://staging.algeriastartupjobs.com) |
-| [./api](./api)     | [production.api.algeriastartupjobs.com](https://production.api.algeriastartupjobs.com) | [staging.api.algeriastartupjobs.com](https://staging.api.algeriastartupjobs.com) |
-| [./infra](./infra) |                                                                                        |                                                                                  |
+| **Folder**         |                                               **Production** |                                            **Staging** |
+| :----------------- | -----------------------------------------------------------: | -----------------------------------------------------: |
+| [./web](./web)     |                               [dzjob.com](https://dzjob.com) |         [staging.dzjob.com](https://staging.dzjob.com) |
+| [./api](./api)     | [production.api.dzjob.com](https://production.api.dzjob.com) | [staging.api.dzjob.com](https://staging.api.dzjob.com) |
+| [./infra](./infra) |                                                              |                                                        |
 
 ## Get Started
 

@@ -42,10 +42,7 @@ fn read_html(
   let file_content = file_content.unwrap();
 
   let file_content = file_content
-    .replace(
-      "{{HTML_TITLE}}",
-      format!("{} | Algeria Startup Jobs", &title).as_str(),
-    )
+    .replace("{{HTML_TITLE}}", format!("{} | DZ Job", &title).as_str())
     .replace("{{HTML_DESCRIPTION}}", &description)
     .replace("{{HTML_IMAGE}}", &image);
 
@@ -74,9 +71,9 @@ pub async fn index(State(app_state): State<AppState>) -> impl IntoResponse {
       app_state.config_service.get_config().html_path,
     ),
     title: "Join a startup in Algeria".to_string(),
-    description: "Algeria Startup Jobs is a job board for startups in Algeria".to_string(),
+    description: "DZ Job is a job board for startups in Algeria".to_string(),
     image: format!(
-      "https://{}.assets.magiframe.com/assets/apple-touch-startup-image-1136x640.png",
+      "https://{}.assets.dzjob.io/assets/apple-touch-startup-image-1136x640.png",
       app_state.config_service.get_config().stage.as_str()
     ),
   }))
@@ -120,7 +117,7 @@ pub async fn jobs(
     title: get_post_long_title(&post, &poster),
     description: post.short_description,
     image: format!(
-      "https://{}.assets.magiframe.com/assets/apple-touch-startup-image-1136x640.png",
+      "https://{}.assets.dzjob.io/assets/apple-touch-startup-image-1136x640.png",
       app_state.config_service.get_config().stage.as_str()
     ),
   }))
@@ -150,7 +147,7 @@ pub async fn jobs_for_tag(
     title: format!("Startup jobs for {} in Algeria", tag.name),
     description: format!("Find startup Jobs for {} in Algeria", tag.name),
     image: format!(
-      "https://{}.assets.magiframe.com/assets/apple-touch-startup-image-1136x640.png",
+      "https://{}.assets.dzjob.io/assets/apple-touch-startup-image-1136x640.png",
       app_state.config_service.get_config().stage.as_str()
     ),
   }))
@@ -170,7 +167,7 @@ pub async fn create(State(app_state): State<AppState>) -> impl IntoResponse {
     title: "Post a job ad for free".to_string(),
     description: "Free job board for startups in Algeria".to_string(),
     image: format!(
-      "https://{}.assets.magiframe.com/assets/apple-touch-startup-image-1136x640.png",
+      "https://{}.assets.dzjob.io/assets/apple-touch-startup-image-1136x640.png",
       app_state.config_service.get_config().stage.as_str()
     ),
   }))
@@ -247,11 +244,7 @@ pub async fn sitemap(State(app_state): State<AppState>) -> impl IntoResponse {
     .iter()
     .map(|url| {
       UrlEntryBuilder::default()
-        .loc(
-          format!("https://www.magiframe.com{}", url.0)
-            .parse()
-            .unwrap(),
-        )
+        .loc(format!("https://www.dzjob.io{}", url.0).parse().unwrap())
         .priority(url.1)
         .changefreq(url.2)
         .build()
@@ -273,7 +266,7 @@ pub async fn import(State(app_state): State<AppState>) -> impl IntoResponse {
     title: "Import your job post from other platforms".to_string(),
     description: "Free job board for startups in Algeria".to_string(),
     image: format!(
-      "https://{}.assets.magiframe.com/assets/apple-touch-startup-image-1136x640.png",
+      "https://{}.assets.dzjob.io/assets/apple-touch-startup-image-1136x640.png",
       app_state.config_service.get_config().stage.as_str()
     ),
   }))

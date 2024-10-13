@@ -7,8 +7,8 @@ interface UsePageTitleOptions {
 
 export const usePageTitle = (
   title: string,
-  { enabled = true, suffix = " | Algeria Startup Jobs" }: UsePageTitleOptions = {
-    suffix: " | Algeria Startup Jobs",
+  { enabled = true, suffix = " | DZ Job" }: UsePageTitleOptions = {
+    suffix: " | DZ Job",
     enabled: true,
   }
 ) => {

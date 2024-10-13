@@ -75,7 +75,7 @@ export const Page: FC = () => {
                   <Link
                     to="#"
                     variant="v4"
-                    onClick={() => alert("Stay updated at github.com/algeriastartupjobs")}
+                    onClick={() => alert("Stay updated at github.com/zibanpirate/dzjob")}
                   >
                     Send code again
                   </Link>

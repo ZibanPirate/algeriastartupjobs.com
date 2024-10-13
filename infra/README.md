@@ -5,7 +5,7 @@
 # SSH into `./api` VPS
 
 ```sh
-ssh -i [asj-ssh-file] [do_droplet_user]@[droplet-ip-address]
+ssh -i [dzjob-ssh-file] [do_droplet_user]@[droplet-ip-address]
 ```
 
 # Check `./api` service
@@ -13,11 +13,11 @@ ssh -i [asj-ssh-file] [do_droplet_user]@[droplet-ip-address]
 Status:
 
 ```sh
-sudo systemctl status algeriastartupjobs-api
+sudo systemctl status dzjob-api
 ```
 
 Logs:
 
 ```sh
-journalctl -u algeriastartupjobs-api
+journalctl -u dzjob-api
 ```

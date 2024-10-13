@@ -47,17 +47,17 @@ variable "do_droplet_password" {
 
 locals {
   app_port             = "9090"
-  app_folder_name      = "asj"
+  app_folder_name      = "dzjob"
   home                 = "/home/${var.do_droplet_user}"
   app_folder           = "${local.home}/${local.app_folder_name}"
   certificate_folder   = "/etc/ssl/certs"
-  app_name             = "algeriastartupjobs-api"
-  scraper_app_name     = "algeriastartupjobs"
-  service_name         = "algeriastartupjobs-api"
-  scraper_service_name = "algeriastartupjobs-scraper"
+  app_name             = "dzjob-api"
+  scraper_app_name     = "dzjob"
+  service_name         = "dzjob-api"
+  scraper_service_name = "dzjob-scraper"
   stage                = terraform.workspace
-  root_domain_name     = "api.magiframe.com"
-  web_root_domain_name = "magiframe.com"
+  root_domain_name     = "api.dzjob.io"
+  web_root_domain_name = "dzjob.io"
   sub_domain_name      = local.stage
   domain_name          = "${local.sub_domain_name}.${local.root_domain_name}"
   web_domain_name      = "${local.stage == "production" ? "www" : "staging"}.${local.web_root_domain_name}"
@@ -89,7 +89,7 @@ resource "digitalocean_droplet" "api" {
     write_files:
     - content: |
         [Unit]
-        Description=Algeria Startup Jobs API
+        Description=DZ Job API
         After=network.target
 
         [Service]
@@ -107,7 +107,7 @@ resource "digitalocean_droplet" "api" {
 
     - content: |
         [Unit]
-        Description=Algeria Startup Jobs Scraper
+        Description=DZ Job Scraper
         After=network.target
 
         [Service]
@@ -254,7 +254,7 @@ resource "ssh_resource" "upload_app_and_deps_to_vps" {
     "sudo systemctl stop ${local.service_name} || true",
     "sudo systemctl stop ${local.scraper_service_name} || true",
     #
-    "sudo curl -o ${local.app_folder}/${local.app_name} http://${data.terraform_remote_state.ructc.outputs.digitalocean_droplet_rustc_ipv4_address}:8000/code/target/release/algeriastartupjobs-api",
+    "sudo curl -o ${local.app_folder}/${local.app_name} http://${data.terraform_remote_state.ructc.outputs.digitalocean_droplet_rustc_ipv4_address}:8000/code/target/release/dzjob-api",
     "sudo chmod +x ${local.app_folder}/${local.app_name} || true",
     #
     # "sudo curl -o ${local.app_folder}/${local.scraper_app_name}.dep http://${data.terraform_remote_state.ructc.outputs.digitalocean_droplet_rustc_ipv4_address}:8000/scraper_code/out/make/deb/x64/algeriastartupjobs_0.0.0_amd64.deb", # @TODO-ZM: remove version from the file name

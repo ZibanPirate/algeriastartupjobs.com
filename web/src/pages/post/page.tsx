@@ -154,7 +154,7 @@ export const Page: FC = () => {
                       <Icon
                         variant="v3"
                         name="editPost"
-                        onClick={() => alert("stay tuned at github.com/algeriastartupjobs")}
+                        onClick={() => alert("stay tuned at github.com/zibanpirate/dzjob")}
                       />
                     </Stack>
                   )}
@@ -174,7 +174,7 @@ export const Page: FC = () => {
                       <Link
                         variant="v4"
                         to="#"
-                        onClick={() => alert("Stay updated at github.com/algeriastartupjobs")}
+                        onClick={() => alert("Stay updated at github.com/zibanpirate/dzjob")}
                       >
                         ask
                       </Link>
@@ -239,7 +239,7 @@ export const Page: FC = () => {
               <Stack orientation="horizontal" margin="3 0 0" align="center" gap="1">
                 <Button
                   variant="v3"
-                  onClick={() => alert("Stay updated at github.com/algeriastartupjobs")}
+                  onClick={() => alert("Stay updated at github.com/zibanpirate/dzjob")}
                 >
                   Apply
                 </Button>
@@ -247,7 +247,7 @@ export const Page: FC = () => {
                 <Link
                   to="#"
                   variant="v4"
-                  onClick={() => alert("Stay updated at github.com/algeriastartupjobs")}
+                  onClick={() => alert("Stay updated at github.com/zibanpirate/dzjob")}
                 >
                   share this post
                 </Link>

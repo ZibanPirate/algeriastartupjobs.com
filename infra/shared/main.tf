@@ -34,20 +34,19 @@ variable "do_ssh_pub_key" {
 }
 
 locals {
-  root_domain_name        = "magiframe.com"
+  root_domain_name        = "dzjob.io"
   is_shared_workspace     = terraform.workspace == "shared"
   count                   = local.is_shared_workspace ? 1 : 0
-  contact_email_address   = "contact@magiframe.com"
-  api_root_domain_name    = "api.magiframe.com"
-  assets_root_domain_name = "assets.magiframe.com"
+  contact_email_address   = "contact@dzjob.io"
+  api_root_domain_name    = "api.dzjob.io"
+  assets_root_domain_name = "assets.dzjob.io"
   tags                    = { Project = "algeria-startup-jobs", Environment = terraform.workspace }
   # @TODO-ZM: make this more generic
   email_dns_records = [
     { type : "MX", name : "", value : ["10 mx.zoho.com", "20 mx2.zoho.com", "50 mx3.zoho.com"] },
     { type : "TXT", name : "", value : ["v=spf1 include:zeptomail.net mx include:zoho.com ~all", "google-site-verification=cSr0V7GyACe-BFr9GaKtVFFw6bz_fTuiJ1cJDraevzY"] },
-    { type : "TXT", name : "dkim._domainkey", value : ["v=DKIM1; k=rsa; p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDCm72cEJ58s0O+DDFEuYbfofjbNxav37gs4avX784W6s7IOYTdUJcodUCfSUVmb3rPxocVhu5yU3X81BuETG54kg9hgSePx8FANURvkEKbLyyYZZes1g5zhJ1KK7mLkKn5wKnD54WDlrokf6u2TBw9oNU5vlYU1ZHgtxYQ2xmSaQIDAQAB"] },
-    { type : "TXT", name : "12182127._domainkey", value : ["k=rsa; p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQChtRggTaZ76bLzMWQWUi6AVQTWDqSRDyUJ0qBQEaZu14szegFLuvG6V1WEjEDaslwfwqGAdEO0cyPr9tV+K5NhYSF4g/86FqNiQnt4v/qjDPymuFv1gpE1tyTGxzlOUumrW1rf330/ksx/myxd1QSv6jBoyw5oZyYMba/Dn7yIBQIDAQAB"] },
-    { type : "CNAME", name : "bounce", value : ["cluster89.zeptomail.com"] },
+    { type : "TXT", name : "13102013._domainkey", value : ["k=rsa; p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDDtOYLbmHHJ0hpxj/qFkdKOLlGNTFqNvRkkL+r/oqz5qw73/kgxenA61VJgbi23gC48RfVjvcxkVaLqBTQXaJr+9XQ400QJSUjmp/lms4QItAkkZlYiGzoY4PNyl9sDP2jygzmKkb6xDAJoHVsh1IE3b5dLylumcS4KGMB7Z1irwIDAQAB"] },
+    { type : "CNAME", name : "bounce-zem", value : ["cluster89.zeptomail.com"] },
   ]
 }
 
@@ -150,7 +149,7 @@ provider "digitalocean" {
 
 resource "digitalocean_ssh_key" "api" {
   count      = local.count
-  name       = "Algeria Startup Jobs Terraform Key"
+  name       = "DZ Job Terraform Key"
   public_key = var.do_ssh_pub_key
 }
 
@@ -160,7 +159,7 @@ output "digitalocean_ssh_key_fingerprint" {
 
 resource "digitalocean_project" "api" {
   count = local.count
-  name  = "Algeria Startup Jobs"
+  name  = "DZ Job"
 }
 
 output "digitalocean_project_id" {

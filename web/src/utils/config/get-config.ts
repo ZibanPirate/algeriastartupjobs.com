@@ -7,15 +7,15 @@ const _getConfig = () => ({
   api: {
     base_url: [
       `http://${location.hostname}:9090`,
-      "https://staging.api.magiframe.com",
-      "https://production.api.magiframe.com",
+      "https://staging.api.dzjob.io",
+      "https://production.api.dzjob.io",
     ][stageIndex],
   },
   web: {
     base_url: [
       `http://${location.hostname}:3000`,
-      "https://staging.magiframe.com",
-      "https://www.magiframe.com",
+      "https://staging.dzjob.io",
+      "https://www.dzjob.io",
     ][stageIndex],
     version: APP_VERSION,
   },

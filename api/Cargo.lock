@@ -49,46 +49,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "algeriastartupjobs-api"
-version = "0.1.0"
-dependencies = [
- "async-stream",
- "axum",
- "bk-tree",
- "cargo-watch",
- "chrono",
- "dotenv",
- "fs",
- "futures-util",
- "hyper",
- "itertools",
- "jsonwebtoken",
- "local-ip-address",
- "rand",
- "reqwest",
- "rust-fuzzy-search",
- "sentry",
- "sentry-tower",
- "sentry-tracing",
- "serde",
- "serde_json",
- "sitewriter",
- "sled",
- "slug",
- "sqlx",
- "strum_macros",
- "titlecase",
- "tokio",
- "tokio-cron-scheduler",
- "tokio-stream",
- "tower",
- "tower-http",
- "tracing",
- "tracing-subscriber",
- "utility-types",
-]
-
-[[package]]
 name = "allocator-api2"
 version = "0.2.18"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -963,6 +923,46 @@ name = "dotenvy"
 version = "0.15.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1aaf95b3e5c8f23aa320147307562d361db0ae0d51242340f558153b4eb2439b"
+
+[[package]]
+name = "dzjob-api"
+version = "0.1.0"
+dependencies = [
+ "async-stream",
+ "axum",
+ "bk-tree",
+ "cargo-watch",
+ "chrono",
+ "dotenv",
+ "fs",
+ "futures-util",
+ "hyper",
+ "itertools",
+ "jsonwebtoken",
+ "local-ip-address",
+ "rand",
+ "reqwest",
+ "rust-fuzzy-search",
+ "sentry",
+ "sentry-tower",
+ "sentry-tracing",
+ "serde",
+ "serde_json",
+ "sitewriter",
+ "sled",
+ "slug",
+ "sqlx",
+ "strum_macros",
+ "titlecase",
+ "tokio",
+ "tokio-cron-scheduler",
+ "tokio-stream",
+ "tower",
+ "tower-http",
+ "tracing",
+ "tracing-subscriber",
+ "utility-types",
+]
 
 [[package]]
 name = "either"

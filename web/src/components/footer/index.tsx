@@ -8,7 +8,7 @@ export const Footer: FC = () => {
     <Stack orientation="vertical" margin="auto" align="center" padding="1">
       <Text variant="v4">
         Source code is publicly available at&nbsp;
-        <Link to="https://github.com/algeriastartupjobs/algeriastartupjobs.com" variant="v4">
+        <Link to="https://github.com/zibanpirate/dzjob" variant="v4">
           Github
         </Link>
         , stay tuned at{" "}
@@ -16,7 +16,7 @@ export const Footer: FC = () => {
           Twitter
         </Link>
         ,{" "}
-        <Link to="https://www.instagram.com/algeriastartupjobs" variant="v4">
+        <Link to="https://www.instagram.com/algeriastartup" variant="v4">
           Instagram
         </Link>{" "}
         and{" "}

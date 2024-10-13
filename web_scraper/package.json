@@ -1,7 +1,7 @@
 {
-  "name": "algeriastartupjobs",
-  "productName": "algeriastartupjobs",
-  "description": "web scraper for algeriastartupjobs",
+  "name": "dzjob",
+  "productName": "dzjob",
+  "description": "web scraper for dzjob",
   "version": "0.0.0",
   "main": ".webpack/main",
   "scripts": {

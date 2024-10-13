@@ -28,7 +28,7 @@ export default defineConfig(({ mode: stage }) => ({
       },
     }),
   ],
-  base: stage === "development" ? "/" : `https://${stage}.assets.magiframe.com/`,
+  base: stage === "development" ? "/" : `https://${stage}.assets.dzjob.io/`,
   publicDir: "dist",
   resolve: {
     alias: {

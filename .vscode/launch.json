@@ -12,13 +12,13 @@
       "name": "Debug ./api",
       "type": "lldb",
       "request": "attach",
-      "program": "${workspaceFolder}/target/debug/algeriastartupjobs-api",
+      "program": "${workspaceFolder}/target/debug/dzjob-api",
       "windows": {
         // NOTE-ZM: haven't tested on Windows, use it with a big grain of salt
         "name": "Launch api (Windows)",
         "type": "cppvsdbg",
         "request": "launch",
-        "program": "${workspaceFolder}/target/debug/algeriastartupjobs-api.exe"
+        "program": "${workspaceFolder}/target/debug/dzjob-api.exe"
       }
     }
   ]

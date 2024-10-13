@@ -19,7 +19,7 @@ jobs:
       - name: Upload Build Artifact
         uses: actions/upload-artifact@v3.1.2
         with:
-          name: algeriastartupjobs-api
-          path: ./api/target/release/algeriastartupjobs-api
+          name: dzjob-api
+          path: ./api/target/release/dzjob-api
           if-no-files-found: error
           retention-days: 1

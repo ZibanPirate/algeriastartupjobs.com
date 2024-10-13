@@ -212,6 +212,6 @@ output "digitalocean_droplet_rustc_ipv4_address" {
 #   ]
 
 #   provisioner "local-exec" {
-#     command = "curl -o ${path.module}/algeriastartupjobs-api http://${digitalocean_droplet.rustc.ipv4_address}:8000/target/release/algeriastartupjobs-api"
+#     command = "curl -o ${path.module}/dzjob-api http://${digitalocean_droplet.rustc.ipv4_address}:8000/target/release/dzjob-api"
 #   }
 # }

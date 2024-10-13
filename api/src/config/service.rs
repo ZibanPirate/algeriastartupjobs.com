@@ -56,7 +56,7 @@ impl ConfigService {
       search_url: "http://127.0.0.1:7280".to_string(),
       kv_db_dir: match stage {
         Stage::Development => "./kv_db_data",
-        _ => "~/asj/kv_db",
+        _ => "~/dzjob/kv_db",
       }
       .to_string(),
       email_service_auth_token: std::env::var("EMAIL_SERVICE_AUTH_TOKEN")

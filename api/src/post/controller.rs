@@ -455,7 +455,7 @@ pub async fn create_one_post_with_poster(
       &body.poster.email,
       &"Confirm your email".to_string(),
       &format!(
-        r#"Your email is used to create a FREE job post at magiframe.com with title:
+        r#"Your email is used to create a FREE job post at dzjob.io with title:
 
 {}
 
@@ -467,9 +467,9 @@ Please confirm your email by copying the code below into the confirmation page:
 
 Thank you for using our service!
 
-ASJ Team
-contact@magiframe.com
-https://www.magiframe.com
+DZ Job Team
+contact@dzjob.io
+https://www.dzjob.io
 "#,
         &body.post.title, confirmation_code,
       ),

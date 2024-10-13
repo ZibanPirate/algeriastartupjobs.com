@@ -5,12 +5,12 @@ data "terraform_remote_state" "shared" {
 
 locals {
   stage                   = terraform.workspace
-  root_domain_name        = "magiframe.com"
-  assets_root_domain_name = "assets.magiframe.com"
+  root_domain_name        = "dzjob.io"
+  assets_root_domain_name = "assets.dzjob.io"
   sub_domain_name         = local.stage
   domainName              = "${local.sub_domain_name}.${local.assets_root_domain_name}"
   bucketName              = "${local.sub_domain_name}.${local.assets_root_domain_name}"
-  api_app_folder_name     = "asj"
+  api_app_folder_name     = "dzjob"
   api_app_folder          = "/home/${var.do_droplet_user}/${local.api_app_folder_name}"
 }
 
@@ -93,7 +93,7 @@ resource "aws_s3_bucket_policy" "website" {
 }
 
 resource "aws_cloudfront_cache_policy" "website" {
-  name        = "${local.stage}_aws_cloudfront_cache_policy"
+  name        = "${local.stage}_dzjob_aws_cloudfront_cache_policy"
   default_ttl = 3600
   min_ttl     = 0
   max_ttl     = 86400
@@ -111,7 +111,7 @@ resource "aws_cloudfront_cache_policy" "website" {
 }
 
 resource "aws_cloudfront_origin_request_policy" "website" {
-  name = "${local.stage}_aws_cloudfront_origin_request_policy"
+  name = "${local.stage}_dzjob_aws_cloudfront_origin_request_policy"
   cookies_config {
     cookie_behavior = "all"
   }

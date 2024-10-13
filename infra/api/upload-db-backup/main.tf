@@ -8,9 +8,9 @@ terraform {
 
 locals {
   stage               = terraform.workspace
-  api_app_folder_name = "asj"
+  api_app_folder_name = "dzjob"
   api_app_folder      = "/home/${var.do_droplet_user}/${local.api_app_folder_name}"
-  service_name        = "algeriastartupjobs-api"
+  service_name        = "dzjob-api"
 }
 
 data "terraform_remote_state" "api" {
