@@ -1,12 +1,12 @@
-# dzjob.com
+# dzjob.io
 
-The entire code for dzjob.com
+The entire code for dzjob.io
 
-| **Folder**         |                                               **Production** |                                            **Staging** |
-| :----------------- | -----------------------------------------------------------: | -----------------------------------------------------: |
-| [./web](./web)     |                               [dzjob.com](https://dzjob.com) |         [staging.dzjob.com](https://staging.dzjob.com) |
-| [./api](./api)     | [production.api.dzjob.com](https://production.api.dzjob.com) | [staging.api.dzjob.com](https://staging.api.dzjob.com) |
-| [./infra](./infra) |                                                              |                                                        |
+| **Folder**         |                                             **Production** |                                          **Staging** |
+| :----------------- | ---------------------------------------------------------: | ---------------------------------------------------: |
+| [./web](./web)     |                               [dzjob.io](https://dzjob.io) |         [staging.dzjob.io](https://staging.dzjob.io) |
+| [./api](./api)     | [production.api.dzjob.io](https://production.api.dzjob.io) | [staging.api.dzjob.io](https://staging.api.dzjob.io) |
+| [./infra](./infra) |                                                            |                                                      |
 
 ## Get Started
 
